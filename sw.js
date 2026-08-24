@@ -1,12 +1,15 @@
 /* Pockez service worker - offline app shell.
-   Bump CACHE_VERSION whenever you ship changes, so installed clients
-   refresh their copy on the next visit. */
-const CACHE_VERSION = "pockez-v2";
+   RELEASE CHECKLIST - bump ALL of these together when you ship changes:
+   1. CACHE_VERSION below (e.g. pockez-v3 -> pockez-v4)
+   2. the ?v=N query on style.css / app.js in index.html
+   A changed URL can never be served from a stale cache - not the phone's
+   HTTP cache, not a service worker, not the GitHub Pages CDN. */
+const CACHE_VERSION = "pockez-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css",
-  "./app.js",
+  "./style.css?v=2",
+  "./app.js?v=2",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
