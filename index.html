@@ -24,7 +24,23 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="style.css?v=6" />
+    <link rel="stylesheet" href="style.css?v=7" />
+
+    <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
+         during a site rebuild), force the app visible instead of sticking on
+         the splash forever. No-op when the app reveals normally. -->
+    <script>
+      window.setTimeout(function () {
+        if (!document.body.classList.contains("reveal-header")) {
+          document.body.classList.remove("no-js", "splash");
+          document.body.classList.add(
+            "reveal-header",
+            "content-visible",
+            "animations-ready"
+          );
+        }
+      }, 5000);
+    </script>
   </head>
   <body class="no-js">
     <svg class="svg-defs" aria-hidden="true">
@@ -623,10 +639,10 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v6</p>
+        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v7</p>
       </footer>
     </div>
 
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
   </body>
 </html>

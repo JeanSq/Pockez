@@ -4,12 +4,12 @@
    2. the ?v=N query on style.css / app.js in index.html
    A changed URL can never be served from a stale cache - not the phone's
    HTTP cache, not a service worker, not the GitHub Pages CDN. */
-const CACHE_VERSION = "pockez-v7";
+const CACHE_VERSION = "pockez-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=6",
-  "./app.js?v=6",
+  "./style.css?v=7",
+  "./app.js?v=7",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
@@ -41,13 +41,15 @@ self.addEventListener("activate", (event) => {
 });
 
 /* Cache-first with background refresh (stale-while-revalidate):
-   instant loads, and the cache self-heals whenever the network is up. */
+   instant loads, and the cache self-heals whenever the network is up.
+   `ignoreSearch` lets a versioned request (style.css?v=N) fall back to ANY
+   cached version, so a mid-deploy 404 can never break a working client. */
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches.match(request, { ignoreSearch: true }).then((cached) => {
       const network = fetch(request)
         .then((response) => {
           const cacheable =
@@ -62,7 +64,14 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => {
+          // Offline / failed fetch: navigations fall back to the cached
+          // shell so the app still opens; assets serve the last good copy.
+          if (request.mode === "navigate") {
+            return caches.match("./index.html", { ignoreSearch: true });
+          }
+          return cached;
+        });
       return cached || network;
     })
   );

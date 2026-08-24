@@ -2232,15 +2232,27 @@ goalWeightInput.addEventListener("change", () => {
   renderWeightLog();
 });
 
-loadLanguage();
-loadSettings();
-renderProfiles();
-renderNotes();
-loadBodyStats();
-setTodayAsMeasurementDate();
-renderWeightLog();
-loadTrainerPlan();
-renderDashboardSummary();
+// Boot inits - each wrapped so one failing subsystem can never kill the
+// splash reveal below (a dead script here used to stick the app on splash).
+const bootSteps = [
+  loadLanguage,
+  loadSettings,
+  renderProfiles,
+  renderNotes,
+  loadBodyStats,
+  setTodayAsMeasurementDate,
+  renderWeightLog,
+  loadTrainerPlan,
+  renderDashboardSummary,
+];
+for (const step of bootSteps) {
+  try {
+    step();
+  } catch (error) {
+    console.error("Boot step failed:", error);
+    debugLog(`boot step failed: ${error && error.message}`);
+  }
+}
 
 // After title intro animation, reveal header and UI while loading widget.
 // Use an event-driven approach (animationend) with a fallback timeout to avoid
