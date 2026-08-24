@@ -504,7 +504,6 @@ const LEGACY_PREFIX = "sketch-dashboard-";
 const STORAGE_KEYS = {
   notes: `${STORAGE_PREFIX}notes`,
   language: `${STORAGE_PREFIX}language`,
-  activeWidget: `${STORAGE_PREFIX}active-widget`,
   accent: `${STORAGE_PREFIX}accent`,
   background: `${STORAGE_PREFIX}background`,
   bodyStats: `${STORAGE_PREFIX}body-stats`,
@@ -1797,36 +1796,12 @@ function showWidget(widgetId) {
     }
   }
 
-  // Only persist real widget ids so temporary states never clobber the saved value
-  const isValidWidget = [...widgetPanels].some(
-    (panel) => panel.dataset.widget === widgetId
-  );
-  if (isValidWidget) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.activeWidget, widgetId);
-    } catch (error) {
-      console.warn("Could not save active widget:", error);
-    }
-  }
-
   logUiState(`Widget changed to ${widgetId}`);
 }
 
 function loadActiveWidget() {
-  let savedWidget = "dashboard";
-
-  try {
-    savedWidget = localStorage.getItem(STORAGE_KEYS.activeWidget) || "notes";
-  } catch (error) {
-    console.warn("Could not read active widget:", error);
-  }
-
-  const validIds = [...widgetPanels].map((panel) => panel.dataset.widget);
-  if (!validIds.includes(savedWidget)) {
-    savedWidget = "notes";
-  }
-
-  showWidget(savedWidget);
+  // The app always opens on Home - no session restore.
+  showWidget("dashboard");
 }
 
 for (const button of navButtons) {
@@ -2040,18 +2015,8 @@ settingsOpen.addEventListener("click", () => {
 // Single restore point: fires for the X button, clicks outside the dialog,
 // and the Escape key alike.
 settingsDialog.addEventListener("close", () => {
-  let toShow = widgetBeforeSettings;
-
-  if (!toShow) {
-    try {
-      toShow = localStorage.getItem(STORAGE_KEYS.activeWidget);
-    } catch (error) {
-      toShow = null;
-    }
-  }
-
   const validIds = [...widgetPanels].map((panel) => panel.dataset.widget);
-  showWidget(validIds.includes(toShow) ? toShow : "notes");
+  showWidget(validIds.includes(widgetBeforeSettings) ? widgetBeforeSettings : "dashboard");
 
   widgetBeforeSettings = null;
   debugLog("settings closed, restored widget");
