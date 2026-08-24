@@ -2141,8 +2141,9 @@ body.animations-off .widget-title {
   }
 
   .weight-form {
-    /* Date gets a little extra room for "24 ago. 2026" + picker icon */
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    /* Full-width rows on phones: the date picker and numeric keyboard get
+       the whole lane, so the two fields can never crowd or touch each other */
+    grid-template-columns: 1fr;
   }
 
   .trainer-form {
