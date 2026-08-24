@@ -509,7 +509,6 @@ const STORAGE_KEYS = {
   bodyStats: `${STORAGE_PREFIX}body-stats`,
   weightEntries: `${STORAGE_PREFIX}weight-entries`,
   notesCollection: `${STORAGE_PREFIX}notes-collection`,
-  activeNote: `${STORAGE_PREFIX}active-note`,
   goalWeight: `${STORAGE_PREFIX}goal-weight`,
   animations: `${STORAGE_PREFIX}animations`,
   darkMode: `${STORAGE_PREFIX}dark-mode`,
@@ -540,6 +539,8 @@ const noteTitleInput = document.getElementById("note-title-input");
 const noteList = document.getElementById("note-list");
 const newNoteButton = document.getElementById("note-new");
 const saveStatus = document.getElementById("save-status");
+const noteEditor = document.querySelector(".note-editor");
+const notesLayout = document.querySelector(".notes-layout");
 const navButtons = document.querySelectorAll(".nav-btn");
 const widgetPanels = document.querySelectorAll(".widget-panel");
 const settingsDialog = document.getElementById("settings-dialog");
@@ -1872,13 +1873,14 @@ function saveNotes(notes) {
   }
 }
 
-function getActiveNoteId(notes) {
-  const savedId = loadPreference(STORAGE_KEYS.activeNote, "");
-  return notes.some((note) => note.id === savedId) ? savedId : notes[0]?.id || null;
-}
+// The note currently open in the editor. In-memory only: a fresh visit
+// starts with the editor hidden until the user opens or creates a note.
+let activeNoteId = null;
 
-function saveActiveNoteId(noteId) {
-  savePreference(STORAGE_KEYS.activeNote, noteId || "");
+function setEditorVisible(visible) {
+  if (noteEditor) noteEditor.hidden = !visible;
+  if (saveStatus) saveStatus.hidden = !visible;
+  if (notesLayout) notesLayout.classList.toggle("editor-hidden", !visible);
 }
 
 function renderNoteList(notes, activeNoteId) {
@@ -1917,17 +1919,16 @@ function renderNoteList(notes, activeNoteId) {
 
 function renderNotes() {
   const notes = getNotes();
-  const activeNoteId = getActiveNoteId(notes);
   const activeNote = notes.find((note) => note.id === activeNoteId);
 
   renderNoteList(notes, activeNoteId);
+  setEditorVisible(Boolean(activeNote));
   noteTitleInput.value = activeNote?.title || "";
   notesInput.value = activeNote?.content || "";
-  saveActiveNoteId(activeNoteId);
 }
 
 function selectNote(noteId) {
-  saveActiveNoteId(noteId);
+  activeNoteId = noteId;
   renderNotes();
   showSaveStatus("saved");
 }
@@ -1942,39 +1943,27 @@ function createNote() {
   };
   notes.push(newNote);
   saveNotes(notes);
-  saveActiveNoteId(newNote.id);
+  activeNoteId = newNote.id;
   renderNotes();
   noteTitleInput.focus();
 }
 
 function deleteNote(noteId) {
-  const currentNotes = getNotes();
-  const wasActive = getActiveNoteId(currentNotes) === noteId;
-  const notes = currentNotes.filter((note) => note.id !== noteId);
-  saveNotes(notes);
-  if (wasActive) {
-    saveActiveNoteId(notes[0]?.id || "");
+  const notes = getNotes().filter((note) => note.id !== noteId);
+  if (activeNoteId === noteId) {
+    // Closing the editor beats auto-opening a different note
+    activeNoteId = null;
   }
+  saveNotes(notes);
   renderNotes();
 }
 
 function saveActiveNote() {
+  if (!activeNoteId) return; // editor is hidden - nothing to save
+
   const notes = getNotes();
-  const activeNoteId = getActiveNoteId(notes);
   const activeNote = notes.find((note) => note.id === activeNoteId);
-  if (!activeNote) {
-    const newNote = {
-      id: crypto.randomUUID(),
-      title: noteTitleInput.value,
-      content: notesInput.value,
-      updatedAt: new Date().toISOString(),
-    };
-    notes.push(newNote);
-    saveNotes(notes);
-    saveActiveNoteId(newNote.id);
-    renderNotes();
-    return;
-  }
+  if (!activeNote) return;
 
   activeNote.title = noteTitleInput.value;
   activeNote.content = notesInput.value;

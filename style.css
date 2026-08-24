@@ -1987,6 +1987,15 @@ body.animations-off .widget-title {
   min-width: 0;
 }
 
+.note-editor[hidden] {
+  display: none;
+}
+
+/* With the editor away, the note list uses the full row */
+.notes-layout.editor-hidden {
+  grid-template-columns: 1fr;
+}
+
 .note-title-input {
   width: 100%;
   margin-bottom: 0.5rem;
