@@ -430,9 +430,20 @@ if (DEBUG_ENABLED) {
   });
 }
 
+// Freeze perpetual decorative loops while scrolling (see .is-scrolling CSS).
+let __scrollEndTimer = null;
+function __markScrolling() {
+  document.body.classList.add("is-scrolling");
+  if (__scrollEndTimer) clearTimeout(__scrollEndTimer);
+  __scrollEndTimer = setTimeout(() => {
+    document.body.classList.remove("is-scrolling");
+  }, 200);
+}
+window.addEventListener("scroll", __markScrolling, { passive: true });
+
 // (?debug) Scroll-geometry probe: logs the exact numbers that expose any
-// horizontal shift - scrollbar width, column edges and centering error.
-// If the column truly never moves, every entry shows identical values.
+// horizontal shift - scrollbar width, column edges, centering error, and
+// the fixed nav / active panel rects.
 let __lastScrollProbe = 0;
 window.addEventListener(
   "scroll",
@@ -444,6 +455,10 @@ window.addEventListener(
 
     const root = document.documentElement;
     const bodyRect = document.body.getBoundingClientRect();
+    const navRect = document.querySelector(".app-nav")?.getBoundingClientRect();
+    const panelRect = document
+      .querySelector(".widget-panel.is-active")
+      ?.getBoundingClientRect();
     const round1 = (n) => Math.round(n * 10) / 10;
     debugLog("scroll geometry", {
       scrollTop: Math.round(window.scrollY),
@@ -453,6 +468,10 @@ window.addEventListener(
       bodyLeftGap: round1(bodyRect.left),
       bodyRightGap: round1(window.innerWidth - bodyRect.right),
       centerDeviation: round1((bodyRect.left + bodyRect.right) / 2 - window.innerWidth / 2),
+      navLeft: navRect ? round1(navRect.left) : null,
+      navRightGap: navRect ? round1(window.innerWidth - navRect.right) : null,
+      panelLeft: panelRect ? round1(panelRect.left) : null,
+      panelRightGap: panelRect ? round1(window.innerWidth - panelRect.right) : null,
     });
   },
   { passive: true }

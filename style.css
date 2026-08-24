@@ -731,6 +731,22 @@ body.background-paper .nav-btn.is-active {
     infinite;
 }
 
+/* While the viewport is scrolling, freeze perpetual decorative loops
+   (pulsing paper shadows, icon chromatic shift): peripheral motion during
+   scroll reads as "the window itself sliding". JS toggles `is-scrolling`
+   on scroll events and removes it shortly after scrolling stops, so the
+   loops resume seamlessly at rest. */
+body.is-scrolling .rugged-paper,
+body.is-scrolling .nav-btn.is-active .nav-icon {
+  animation-play-state: paused !important;
+}
+
+/* ...but never stall one-shot entrance pops (they would otherwise freeze
+   on their hidden first frame while the user scrolls through them) */
+body.is-scrolling .pop-in {
+  animation-play-state: running !important;
+}
+
 body.animations-off *,
 body.animations-off *::before,
 body.animations-off *::after {
