@@ -511,13 +511,22 @@ body.dark-mode .settings-dialog::backdrop {
 
 .swatch,
 .background-choice {
-  display: block;
-  min-height: 56px;
-  padding: 2.8rem 0.3rem 0.35rem;
+  /* Fixed-size box: long labels wrap upward into the color area instead of
+     stretching the box (two-line Spanish labels were growing the row). */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  min-height: 64px;
+  padding: 0.4rem 0.3rem 0.45rem;
   border: 2px solid transparent;
-  border-radius: 3px;
+  border-radius: 8px;
   font-size: 0.78rem;
+  line-height: 1.15;
   text-align: center;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .choice-option input:checked + .swatch,
@@ -2089,6 +2098,14 @@ body.animations-off .widget-title {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     max-height: 120px;
+  }
+
+  /* Perfect squares on phones; the label shrinks instead of the box */
+  .swatch,
+  .background-choice {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    font-size: 0.66rem;
   }
 
   .weight-form {
