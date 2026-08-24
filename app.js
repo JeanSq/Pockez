@@ -1752,6 +1752,13 @@ function animateStaggerIn(elements, stepMs = 60) {
 }
 
 function showWidget(widgetId) {
+  // Remember whether this tab was already on screen: restoring it (e.g.
+  // after closing the settings dialog) must not replay entrance
+  // animations the user has already seen.
+  const previousPanel = document.querySelector(".widget-panel.is-active");
+  const isSamePanel =
+    Boolean(previousPanel) && previousPanel.dataset.widget === widgetId;
+
   for (const panel of widgetPanels) {
     const isActive = panel.dataset.widget === widgetId;
     panel.classList.toggle("is-active", isActive);
@@ -1764,18 +1771,21 @@ function showWidget(widgetId) {
     button.setAttribute("aria-current", isActive ? "page" : "false");
   }
 
-  // Staggered entrance for the freshly shown tab's cards: dashboard
-  // summaries and quick links, body stat results/targets, and the weight
-  // summary + chart wrap.
-  const activePanel = [...widgetPanels].find(
-    (panel) => panel.dataset.widget === widgetId
-  );
-  if (activePanel) {
-    animateStaggerIn(
-      activePanel.querySelectorAll(
-        ".summary-card, .quick-link, .result-card, .target-card, .weight-chart-wrap"
-      )
+  // Staggered entrance for a freshly SHOWN tab (dashboard summaries and
+  // quick links, body stat results/targets, weight summary + chart wrap).
+  // Deliberately skipped when the tab was already visible - e.g. it sits
+  // under the settings dialog, so closing settings just restores it.
+  if (!isSamePanel) {
+    const activePanel = [...widgetPanels].find(
+      (panel) => panel.dataset.widget === widgetId
     );
+    if (activePanel) {
+      animateStaggerIn(
+        activePanel.querySelectorAll(
+          ".summary-card, .quick-link, .result-card, .target-card, .weight-chart-wrap"
+        )
+      );
+    }
   }
 
   // Only persist real widget ids so temporary states never clobber the saved value
