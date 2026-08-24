@@ -1422,6 +1422,16 @@ body.animations-off .widget-title {
 .weight-form .form-submit {
   width: auto;
   white-space: nowrap;
+  /* Desktop: the button keeps the top-right cell even though the goal row
+     now comes first in the DOM */
+  grid-column: 3;
+  grid-row: 1;
+}
+
+/* Shown only while editing a measurement; parked below the goal row */
+.weight-form .measurement-cancel {
+  grid-column: 3;
+  grid-row: 3;
 }
 
 .weight-goal-row {
@@ -1430,6 +1440,9 @@ body.animations-off .widget-title {
   align-items: end;
   gap: 0.75rem;
   margin-top: 0.85rem;
+  /* Desktop: full-width second row, under fecha | peso | button */
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
 
 .weight-goal-row .form-field {
@@ -2192,6 +2205,14 @@ body.animations-off .widget-title {
 
   .chart-controls {
     justify-content: space-between;
+  }
+
+  /* Undo the desktop grid placement - everything just stacks here */
+  .weight-form .form-submit,
+  .weight-form .measurement-cancel,
+  .weight-form .weight-goal-row {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .weight-form .form-submit {

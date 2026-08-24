@@ -24,7 +24,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="style.css?v=5" />
+    <link rel="stylesheet" href="style.css?v=6" />
   </head>
   <body class="no-js">
     <svg class="svg-defs" aria-hidden="true">
@@ -488,6 +488,13 @@
               <span data-i18n="measurementWeightLabel">Weight (kg)</span>
               <input id="measurement-weight-input" type="number" min="25" max="350" step="0.1" required />
             </label>
+            <div class="weight-goal-row">
+              <label class="form-field">
+                <span data-i18n="goalWeightLabel">Goal weight (kg)</span>
+                <input id="goal-weight-input" type="number" min="25" max="350" step="0.1" />
+              </label>
+              <p class="goal-hint" id="goal-hint" data-i18n="goalWeightHint">Your goal appears as a guide on the graph.</p>
+            </div>
             <button class="form-submit" type="submit" data-i18n="addMeasurementButton">
               Add measurement
             </button>
@@ -495,14 +502,6 @@
               Cancel edit
             </button>
           </form>
-
-          <div class="weight-goal-row">
-            <label class="form-field">
-              <span data-i18n="goalWeightLabel">Goal weight (kg)</span>
-              <input id="goal-weight-input" type="number" min="25" max="350" step="0.1" />
-            </label>
-            <p class="goal-hint" id="goal-hint" data-i18n="goalWeightHint">Your goal appears as a guide on the graph.</p>
-          </div>
 
           <div class="chart-controls">
             <label class="chart-filter-label" for="chart-range-select" data-i18n="chartRangeLabel">Chart range</label>
@@ -624,10 +623,10 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v5</p>
+        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v6</p>
       </footer>
     </div>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
   </body>
 </html>
