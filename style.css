@@ -1376,7 +1376,9 @@ body.animations-off .widget-title {
 
 .weight-form {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  /* minmax(0, ...): lets each column shrink below its content's intrinsic
+     minimum, so the date input can never fuse into the weight input */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;
   gap: 0.75rem;
   margin-top: 1rem;
@@ -1384,6 +1386,13 @@ body.animations-off .widget-title {
 
 .weight-form .form-field {
   margin-bottom: 0;
+  min-width: 0;
+}
+
+/* Same box for date and number inputs - native date pickers render taller */
+.weight-form .form-field input {
+  height: 44px;
+  padding: 0.35rem 0.5rem;
 }
 
 .weight-form .form-submit {
@@ -2109,7 +2118,8 @@ body.animations-off .widget-title {
   }
 
   .weight-form {
-    grid-template-columns: 1fr 1fr;
+    /* Date gets a little extra room for "24 ago. 2026" + picker icon */
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   }
 
   .trainer-form {
