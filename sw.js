@@ -4,16 +4,21 @@
    2. the ?v=N query on style.css / app.js in index.html
    A changed URL can never be served from a stale cache - not the phone's
    HTTP cache, not a service worker, not the GitHub Pages CDN. */
-const CACHE_VERSION = "pockez-v8";
+const CACHE_VERSION = "pockez-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=7",
-  "./app.js?v=7",
+  "./style.css?v=8",
+  "./app.js?v=8",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./fonts/bangers-400.woff2",
+  "./fonts/caveat.woff2",
+  "./fonts/kalam-300.woff2",
+  "./fonts/kalam-400.woff2",
+  "./fonts/kalam-700.woff2",
 ];
 
 self.addEventListener("install", (event) => {

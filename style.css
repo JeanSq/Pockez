@@ -1,3 +1,47 @@
+/* --- Self-hosted fonts (OFL-licensed, from Google Fonts) ---
+   Precached by the service worker: instant loads, fully offline, and no
+   flash of fallback font from a cold cross-origin request. Caveat ships as
+   a variable font covering weights 400-700 in a single file. */
+@font-face {
+  font-family: "Bangers";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/bangers-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("fonts/caveat.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Kalam";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("fonts/kalam-300.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Kalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/kalam-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Kalam";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/kalam-700.woff2") format("woff2");
+}
+
 /* --- Muted palette + Spider-Verse accent pair --- */
 :root {
   --bg: #34383d;

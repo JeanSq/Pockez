@@ -17,14 +17,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Pockez" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bangers&family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Self-hosted fonts (see fonts/ + @font-face in style.css): preloading
+         the headline fonts so even a cold first load starts the download
+         immediately - no flash of fallback font -->
+    <link rel="preload" href="fonts/bangers-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/kalam-400.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link rel="stylesheet" href="style.css?v=7" />
+    <link rel="stylesheet" href="style.css?v=8" />
 
     <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
          during a site rebuild), force the app visible instead of sticking on
@@ -639,10 +639,10 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v7</p>
+        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v8</p>
       </footer>
     </div>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
   </body>
 </html>
