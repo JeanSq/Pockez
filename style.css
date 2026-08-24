@@ -1402,6 +1402,9 @@ body.animations-off .widget-title {
 
 /* Same box for date and number inputs - native date pickers render taller */
 .weight-form .form-field input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 44px;
   padding: 0.35rem 0.5rem;
 }
@@ -2144,6 +2147,14 @@ body.animations-off .widget-title {
     /* Full-width rows on phones: the date picker and numeric keyboard get
        the whole lane, so the two fields can never crowd or touch each other */
     grid-template-columns: 1fr;
+  }
+
+  /* Android's native date widget draws itself larger than plain inputs and
+     can spill past the lane. Strip its UA chrome on phones so it renders as
+     an identical plain box - tapping it still opens the date picker. */
+  .weight-form .form-field input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   .trainer-form {
