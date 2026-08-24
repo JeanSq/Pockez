@@ -2,7 +2,7 @@
  * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
-import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=9";
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=10";
 import { translations } from "./i18n.js?v=9";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately

@@ -198,6 +198,9 @@ body {
   display: flex;
   flex-direction: column;
   font-family: var(--font-body);
+  /* Base text color: elements without their own color inherit this, so they
+     adapt to dark mode instead of staying browser-default black */
+  color: var(--ink);
   /* Tilted cards must never create a horizontal scrollbar */
   overflow-x: clip;
   overflow-anchor: none;

@@ -64,23 +64,3 @@ export function removePreference(key) {
     console.warn("Could not remove preference:", error);
   }
 }
-
-/* Structured helpers — available for the gradual migration of the JSON
-   read/write spots in app.js onto this module. */
-export function loadJSON(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (error) {
-    console.warn("Could not parse stored data:", error);
-    return fallback;
-  }
-}
-
-export function saveJSON(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn("Could not store data:", error);
-  }
-}
