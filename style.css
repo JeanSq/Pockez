@@ -129,6 +129,8 @@ html {
   overflow-anchor: none;
   scrollbar-width: thin;
   scrollbar-color: var(--aberration-b) transparent;
+  /* No grey flash box on taps (Android WebView / iOS) */
+  -webkit-tap-highlight-color: transparent;
 }
 
 @supports (scrollbar-gutter: stable) {
@@ -141,8 +143,14 @@ html {
 body {
   max-width: 880px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 6.5rem; /* Increased bottom padding to accommodate floating menu */
+  /* Increased bottom padding to accommodate floating menu */
+  padding: 1.5rem 1rem 6.5rem;
+  /* Notched / gesture-bar phones in fullscreen: keep content clear */
+  padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1rem
+    calc(6.5rem + env(safe-area-inset-bottom, 0px));
   min-height: 100vh;
+  /* dvh = the REAL visible viewport on phones (Safari's URL bar eats 100vh) */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   font-family: var(--font-body);
@@ -622,7 +630,9 @@ body.dark-mode .settings-dialog::backdrop {
 /* --- Icon nav: bare icons, no boxes --- */
 .app-nav {
   position: fixed;
-  bottom: 16px; /* Floats on the lower zone of the app */
+  /* Floats on the lower zone of the app; lifts above the iPhone gesture bar */
+  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 100; /* Sit above all footer and widgets */
@@ -2064,6 +2074,14 @@ body.animations-off .widget-title {
 }
 
 @media (max-width: 520px) {
+  /* iOS Safari auto-zooms the whole page when focusing any control whose
+     font-size is under 16px - keep every control at 1rem on phones */
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
+
   .profile-controls {
     grid-template-columns: 1fr 1fr 1fr;
   }
