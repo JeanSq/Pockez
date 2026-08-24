@@ -483,9 +483,31 @@ window.addEventListener(
 // --- PWA: service worker (offline + installable when served over http[s]) ---
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((error) => {
-      console.warn("Service worker registration failed:", error);
-    });
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((registration) => {
+        // Check for updates whenever the app returns to the foreground
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) registration.update().catch(() => {});
+        });
+      })
+      .catch((error) => {
+        console.warn("Service worker registration failed:", error);
+      });
+
+    // When an updated worker takes over (sw.js uses skipWaiting +
+    // clients.claim), reload once so the page immediately runs the fresh
+    // files instead of waiting for the next visit. Only wired when a
+    // controller already exists - i.e. this is an UPDATE, not the first
+    // install - and the flag prevents reload loops.
+    if (navigator.serviceWorker.controller) {
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+    }
   });
 }
 

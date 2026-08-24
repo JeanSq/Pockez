@@ -1,7 +1,7 @@
 /* Pockez service worker - offline app shell.
    Bump CACHE_VERSION whenever you ship changes, so installed clients
    refresh their copy on the next visit. */
-const CACHE_VERSION = "pockez-v1";
+const CACHE_VERSION = "pockez-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
