@@ -19,7 +19,7 @@
   --spider-steps: 2;
 
   /* Glassmorphism nav variables (Default / Darkish fallback) */
-  --nav-bg: rgba(42, 45, 49, 0.25);
+  --nav-bg: rgba(42, 45, 49, 0.82);
   --nav-border: rgba(255, 255, 255, 0.08);
   --nav-border-bottom: rgba(255, 255, 255, 0.16);
   --nav-shadow: 
@@ -30,7 +30,7 @@
 }
 
 body.background-paper {
-  --nav-bg: rgba(235, 228, 216, 0.25);
+  --nav-bg: rgba(235, 228, 216, 0.85);
   --nav-border: rgba(26, 26, 26, 0.06);
   --nav-border-bottom: rgba(26, 26, 26, 0.12);
   --nav-shadow: 
@@ -82,7 +82,7 @@ body.dark-mode {
     linear-gradient(175deg, #414348 0%, #2e3034 100%);
 
   /* Glassmorphism dark mode overrides */
-  --nav-bg: rgba(48, 50, 54, 0.25);
+  --nav-bg: rgba(48, 50, 54, 0.82);
   --nav-border: rgba(255, 255, 255, 0.08);
   --nav-border-bottom: rgba(255, 255, 255, 0.16);
   --nav-shadow: 
@@ -620,10 +620,12 @@ body.dark-mode .settings-dialog::backdrop {
   margin: 0;
   padding: 0.4rem 2rem; /* Thinner vertically */
   
-  /* Glassmorphism background and borders */
+  /* Glassmorphism background and borders
+     NOTE: no backdrop-filter here on purpose - its per-frame resampling of
+     the content sliding beneath the fixed bar caused horizontal shimmer
+     while scrolling (Chromium). Readability is preserved via higher
+     --nav-bg opacity instead. Re-add blur only together with a test. */
   background: var(--nav-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--nav-border);
   border-bottom: 2.5px solid var(--nav-border-bottom);
   border-radius: 9999px;
