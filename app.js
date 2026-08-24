@@ -461,10 +461,13 @@ window.addEventListener(
       ?.getBoundingClientRect();
     const round1 = (n) => Math.round(n * 10) / 10;
     debugLog("scroll geometry", {
-      scrollTop: Math.round(window.scrollY),
+      scrollXExact: Math.round(window.scrollX * 100) / 100,
+      scrollYExact: Math.round(window.scrollY * 100) / 100,
       innerWidth: window.innerWidth,
       rootClientWidth: root.clientWidth,
       scrollbarWidth: window.innerWidth - root.clientWidth,
+      rootHOverflow: root.scrollWidth - root.clientWidth,
+      bodyHOverflow: document.body.scrollWidth - document.body.clientWidth,
       bodyLeftGap: round1(bodyRect.left),
       bodyRightGap: round1(window.innerWidth - bodyRect.right),
       centerDeviation: round1((bodyRect.left + bodyRect.right) / 2 - window.innerWidth / 2),
