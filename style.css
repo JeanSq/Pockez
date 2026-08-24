@@ -1496,7 +1496,11 @@ body.animations-off *::after {
   background: rgba(255, 255, 255, 0.2);
 }
 
-@keyframes trainer-plan-pop {
+/* Shared staggered entrance used across tabs (trainer plan, dashboard
+   cards, weight summary, ...). `backwards` fill keeps pre-delay frames
+   hidden but releases the final frame afterwards so hover transforms
+   still work. */
+@keyframes card-pop-in {
   0% {
     opacity: 0;
     transform: scale(0.96) rotate(-0.7deg);
@@ -1511,9 +1515,14 @@ body.animations-off *::after {
   }
 }
 
+.pop-in {
+  animation: card-pop-in 420ms ease-out backwards;
+  animation-delay: var(--pop-delay, 0ms);
+}
+
 .trainer-day-animated {
-  animation: trainer-plan-pop 420ms ease-out both;
-  animation-delay: var(--trainer-delay, 0ms);
+  animation: card-pop-in 420ms ease-out backwards;
+  animation-delay: var(--pop-delay, var(--trainer-delay, 0ms));
 }
 
 .trainer-day h4 {
@@ -1539,8 +1548,8 @@ body.animations-off *::after {
 }
 
 .exercise-card-animated {
-  animation: trainer-plan-pop 360ms ease-out both;
-  animation-delay: var(--trainer-delay, 0ms);
+  animation: card-pop-in 360ms ease-out backwards;
+  animation-delay: var(--pop-delay, var(--trainer-delay, 0ms));
 }
 
 .exercise-card:hover,

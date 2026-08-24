@@ -1680,6 +1680,27 @@ function setTodayAsMeasurementDate() {
 }
 
 // --- Widget navigation (one panel at a time) ---
+// Staggered entrance for cards in a freshly shown tab. Mirrors the
+// trainer plan pop. Purely decorative: `animations-off` and reduced-motion
+// neutralize it through CSS.
+function animateStaggerIn(elements, stepMs = 60) {
+  const list = Array.from(elements);
+  if (!list.length) return;
+
+  for (const el of list) {
+    el.classList.remove("pop-in");
+  }
+
+  // Style flush so re-adding the class restarts the animation even when
+  // the panel never left the screen (e.g. restoring after Settings closes).
+  void list[0].offsetWidth;
+
+  list.forEach((el, index) => {
+    el.style.setProperty("--pop-delay", `${index * stepMs}ms`);
+    el.classList.add("pop-in");
+  });
+}
+
 function showWidget(widgetId) {
   for (const panel of widgetPanels) {
     const isActive = panel.dataset.widget === widgetId;
@@ -1691,6 +1712,20 @@ function showWidget(widgetId) {
     const isActive = button.dataset.widget === widgetId;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-current", isActive ? "page" : "false");
+  }
+
+  // Staggered entrance for the freshly shown tab's cards: dashboard
+  // summaries and quick links, body stat results/targets, and the weight
+  // summary + chart wrap.
+  const activePanel = [...widgetPanels].find(
+    (panel) => panel.dataset.widget === widgetId
+  );
+  if (activePanel) {
+    animateStaggerIn(
+      activePanel.querySelectorAll(
+        ".summary-card, .quick-link, .result-card, .target-card, .weight-chart-wrap"
+      )
+    );
   }
 
   // Only persist real widget ids so temporary states never clobber the saved value
