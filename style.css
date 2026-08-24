@@ -628,9 +628,6 @@ body.dark-mode .settings-dialog::backdrop {
   box-shadow: var(--nav-shadow);
 
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  /* Own compositor layer: stops the blurred glass from "swimming"
-     against the background while the page scrolls */
-  will-change: transform;
 }
 
 body.background-paper .app-nav {
@@ -755,6 +752,15 @@ body.animations-off *::after {
 }
 
 /* --- Widget panels --- */
+/* Promote the big tilted surfaces to their own compositor layers: scrolling
+   then translates pre-rasterized textures instead of re-snapping rotated
+   edges every frame (reads as horizontal wobble at fractional device
+   pixel ratios, e.g. Windows 125%/150% scaling). */
+.widget-panel,
+.header-text {
+  will-change: transform;
+}
+
 .dashboard {
   flex: 1;
   display: flex;
