@@ -67,19 +67,21 @@ body.background-blueprint {
 }
 
 body.dark-mode {
-  --paper: #4a4c50;
-  --paper-shadow: #383a3e;
-  --ink: #f0ece3;
-  --ink-muted: #d0cbc2;
-  --ink-faint: #aaa69f;
-  --text-on-dark: #f0ece3;
-  --text-muted-on-dark: #c1bdb5;
-  --bg: #3a3c40;
-  --bg-deep: #303236;
+  /* Contrast-tuned palette: brighter warm inks on a slightly deeper paper
+     so the handwritten fonts stay crisp on the grey surfaces */
+  --paper: #414349;
+  --paper-shadow: #313338;
+  --ink: #f7f3ea;
+  --ink-muted: #ddd8ce;
+  --ink-faint: #b5b0a6;
+  --text-on-dark: #f7f3ea;
+  --text-muted-on-dark: #cdc8bf;
+  --bg: #35373b;
+  --bg-deep: #2b2d31;
   background-color: var(--bg-deep);
   background-image:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 28px),
-    linear-gradient(175deg, #414348 0%, #2e3034 100%);
+    linear-gradient(175deg, #3a3c42 0%, #2b2d31 100%);
 
   /* Glassmorphism dark mode overrides */
   --nav-bg: rgba(48, 50, 54, 0.25);
