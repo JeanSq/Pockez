@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2a2d31" />
+    <title>Pockez</title>
+
+    <!-- Inline SVG favicon: no extra file, no 404 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%23b54a4a%22/><text x=%2216%22 y=%2223%22 font-family=%22Arial,sans-serif%22 font-size=%2219%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22%23ebe4d8%22>P</text></svg>" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="no-js">
+    <svg class="svg-defs" aria-hidden="true">
+      <filter id="paper-grain" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+      </filter>
+    </svg>
+
+    <div class="page">
+      <header class="header">
+        <div class="header-text">
+          <h1 class="title" data-i18n="appTitle">Pockez</h1>
+          <p class="subtitle" data-i18n="appSubtitle">
+            Notes, habits, and health — all in one place.
+          </p>
+        </div>
+
+        <nav class="app-nav" aria-label="Dashboard sections">
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            data-widget="dashboard"
+            data-i18n-aria="navDashboard"
+            aria-label="Dashboard"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <path d="M5 14 16 5l11 9v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                <path d="M12 28v-8h8v8M10 14h3M19 14h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            data-widget="notes"
+            data-i18n-aria="navNotes"
+            aria-label="Notes"
+            
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <path
+                  d="M8 4h12l6 6v17a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+                <path d="M20 4v6h6M10 14h12M10 19h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            data-widget="body"
+            data-i18n-aria="navBody"
+            aria-label="Body stats"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <circle cx="16" cy="5.5" r="3" fill="none" stroke="currentColor" stroke-width="1.8" />
+                <path
+                  d="M16 8.5v9M10 12.5h12M16 17.5l-5 10M16 17.5l5 10"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            data-widget="weight"
+            data-i18n-aria="navWeight"
+            aria-label="Weight log"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <path
+                  d="M5 26h22M6 23l6-6 4 3 9-11"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path d="M21 9h4v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            data-widget="trainer"
+            data-i18n-aria="navTrainer"
+            aria-label="Personal trainer"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <path d="M6 9h5M21 9h5M8 6v6M24 6v6M11 9h10M11 23h10M8 20v6M24 20v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                <path d="M11 13h10v6H11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="nav-btn spider-hover"
+            id="settings-open"
+            data-i18n-aria="settings"
+            aria-label="Settings"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" class="icon-svg">
+                <circle cx="16" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="1.8" />
+                <path d="M16 6V3M16 29v-3M6 16H3M29 16h-3M8.9 8.9L6.8 6.8M25.2 25.2l-2.1-2.1M8.9 23.1l-2.1 2.1M25.2 6.8l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </span>
+          </button>
+        </nav>
+      </header>
+
+      <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+        <div class="settings-content">
+          <div class="settings-heading">
+            <h2 id="settings-title" class="widget-title" data-i18n="settingsTitle">
+              Settings
+            </h2>
+            <button
+              type="button"
+              class="settings-close"
+              id="settings-close"
+              data-i18n-aria="closeSettings"
+              aria-label="Close settings"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="settings-options-row">
+            <label class="setting-group language-setting">
+              <span class="setting-label" data-i18n="languageLabel">Language</span>
+              <select id="language-select" aria-label="Language">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+              </select>
+            </label>
+
+            <div class="settings-toggles">
+              <label class="animation-setting">
+                <span class="setting-label" data-i18n="animationsLabel">Animations</span>
+                <span class="toggle-control">
+                  <input id="animations-toggle" type="checkbox" checked />
+                  <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-state" data-i18n="animationsOn">On</span>
+                </span>
+              </label>
+              <label class="animation-setting">
+                <span class="setting-label" data-i18n="darkModeLabel">Dark mode</span>
+                <span class="toggle-control">
+                  <input id="dark-mode-toggle" type="checkbox" />
+                  <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-state" data-i18n="darkModeOff">Off</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <fieldset class="setting-group">
+            <legend class="setting-label" data-i18n="accentLabel">Accent color</legend>
+            <div class="choice-grid">
+              <label class="choice-option">
+                <input type="radio" name="accent" value="red-blue" checked />
+                <span class="swatch swatch-red-blue" data-i18n="accentRedBlue">Red + blue</span>
+              </label>
+              <label class="choice-option">
+                <input type="radio" name="accent" value="orange-teal" />
+                <span class="swatch swatch-orange-teal" data-i18n="accentOrangeTeal">Orange + teal</span>
+              </label>
+              <label class="choice-option">
+                <input type="radio" name="accent" value="yellow-pink" />
+                <span class="swatch swatch-yellow-pink" data-i18n="accentYellowPink">Yellow + pink</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="setting-group">
+            <legend class="setting-label" data-i18n="backgroundLabel">Background style</legend>
+            <div class="choice-grid background-choices">
+              <label class="choice-option">
+                <input type="radio" name="background" value="paper" />
+                <span class="background-choice background-paper" data-i18n="backgroundPaper">Paper</span>
+              </label>
+              <label class="choice-option">
+                <input type="radio" name="background" value="dark-paper" />
+                <span class="background-choice background-dark-paper" data-i18n="backgroundDarkPaper">Dark paper</span>
+              </label>
+              <label class="choice-option">
+                <input type="radio" name="background" value="graffiti" checked />
+                <span class="background-choice background-graffiti" data-i18n="backgroundGraffiti">Graffiti traces</span>
+              </label>
+              <label class="choice-option">
+                <input type="radio" name="background" value="blueprint" />
+                <span class="background-choice background-blueprint" data-i18n="backgroundBlueprint">Blueprint paper</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="setting-group data-tools">
+            <legend class="setting-label" data-i18n="dataToolsLabel">Your data</legend>
+            <div class="data-tools-grid">
+              <button type="button" class="data-tool-button" id="export-data" data-i18n="exportData">Export data</button>
+              <button type="button" class="data-tool-button" id="import-data-button" data-i18n="importData">Import data</button>
+              <button type="button" class="data-tool-button data-tool-danger" id="clear-data" data-i18n="clearData">Clear all data</button>
+            </div>
+            <input id="import-data-input" type="file" accept="application/json" hidden />
+            <p class="setting-help" data-i18n="dataToolsHint">Keep a backup or move your dashboard to another browser.</p>
+          </fieldset>
+
+        </div>
+      </dialog>
+
+      <main class="dashboard">
+        <section
+          class="widget-panel rugged-paper spider-hover"
+          data-widget="dashboard"
+          aria-labelledby="dashboard-heading"
+          hidden
+        >
+          <div class="dashboard-heading">
+            <span class="dashboard-eyebrow" data-i18n="dashboardEyebrow">Personal snapshot</span>
+            <h2 id="dashboard-heading" class="widget-title" data-i18n="dashboardTitle">Today</h2>
+          </div>
+          <p class="widget-hint" data-i18n="dashboardHint">
+            A quick look at your personal dashboard.
+          </p>
+          <section class="dashboard-summary" aria-live="polite">
+            <div class="summary-card">
+              <span data-i18n="summaryLatestWeight">Latest weight</span>
+              <strong><span id="summary-weight">—</span> <small data-i18n="weightUnit">kg</small></strong>
+              <em id="summary-weight-change">—</em>
+            </div>
+            <div class="summary-card">
+              <span data-i18n="summaryBmi">BMI</span>
+              <strong id="summary-bmi">—</strong>
+              <em data-i18n="summaryFromBody">From Body Stats</em>
+            </div>
+            <div class="summary-card">
+              <span data-i18n="summaryCalories">Calorie target</span>
+              <strong><span id="summary-calories">—</span> <small data-i18n="caloriesUnit">kcal/day</small></strong>
+              <em id="summary-calorie-mode">—</em>
+            </div>
+          </section>
+          <div class="dashboard-quick-links">
+            <button type="button" class="quick-link" data-widget-target="body" data-i18n="openBodyStats">Open Body Stats</button>
+            <button type="button" class="quick-link" data-widget-target="weight" data-i18n="openWeightLog">Open Weight Log</button>
+          </div>
+        </section>
+
+        <section
+          class="widget-panel rugged-paper spider-hover"
+          data-widget="notes"
+          aria-labelledby="notes-heading"
+        >
+          <h2 id="notes-heading" class="widget-title" data-i18n="notesTitle">Notes</h2>
+          <p class="widget-hint" data-i18n="notesHint">
+            Jot anything down. Saves automatically.
+          </p>
+          <div class="notes-layout">
+            <aside class="notes-sidebar" aria-label="Saved notes">
+              <button type="button" class="form-submit note-new-button" id="note-new" data-i18n="newNoteButton">
+                New note
+              </button>
+              <ul class="note-list" id="note-list"></ul>
+            </aside>
+            <div class="note-editor">
+              <label class="note-title-label">
+                <span class="sr-only" data-i18n="noteTitleLabel">Note title</span>
+                <input id="note-title-input" class="note-title-input" type="text" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Note title" />
+              </label>
+              <textarea
+                id="notes-input"
+                class="notes-area"
+                rows="10"
+                data-i18n-placeholder="notesPlaceholder"
+                placeholder="Write your thoughts here..."
+              ></textarea>
+            </div>
+          </div>
+          <p class="save-status" id="save-status" data-i18n="saved">Saved</p>
+        </section>
+
+        <section
+          class="widget-panel rugged-paper spider-hover"
+          data-widget="body"
+          aria-labelledby="body-heading"
+          hidden
+        >
+          <h2 id="body-heading" class="widget-title" data-i18n="bodyStatsTitle">Body stats</h2>
+          <p class="widget-hint" data-i18n="bodyStatsHint">
+            Add your details to estimate BMI, BMR, and daily calories.
+          </p>
+          <section class="profile-manager" aria-labelledby="profile-manager-title">
+            <div class="profile-manager-heading">
+              <span class="profile-label" id="profile-manager-title" data-i18n="profileLabel">Profile</span>
+              <span class="profile-count" id="profile-count"></span>
+            </div>
+            <div class="profile-controls">
+              <select id="profile-select" aria-label="Profile"></select>
+              <button type="button" class="profile-action" id="profile-add" data-i18n="addProfile">Add</button>
+              <button type="button" class="profile-action" id="profile-rename" data-i18n="renameProfile">Rename</button>
+              <button type="button" class="profile-action profile-action-danger" id="profile-delete" data-i18n="deleteProfile">Delete</button>
+            </div>
+            <div class="profile-editor" id="profile-editor" hidden>
+              <input id="profile-name-input" type="text" maxlength="32" data-i18n-placeholder="profileNamePlaceholder" placeholder="Profile name" />
+              <button type="button" class="profile-action" id="profile-save" data-i18n="saveProfile">Save</button>
+              <button type="button" class="profile-action" id="profile-cancel" data-i18n="cancelProfileEdit">Cancel</button>
+            </div>
+            <p class="profile-hint" data-i18n="profileHint">Each profile has its own body stats, weight log, and goal.</p>
+          </section>
+          <form class="body-form" id="body-form">
+            <div class="form-grid">
+              <label class="form-field">
+                <span data-i18n="ageLabel">Age</span>
+                <input id="age-input" type="number" min="13" max="120" step="1" required />
+              </label>
+              <label class="form-field">
+                <span data-i18n="sexLabel">Sex</span>
+                <select id="sex-input" required>
+                  <option value="female" data-i18n="femaleOption">Female</option>
+                  <option value="male" data-i18n="maleOption">Male</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span data-i18n="heightLabel">Height (cm)</span>
+                <input id="height-input" type="number" min="100" max="250" step="0.1" required />
+              </label>
+              <label class="form-field">
+                <span data-i18n="weightLabel">Weight (kg)</span>
+                <input id="body-weight-input" type="number" min="25" max="350" step="0.1" required />
+              </label>
+            </div>
+
+            <label class="form-field">
+              <span data-i18n="activityLabel">Activity level</span>
+              <select id="activity-input" required>
+                <option value="1.2" data-i18n="activitySedentary" data-i18n-title="activitySedentaryDescription" data-description-key="activitySedentaryDescription">Sedentary</option>
+                <option value="1.375" data-i18n="activityLight" data-i18n-title="activityLightDescription" data-description-key="activityLightDescription">Lightly active</option>
+                <option value="1.55" data-i18n="activityModerate" data-i18n-title="activityModerateDescription" data-description-key="activityModerateDescription">Moderately active</option>
+                <option value="1.725" data-i18n="activityVery" data-i18n-title="activityVeryDescription" data-description-key="activityVeryDescription">Very active</option>
+                <option value="1.9" data-i18n="activityExtra" data-i18n-title="activityExtraDescription" data-description-key="activityExtraDescription">Extra active</option>
+              </select>
+              <span class="field-description" id="activity-description"></span>
+            </label>
+
+            <fieldset class="calorie-mode-group">
+              <legend class="form-field-label" data-i18n="calorieModeLabel">Calorie goal</legend>
+              <div class="mode-switch">
+                <label class="mode-option">
+                  <input type="radio" name="calorie-mode" value="deficit" checked />
+                  <span data-i18n="deficitOption">Deficit</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="calorie-mode" value="surplus" />
+                  <span data-i18n="surplusOption">Surplus</span>
+                </label>
+              </div>
+            </fieldset>
+
+          </form>
+
+          <section class="body-results" aria-live="polite">
+            <div class="result-card" tabindex="0">
+              <span data-i18n="bmiLabel">BMI</span>
+              <strong id="bmi-result">—</strong>
+              <small class="bmi-category" id="bmi-category"></small>
+              <small class="result-description" data-i18n="bmiDescription">
+                A height-to-weight ratio used as a general screening measure.
+              </small>
+              <div class="bmi-reference" aria-label="BMI reference" data-i18n-aria="bmiReferenceLabel">
+                <div class="bmi-scale" aria-hidden="true">
+                  <span class="bmi-scale-segment bmi-scale-low"></span>
+                  <span class="bmi-scale-segment bmi-scale-healthy"></span>
+                  <span class="bmi-scale-segment bmi-scale-high"></span>
+                  <span class="bmi-scale-segment bmi-scale-very-high"></span>
+                  <span class="bmi-scale-marker" id="bmi-scale-marker"></span>
+                </div>
+                <div class="bmi-scale-labels" aria-hidden="true">
+                  <span data-i18n="bmiScaleLow">Low</span>
+                  <span data-i18n="bmiScaleHealthy">Healthy</span>
+                  <span data-i18n="bmiScaleHigh">High</span>
+                  <span data-i18n="bmiScaleVeryHigh">Very high</span>
+                </div>
+                <span class="sr-only" id="bmi-reference-description"></span>
+              </div>
+            </div>
+            <div class="result-card" tabindex="0">
+              <span data-i18n="bmrLabel">BMR</span>
+              <strong><span id="bmr-result">—</span> <small data-i18n="caloriesUnit">kcal/day</small></strong>
+              <small class="result-description" data-i18n="bmrDescription">
+                Estimated calories your body uses at rest.
+              </small>
+            </div>
+            <div class="result-card" tabindex="0">
+              <span data-i18n="maintenanceCaloriesLabel">Maintenance</span>
+              <strong><span id="maintenance-calories-result">—</span> <small data-i18n="caloriesUnit">kcal/day</small></strong>
+              <small class="result-description" data-i18n="maintenanceCaloriesDescription">
+                Estimated calories needed to maintain your current weight.
+              </small>
+            </div>
+          </section>
+          <section class="calorie-targets" aria-live="polite">
+            <h3 class="calorie-targets-title" data-i18n="calorieTargetsTitle">Suggested targets</h3>
+            <div class="target-grid">
+              <div class="target-card" tabindex="0">
+                <span data-i18n="conservativeTarget">Conservative · 10%</span>
+                <strong><span id="conservative-calories-result">—</span> <small data-i18n="caloriesUnit">kcal/day</small></strong>
+              </div>
+              <div class="target-card" tabindex="0">
+                <span data-i18n="aggressiveTarget">Aggressive · 15%</span>
+                <strong><span id="aggressive-calories-result">—</span> <small data-i18n="caloriesUnit">kcal/day</small></strong>
+              </div>
+            </div>
+          </section>
+          <p class="bmi-note" data-i18n="bmiCategoryNote">BMI categories are general screening guidance, not a diagnosis.</p>
+          <button class="form-submit body-calculate-button" type="submit" form="body-form" data-i18n="calculateButton">
+            Calculate stats
+          </button>
+          <p class="estimate-note" data-i18n="estimateNote">
+            Estimates for learning and personal tracking, not medical advice.
+          </p>
+        </section>
+
+        <section
+          class="widget-panel rugged-paper spider-hover"
+          data-widget="weight"
+          aria-labelledby="weight-heading"
+          hidden
+        >
+          <h2 id="weight-heading" class="widget-title" data-i18n="weightTitle">Weight log</h2>
+          <p class="widget-hint" data-i18n="weightHint">
+            Record measurements and watch your journey over time.
+          </p>
+          <form class="weight-form" id="weight-form">
+            <label class="form-field">
+              <span data-i18n="measurementDateLabel">Date</span>
+              <input id="measurement-date-input" type="date" required />
+            </label>
+            <label class="form-field">
+              <span data-i18n="measurementWeightLabel">Weight (kg)</span>
+              <input id="measurement-weight-input" type="number" min="25" max="350" step="0.1" required />
+            </label>
+            <button class="form-submit" type="submit" data-i18n="addMeasurementButton">
+              Add measurement
+            </button>
+            <button class="form-submit measurement-cancel" id="measurement-cancel" type="button" data-i18n="cancelEdit" hidden>
+              Cancel edit
+            </button>
+          </form>
+
+          <div class="weight-goal-row">
+            <label class="form-field">
+              <span data-i18n="goalWeightLabel">Goal weight (kg)</span>
+              <input id="goal-weight-input" type="number" min="25" max="350" step="0.1" />
+            </label>
+            <p class="goal-hint" id="goal-hint" data-i18n="goalWeightHint">Your goal appears as a guide on the graph.</p>
+          </div>
+
+          <div class="chart-controls">
+            <label class="chart-filter-label" for="chart-range-select" data-i18n="chartRangeLabel">Chart range</label>
+            <select id="chart-range-select" class="chart-range-select">
+              <option value="all" data-i18n="chartRangeAll">All time</option>
+              <option value="30" data-i18n="chartRange30">Last 30 days</option>
+              <option value="90" data-i18n="chartRange90">Last 90 days</option>
+              <option value="365" data-i18n="chartRange365">Last year</option>
+            </select>
+          </div>
+
+          <section class="weight-summary" aria-live="polite">
+            <div class="result-card">
+              <span data-i18n="startingWeightLabel">Starting weight</span>
+              <strong><span id="starting-weight-result">—</span> <small data-i18n="weightUnit">kg</small></strong>
+            </div>
+            <div class="result-card">
+              <span data-i18n="latestWeightLabel">Latest weight</span>
+              <strong><span id="latest-weight-result">—</span> <small data-i18n="weightUnit">kg</small></strong>
+            </div>
+            <div class="result-card">
+              <span data-i18n="weightChangeLabel">Change</span>
+              <strong><span id="weight-change-result">—</span> <small data-i18n="weightUnit">kg</small></strong>
+            </div>
+            <div class="result-card">
+              <span data-i18n="goalWeightShortLabel">Goal</span>
+              <strong><span id="goal-weight-result">—</span> <small data-i18n="weightUnit">kg</small></strong>
+            </div>
+          </section>
+
+          <div class="weight-chart-wrap">
+            <svg class="weight-chart" id="weight-chart" viewBox="0 0 600 240" role="img" aria-labelledby="weight-chart-description">
+              <desc id="weight-chart-description">A line chart showing weight measurements over time.</desc>
+              <g id="weight-chart-grid"></g>
+              <g id="weight-chart-y-labels"></g>
+              <polygon id="weight-chart-area" points="" fill="var(--aberration-a)" opacity="0.16"></polygon>
+              <line id="weight-goal-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--aberration-b)" stroke-width="2" stroke-dasharray="6 5"></line>
+              <polyline id="weight-trend-line" points="" fill="none" stroke="var(--aberration-b)" stroke-width="2.5" stroke-dasharray="3 4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <polyline id="weight-chart-line" points="" fill="none" stroke="var(--aberration-a)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <g id="weight-chart-points"></g>
+              <g id="weight-chart-x-labels"></g>
+              <g id="weight-chart-tooltip" class="chart-tooltip" hidden>
+                <rect id="weight-chart-tooltip-box" rx="3" ry="3"></rect>
+                <text id="weight-chart-tooltip-text"></text>
+              </g>
+            </svg>
+            <p class="chart-summary sr-only" id="chart-summary" aria-live="polite"></p>
+            <div class="chart-legend">
+              <span><i class="legend-swatch legend-measurement"></i><span data-i18n="measurementLegend">Measurements</span></span>
+              <span data-i18n-title="trendLegendDescription"><i class="legend-swatch legend-trend"></i><span data-i18n="trendLegend">Smoothed trend</span></span>
+              <span><i class="legend-swatch legend-goal"></i><span data-i18n="goalLegend">Goal</span></span>
+            </div>
+            <p class="chart-empty" id="chart-empty" data-i18n="chartEmpty">
+              Add at least two measurements to see your journey.
+            </p>
+          </div>
+
+          <ul class="measurement-list" id="measurement-list" aria-live="polite"></ul>
+        </section>
+
+        <section
+          class="widget-panel rugged-paper spider-hover"
+          data-widget="trainer"
+          aria-labelledby="trainer-heading"
+          hidden
+        >
+          <h2 id="trainer-heading" class="widget-title" data-i18n="trainerTitle">Personal trainer</h2>
+          <p class="widget-hint" data-i18n="trainerHint">Build a practical split around the days you can train.</p>
+
+          <form class="trainer-form" id="trainer-form">
+            <label class="form-field">
+              <span data-i18n="trainingDaysLabel">Days available</span>
+              <select id="training-days-input">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span data-i18n="trainingGoalLabel">Main goal</span>
+              <select id="training-goal-input">
+                <option value="strength" data-i18n="goalStrength">Strength</option>
+                <option value="muscle" selected data-i18n="goalMuscle">Muscle &amp; balance</option>
+                <option value="fitness" data-i18n="goalFitness">General fitness</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span data-i18n="trainingEmphasisLabel">Training emphasis</span>
+              <select id="training-emphasis-input">
+                <option value="balanced" selected data-i18n="emphasisBalanced">Balanced</option>
+                <option value="lower" data-i18n="emphasisLower">Lower-body emphasis</option>
+                <option value="upper" data-i18n="emphasisUpper">Upper-body emphasis</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span data-i18n="trainingVolumeLabel">Weekly volume</span>
+              <select id="training-volume-input">
+                <option value="low" data-i18n="volumeLow">Low</option>
+                <option value="moderate" selected data-i18n="volumeModerate">Moderate</option>
+                <option value="moderateHigh" data-i18n="volumeModerateHigh">Moderate-high</option>
+              </select>
+            </label>
+            <button class="form-submit" type="submit" data-i18n="generatePlan">Generate plan</button>
+          </form>
+
+          <div class="trainer-plan-heading" id="trainer-plan-heading" hidden>
+            <div>
+              <span class="dashboard-eyebrow" data-i18n="yourPlan">Your plan</span>
+              <h3 class="trainer-plan-title" id="trainer-plan-title"></h3>
+            </div>
+            <span class="trainer-plan-meta" id="trainer-plan-meta"></span>
+          </div>
+          <div class="trainer-days" id="trainer-days" aria-live="polite"></div>
+          <p class="estimate-note" data-i18n="trainerNote">Adjust the variables to match your experience, equipment, and recovery.</p>
+          <p class="trainer-safety" data-i18n="trainerSafety">Start light, use controlled form, and stop if something feels painful. This is general education, not medical advice.</p>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p data-i18n="footerNote">Personal dashboard — learning project</p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
