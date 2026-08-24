@@ -480,6 +480,15 @@ window.addEventListener(
   { passive: true }
 );
 
+// --- PWA: service worker (offline + installable when served over http[s]) ---
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  });
+}
+
 debugLog('startup: added splash/no-js handling');
 
 // Hook title animation events to log and ensure we don't reveal content early
