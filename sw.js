@@ -1,15 +1,19 @@
 /* Pockez service worker - offline app shell.
-   RELEASE CHECKLIST - bump ALL of these together when you ship changes:
-   1. CACHE_VERSION below (e.g. pockez-v3 -> pockez-v4)
-   2. the ?v=N query on style.css / app.js in index.html
+   RELEASE CHECKLIST - bump together when you ship changes:
+   1. CACHE_VERSION below (e.g. pockez-v9 -> pockez-v10)
+   2. the ?v=N query on style.css / app.js in index.html (changed files only)
+   3. the ?v=N on the import specifiers at the top of app.js (when a module
+      like storage.js / i18n.js changed)
    A changed URL can never be served from a stale cache - not the phone's
    HTTP cache, not a service worker, not the GitHub Pages CDN. */
-const CACHE_VERSION = "pockez-v9";
+const CACHE_VERSION = "pockez-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css?v=8",
-  "./app.js?v=8",
+  "./app.js?v=9",
+  "./storage.js?v=9",
+  "./i18n.js?v=9",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",

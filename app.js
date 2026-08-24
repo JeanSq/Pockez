@@ -2,377 +2,8 @@
  * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
-
-const translations = {
-  en: {
-    appTitle: "Pockez",
-    appSubtitle: "Notes, habits, and health — all in one place.",
-    languageLabel: "Language",
-    settings: "Settings",
-    closeSettings: "Close settings",
-    settingsTitle: "Settings",
-    accentLabel: "Accent color",
-    accentRedBlue: "Red + blue",
-    accentOrangeTeal: "Orange + teal",
-    accentYellowPink: "Yellow + pink",
-    backgroundLabel: "Background style",
-    backgroundPaper: "Paper",
-    backgroundDarkPaper: "Dark paper",
-    backgroundGraffiti: "Graffiti traces",
-    backgroundBlueprint: "Blueprint paper",
-    animationsLabel: "Animations",
-    animationsOn: "On",
-    animationsOff: "Off",
-    darkModeLabel: "Dark mode",
-    darkModeOn: "On",
-    darkModeOff: "Off",
-    profileLabel: "Profile",
-    addProfile: "Add",
-    renameProfile: "Rename",
-    deleteProfile: "Delete",
-    profileHint: "Each profile has its own body stats, weight log, and goal.",
-    profileCount: "{count} of 5 profiles",
-    profileNamePrompt: "Profile name",
-    profileNamePlaceholder: "Profile name",
-    saveProfile: "Save",
-    cancelProfileEdit: "Cancel",
-    newProfileName: "New profile",
-    renameProfilePrompt: "Rename profile",
-    deleteProfileConfirm: "Delete this profile and all of its data?",
-    lastProfileWarning: "Keep at least one profile.",
-    maxProfilesWarning: "You can have up to 5 profiles.",
-    dataToolsLabel: "Your data",
-    exportData: "Export data",
-    importData: "Import data",
-    clearData: "Clear all data",
-    dataToolsHint: "Keep a backup or move your dashboard to another browser.",
-    clearDataConfirm: "Clear all saved dashboard data? This cannot be undone.",
-    importSuccess: "Data imported",
-    importError: "Could not import data",
-    navNotes: "Notes",
-    navDashboard: "Dashboard",
-    navBody: "Body stats",
-    navWeight: "Weight log",
-    navTrainer: "Personal trainer",
-    trainerTitle: "Personal trainer",
-    trainerHint: "Build a practical split around the days you can train.",
-    trainingDaysLabel: "Days available",
-    trainingGoalLabel: "Main goal",
-    trainingEmphasisLabel: "Training emphasis",
-    trainingVolumeLabel: "Weekly volume",
-    volumeLow: "Low",
-    volumeModerate: "Moderate",
-    volumeModerateHigh: "Moderate-high",
-    volumeLabel: "volume",
-    emphasisBalanced: "Balanced",
-    emphasisLower: "Lower-body emphasis",
-    emphasisUpper: "Upper-body emphasis",
-    goalStrength: "Strength",
-    goalMuscle: "Muscle & balance",
-    goalFitness: "General fitness",
-    generatePlan: "Generate plan",
-    yourPlan: "Your plan",
-    trainerNote: "Adjust the variables to match your experience, equipment, and recovery.",
-    splitFullBody: "Full body",
-    splitUpperLower: "Upper / lower",
-    splitPushPullLegs: "Push / pull / legs",
-    splitUpperLowerPlus: "Upper / lower + full body",
-    dayLabel: "Day",
-    setsLabel: "Sets",
-    repsLabel: "Reps",
-    timeLabel: "Time",
-    restLabel: "Rest",
-    minutesLabel: "min",
-    secondsLabel: "sec",
-    formCueLabel: "Form cue",
-    trainerVisualLabel: "Reference cue",
-    trainerSafety: "Start light, use controlled form, and stop if something feels painful. This is general education, not medical advice.",
-    notesTitle: "Notes",
-    notesHint: "Jot anything down. Saves automatically.",
-    notesPlaceholder: "Write your thoughts here...",
-    newNoteButton: "New note",
-    noteTitleLabel: "Note title",
-    noteTitlePlaceholder: "Note title",
-    untitledNote: "Untitled note",
-    noNotes: "No notes yet. Start with a fresh page.",
-    deleteNote: "Delete note",
-    saved: "Saved",
-    saving: "Saving...",
-    saveError: "Could not save",
-    bodyStatsTitle: "Body stats",
-    bodyStatsHint: "Add your details to estimate BMI, BMR, and daily calories.",
-    ageLabel: "Age",
-    sexLabel: "Sex",
-    femaleOption: "Female",
-    maleOption: "Male",
-    heightLabel: "Height (cm)",
-    weightLabel: "Weight (kg)",
-    activityLabel: "Activity level",
-    activitySedentary: "Sedentary",
-    activitySedentaryDescription: "Little or no planned exercise; mostly sitting during the day.",
-    activityLight: "Lightly active",
-    activityLightDescription: "Light exercise or walking about 1–3 days per week.",
-    activityModerate: "Moderately active",
-    activityModerateDescription: "Moderate exercise or sports about 3–5 days per week.",
-    activityVery: "Very active",
-    activityVeryDescription: "Hard exercise or sports about 6–7 days per week.",
-    activityExtra: "Extra active",
-    activityExtraDescription: "Very hard training, physical work, or demanding training twice a day.",
-    calorieModeLabel: "Calorie goal",
-    deficitOption: "Deficit",
-    surplusOption: "Surplus",
-    calculateButton: "Calculate stats",
-    bmiLabel: "BMI",
-    bmiCategoryUnderweight: "Below the general range",
-    bmiCategoryHealthy: "Within the general range",
-    bmiCategoryOverweight: "Above the general range",
-    bmiCategoryObesity: "Well above the general range",
-    bmiCategoryNote: "BMI categories are general screening guidance, not a diagnosis.",
-    bmiReferenceLabel: "BMI reference ranges",
-    bmiScaleLow: "Low",
-    bmiScaleHealthy: "Healthy",
-    bmiScaleHigh: "High",
-    bmiScaleVeryHigh: "Very high",
-    bmiReferenceDescription: "BMI reference: below 18.5 is low, 18.5 to 24.9 is the general healthy range, 25 to 29.9 is high, and 30 or above is very high.",
-    bmiDescription: "A height-to-weight ratio used as a general screening measure.",
-    bmrLabel: "BMR",
-    bmrDescription: "Estimated calories your body uses at rest.",
-    maintenanceCaloriesLabel: "Maintenance",
-    maintenanceCaloriesDescription: "Estimated calories needed to maintain your current weight.",
-    calorieTargetsTitle: "Suggested targets",
-    conservativeTarget: "Conservative · 10%",
-    aggressiveTarget: "Aggressive · 15%",
-    caloriesUnit: "kcal/day",
-    estimateNote: "Estimates for learning and personal tracking, not medical advice.",
-    weightTitle: "Weight log",
-    weightHint: "Record measurements and watch your journey over time.",
-    measurementDateLabel: "Date",
-    measurementWeightLabel: "Weight (kg)",
-    addMeasurementButton: "Add measurement",
-    startingWeightLabel: "Starting weight",
-    latestWeightLabel: "Latest weight",
-    weightChangeLabel: "Change",
-    weightUnit: "kg",
-    weightTooltip: "Weight",
-    chartEmpty: "Add at least two measurements to see your journey.",
-    deleteMeasurement: "Delete measurement",
-    goalWeightLabel: "Goal weight (kg)",
-    goalWeightHint: "Your goal appears as a guide on the graph.",
-    goalWeightShortLabel: "Goal",
-    progressToGoal: "{percent}% toward goal",
-    progressGoalReached: "Goal reached",
-    measurementLegend: "Measurements",
-    trendLegend: "Smoothed trend",
-    trendLegendDescription: "An average of the latest three measurements that makes the overall direction easier to see.",
-    goalLegend: "Goal",
-    chartRangeLabel: "Chart range",
-    chartRangeAll: "All time",
-    chartRange30: "Last 30 days",
-    chartRange90: "Last 90 days",
-    chartRange365: "Last year",
-    editMeasurement: "Edit measurement",
-    saveMeasurement: "Save measurement",
-    cancelEdit: "Cancel edit",
-    chartSummary: "Showing {count} measurements from {start} to {end}.",
-    footerNote: "Personal dashboard — learning project",
-    dashboardTitle: "Today",
-    dashboardEyebrow: "Personal snapshot",
-    dashboardHint: "A quick look at your personal dashboard.",
-    summaryLatestWeight: "Latest weight",
-    summaryBmi: "BMI",
-    summaryFromBody: "From Body Stats",
-    summaryCalories: "Calorie target",
-    openBodyStats: "Open Body Stats",
-    openWeightLog: "Open Weight Log",
-    noData: "No data yet",
-    deficitSummary: "Deficit",
-    surplusSummary: "Surplus",
-  },
-  es: {
-    appTitle: "Pockez",
-    appSubtitle: "Notas, hábitos y salud — todo en un solo lugar.",
-    languageLabel: "Idioma",
-    settings: "Ajustes",
-    closeSettings: "Cerrar ajustes",
-    settingsTitle: "Ajustes",
-    accentLabel: "Color de acento",
-    accentRedBlue: "Rojo + azul",
-    accentOrangeTeal: "Naranja + turquesa",
-    accentYellowPink: "Amarillo + rosa",
-    backgroundLabel: "Estilo de fondo",
-    backgroundPaper: "Papel",
-    backgroundDarkPaper: "Papel oscuro",
-    backgroundGraffiti: "Trazos de graffiti",
-    backgroundBlueprint: "Papel de plano",
-    animationsLabel: "Animaciones",
-    animationsOn: "Activadas",
-    animationsOff: "Desactivadas",
-    darkModeLabel: "Modo oscuro",
-    darkModeOn: "Activado",
-    darkModeOff: "Desactivado",
-    profileLabel: "Perfil",
-    addProfile: "Añadir",
-    renameProfile: "Renombrar",
-    deleteProfile: "Eliminar",
-    profileHint: "Cada perfil tiene sus propios datos corporales, registro de peso y objetivo.",
-    profileCount: "{count} de 5 perfiles",
-    profileNamePrompt: "Nombre del perfil",
-    profileNamePlaceholder: "Nombre del perfil",
-    saveProfile: "Guardar",
-    cancelProfileEdit: "Cancelar",
-    newProfileName: "Nuevo perfil",
-    renameProfilePrompt: "Renombrar perfil",
-    deleteProfileConfirm: "¿Eliminar este perfil y todos sus datos?",
-    lastProfileWarning: "Conserva al menos un perfil.",
-    maxProfilesWarning: "Puedes tener hasta 5 perfiles.",
-    dataToolsLabel: "Tus datos",
-    exportData: "Exportar datos",
-    importData: "Importar datos",
-    clearData: "Borrar todos los datos",
-    dataToolsHint: "Guarda una copia o mueve tu tablero a otro navegador.",
-    clearDataConfirm: "¿Borrar todos los datos guardados del tablero? No se puede deshacer.",
-    importSuccess: "Datos importados",
-    importError: "No se pudieron importar los datos",
-    navNotes: "Notas",
-    navDashboard: "Panel",
-    navBody: "Datos corporales",
-    navWeight: "Registro de peso",
-    navTrainer: "Entrenador personal",
-    trainerTitle: "Entrenador personal",
-    trainerHint: "Crea una división práctica según los días que puedas entrenar.",
-    trainingDaysLabel: "Días disponibles",
-    trainingGoalLabel: "Objetivo principal",
-    trainingEmphasisLabel: "Enfoque del entrenamiento",
-    trainingVolumeLabel: "Volumen semanal",
-    volumeLow: "Bajo",
-    volumeModerate: "Moderado",
-    volumeModerateHigh: "Moderado-alto",
-    volumeLabel: "volumen",
-    emphasisBalanced: "Equilibrado",
-    emphasisLower: "Enfoque en tren inferior",
-    emphasisUpper: "Enfoque en tren superior",
-    goalStrength: "Fuerza",
-    goalMuscle: "Músculo y equilibrio",
-    goalFitness: "Condición general",
-    generatePlan: "Generar plan",
-    yourPlan: "Tu plan",
-    trainerNote: "Ajusta las variables según tu experiencia, equipo y recuperación.",
-    splitFullBody: "Cuerpo completo",
-    splitUpperLower: "Tren superior / inferior",
-    splitPushPullLegs: "Empuje / tirón / piernas",
-    splitUpperLowerPlus: "Superior / inferior + cuerpo completo",
-    dayLabel: "Día",
-    setsLabel: "Series",
-    repsLabel: "Repeticiones",
-    timeLabel: "Tiempo",
-    restLabel: "Descanso",
-    minutesLabel: "min",
-    secondsLabel: "seg",
-    formCueLabel: "Clave técnica",
-    trainerVisualLabel: "Referencia",
-    trainerSafety: "Empieza ligero, usa una técnica controlada y detente si algo duele. Esto es información general, no consejo médico.",
-    notesTitle: "Notas",
-    notesHint: "Escribe lo que quieras. Se guarda solo.",
-    notesPlaceholder: "Escribe tus ideas aquí...",
-    newNoteButton: "Nueva nota",
-    noteTitleLabel: "Título de nota",
-    noteTitlePlaceholder: "Título de nota",
-    untitledNote: "Nota sin título",
-    noNotes: "Aún no hay notas. Empieza una página nueva.",
-    deleteNote: "Eliminar nota",
-    saved: "Guardado",
-    saving: "Guardando...",
-    saveError: "No se pudo guardar",
-    bodyStatsTitle: "Datos corporales",
-    bodyStatsHint: "Añade tus datos para estimar IMC, TMB y calorías diarias.",
-    ageLabel: "Edad",
-    sexLabel: "Sexo",
-    femaleOption: "Mujer",
-    maleOption: "Hombre",
-    heightLabel: "Altura (cm)",
-    weightLabel: "Peso (kg)",
-    activityLabel: "Nivel de actividad",
-    activitySedentary: "Sedentario",
-    activitySedentaryDescription: "Poco o nada de ejercicio planificado; pasas la mayor parte del día sentado.",
-    activityLight: "Poco activo",
-    activityLightDescription: "Ejercicio ligero o caminatas aproximadamente 1–3 días por semana.",
-    activityModerate: "Moderadamente activo",
-    activityModerateDescription: "Ejercicio moderado o deporte aproximadamente 3–5 días por semana.",
-    activityVery: "Muy activo",
-    activityVeryDescription: "Ejercicio intenso o deporte aproximadamente 6–7 días por semana.",
-    activityExtra: "Extra activo",
-    activityExtraDescription: "Entrenamiento muy intenso, trabajo físico o entrenamientos exigentes dos veces al día.",
-    calorieModeLabel: "Objetivo de calorías",
-    deficitOption: "Déficit",
-    surplusOption: "Superávit",
-    calculateButton: "Calcular datos",
-    bmiLabel: "IMC",
-    bmiCategoryUnderweight: "Por debajo del rango general",
-    bmiCategoryHealthy: "Dentro del rango general",
-    bmiCategoryOverweight: "Por encima del rango general",
-    bmiCategoryObesity: "Muy por encima del rango general",
-    bmiCategoryNote: "Las categorías del IMC son una orientación general, no un diagnóstico.",
-    bmiReferenceLabel: "Rangos de referencia del IMC",
-    bmiScaleLow: "Bajo",
-    bmiScaleHealthy: "Saludable",
-    bmiScaleHigh: "Alto",
-    bmiScaleVeryHigh: "Muy alto",
-    bmiReferenceDescription: "Referencia del IMC: menos de 18,5 es bajo; de 18,5 a 24,9 es el rango saludable general; de 25 a 29,9 es alto; y 30 o más es muy alto.",
-    bmiDescription: "Una relación entre altura y peso usada como medida general de referencia.",
-    bmrLabel: "TMB",
-    bmrDescription: "Calorías estimadas que tu cuerpo usa estando en reposo.",
-    maintenanceCaloriesLabel: "Mantenimiento",
-    maintenanceCaloriesDescription: "Calorías estimadas para mantener tu peso actual.",
-    calorieTargetsTitle: "Objetivos sugeridos",
-    conservativeTarget: "Conservador · 10%",
-    aggressiveTarget: "Agresivo · 15%",
-    caloriesUnit: "kcal/día",
-    estimateNote: "Estimaciones para aprender y registrar datos, no son consejo médico.",
-    weightTitle: "Registro de peso",
-    weightHint: "Registra tus medidas y observa tu progreso con el tiempo.",
-    measurementDateLabel: "Fecha",
-    measurementWeightLabel: "Peso (kg)",
-    addMeasurementButton: "Añadir medida",
-    startingWeightLabel: "Peso inicial",
-    latestWeightLabel: "Peso más reciente",
-    weightChangeLabel: "Cambio",
-    weightUnit: "kg",
-    weightTooltip: "Peso",
-    chartEmpty: "Añade al menos dos medidas para ver tu progreso.",
-    deleteMeasurement: "Eliminar medida",
-    goalWeightLabel: "Peso objetivo (kg)",
-    goalWeightHint: "Tu objetivo aparece como guía en el gráfico.",
-    goalWeightShortLabel: "Objetivo",
-    progressToGoal: "{percent}% hacia el objetivo",
-    progressGoalReached: "Objetivo alcanzado",
-    measurementLegend: "Medidas",
-    trendLegend: "Tendencia suavizada",
-    trendLegendDescription: "Un promedio de las tres medidas más recientes para ver mejor la dirección general.",
-    goalLegend: "Objetivo",
-    chartRangeLabel: "Rango del gráfico",
-    chartRangeAll: "Todo el periodo",
-    chartRange30: "Últimos 30 días",
-    chartRange90: "Últimos 90 días",
-    chartRange365: "Último año",
-    editMeasurement: "Editar medida",
-    saveMeasurement: "Guardar medida",
-    cancelEdit: "Cancelar edición",
-    chartSummary: "Se muestran {count} medidas desde {start} hasta {end}.",
-    footerNote: "Tablero personal — proyecto de aprendizaje",
-    dashboardTitle: "Hoy",
-    dashboardEyebrow: "Resumen personal",
-    dashboardHint: "Un vistazo rápido a tu tablero personal.",
-    summaryLatestWeight: "Peso más reciente",
-    summaryBmi: "IMC",
-    summaryFromBody: "Desde Datos corporales",
-    summaryCalories: "Objetivo de calorías",
-    openBodyStats: "Abrir Datos corporales",
-    openWeightLog: "Abrir Registro de peso",
-    noData: "Aún no hay datos",
-    deficitSummary: "Déficit",
-    surplusSummary: "Superávit",
-  },
-};
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=9";
+import { translations } from "./i18n.js?v=9";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -519,41 +150,6 @@ if (titleEl) {
   titleEl.addEventListener('animationstart', () => debugLog('title animationstart'));
   titleEl.addEventListener('animationend', () => debugLog('title animationend'));
 }
-
-const STORAGE_PREFIX = "@sketch-dashboard:";
-const LEGACY_PREFIX = "sketch-dashboard-";
-
-const STORAGE_KEYS = {
-  notes: `${STORAGE_PREFIX}notes`,
-  language: `${STORAGE_PREFIX}language`,
-  accent: `${STORAGE_PREFIX}accent`,
-  background: `${STORAGE_PREFIX}background`,
-  bodyStats: `${STORAGE_PREFIX}body-stats`,
-  weightEntries: `${STORAGE_PREFIX}weight-entries`,
-  notesCollection: `${STORAGE_PREFIX}notes-collection`,
-  goalWeight: `${STORAGE_PREFIX}goal-weight`,
-  animations: `${STORAGE_PREFIX}animations`,
-  darkMode: `${STORAGE_PREFIX}dark-mode`,
-  profiles: `${STORAGE_PREFIX}profiles`,
-  activeProfile: `${STORAGE_PREFIX}active-profile`,
-  trainerPlan: `${STORAGE_PREFIX}trainer-plan`,
-};
-
-// Migrate legacy keys (copy only if new key not set)
-function migrateLegacyStorage() {
-  try {
-    for (const [key, newKey] of Object.entries(STORAGE_KEYS)) {
-      const legacyKey = `${LEGACY_PREFIX}${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`;
-      if (localStorage.getItem(newKey) == null && localStorage.getItem(legacyKey) != null) {
-        localStorage.setItem(newKey, localStorage.getItem(legacyKey));
-      }
-    }
-  } catch (error) {
-    console.warn("Migration failed:", error);
-  }
-}
-
-migrateLegacyStorage();
 
 const languageSelect = document.getElementById("language-select");
 const notesInput = document.getElementById("notes-input");
@@ -781,7 +377,7 @@ function setLanguage(lang) {
   languageSelect.value = safeLang;
 
   try {
-    localStorage.setItem(STORAGE_KEYS.language, safeLang);
+    savePreference(STORAGE_KEYS.language, safeLang);
   } catch (error) {
     console.warn("Could not save language preference:", error);
   }
@@ -791,29 +387,12 @@ function loadLanguage() {
   let savedLang = "en";
 
   try {
-    savedLang = localStorage.getItem(STORAGE_KEYS.language) || "en";
+    savedLang = loadPreference(STORAGE_KEYS.language, "en");
   } catch (error) {
     console.warn("Could not read language preference:", error);
   }
 
   setLanguage(savedLang);
-}
-
-function savePreference(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch (error) {
-    console.warn("Could not save preference:", error);
-  }
-}
-
-function loadPreference(key, fallback) {
-  try {
-    return localStorage.getItem(key) || fallback;
-  } catch (error) {
-    console.warn("Could not read preference:", error);
-    return fallback;
-  }
 }
 
 const accentThemes = {
@@ -1887,7 +1466,7 @@ function saveNotes(notes) {
   showSaveStatus("saving");
 
   try {
-    localStorage.setItem(STORAGE_KEYS.notesCollection, JSON.stringify(notes));
+    savePreference(STORAGE_KEYS.notesCollection, JSON.stringify(notes));
     showSaveStatus("saved");
   } catch (error) {
     console.error("Save failed:", error);
@@ -2147,7 +1726,7 @@ function importData(file) {
       const imported = JSON.parse(reader.result);
       if (!imported?.data || typeof imported.data !== "object") throw new Error("Invalid backup");
       for (const key of Object.values(STORAGE_KEYS)) {
-        if (typeof imported.data[key] === "string") localStorage.setItem(key, imported.data[key]);
+        if (typeof imported.data[key] === "string") savePreference(key, imported.data[key]);
       }
       window.location.reload();
     } catch (error) {
@@ -2161,7 +1740,7 @@ function importData(file) {
 function clearAllData() {
   const strings = translations[languageSelect.value] || translations.en;
   if (!window.confirm(strings.clearDataConfirm)) return;
-  for (const key of Object.values(STORAGE_KEYS)) localStorage.removeItem(key);
+  for (const key of Object.values(STORAGE_KEYS)) removePreference(key);
   window.location.reload();
 }
 
