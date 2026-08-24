@@ -753,6 +753,15 @@ body.animations-off *::after {
   transition: none !important;
 }
 
+/* Flat mode: with animations disabled, also drop the decorative tilts -
+   axis-aligned boxes are immune to scroll-time rasterization shimmer */
+body.animations-off .rugged-paper,
+body.animations-off .exercise-visual,
+body.animations-off .title,
+body.animations-off .widget-title {
+  transform: none !important;
+}
+
 /* --- Widget panels --- */
 /* Promote the big tilted surfaces to their own compositor layers: scrolling
    then translates pre-rasterized textures instead of re-snapping rotated
