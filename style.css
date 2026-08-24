@@ -736,6 +736,7 @@ body.background-paper .nav-btn.is-active {
    on scroll events and removes it shortly after scrolling stops, so the
    loops resume seamlessly at rest. */
 body.is-scrolling .rugged-paper,
+body.is-scrolling .rugged-paper::before,
 body.is-scrolling .nav-btn.is-active .nav-icon {
   animation-play-state: paused !important;
 }
@@ -759,6 +760,11 @@ body.animations-off .rugged-paper,
 body.animations-off .exercise-visual,
 body.animations-off .title,
 body.animations-off .widget-title {
+  transform: none !important;
+}
+
+/* In flat mode the shadow carrier must not stay counter-rotated */
+body.animations-off .rugged-paper::before {
   transform: none !important;
 }
 
@@ -799,11 +805,26 @@ body.animations-off .widget-title {
     rgba(0, 0, 0, 0.035) 22px 23px
   );
   border: 2.5px solid var(--ink);
+  transform: rotate(-0.5deg);
+  /* NOTE: the animated chromatic shadows live on the ::before overlay
+     below - keeping endless repaints OFF this tilted surface prevents
+     scroll-time rasterization shimmer (horizontal wobble). */
+}
+
+/* Axis-aligned shadow carrier: counter-rotates the parent tilt so the
+   perpetual box-shadow animation repaints an UNROTATED box. The "alive"
+   wobble survives; the shimmer does not. Static trio doubles as the
+   fallback when animations are disabled. */
+.rugged-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: rotate(0.5deg);
+  pointer-events: none;
   box-shadow:
     8px 9px 0 var(--aberration-a),
     -8px -9px 0 var(--aberration-b),
     6px 7px 0 var(--ink);
-  transform: rotate(-0.5deg);
   animation: spiderverse-paper var(--spider-duration) steps(var(--spider-steps))
     infinite;
 }
