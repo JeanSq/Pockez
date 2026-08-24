@@ -112,23 +112,25 @@ body.dark-mode.background-graffiti {
   overflow: hidden;
 }
 
-/* Always-reserved scrollbar space so the centered page column never
-   shifts horizontally when the vertical scrollbar appears or disappears
-   (while scrolling, when tabs render more content, etc.).
-   `overflow-y: scroll` is the deterministic fallback for engines that
-   lack scrollbar-gutter support. */
+/* Deterministic scrollbar handling.
+   - `scrollbar-width: thin` + themed `scrollbar-color` forces Chrome to draw
+     its own consistent thin scrollbar instead of the Windows Fluent
+     overlay/classic hybrid whose width accounting varies mid-session.
+   - `overflow-y: scroll` baseline keeps vertical space occupied everywhere.
+   - Where supported, `scrollbar-gutter: stable both-edges` reserves
+     SYMMETRIC gutters so the centered column stays optically centered
+     regardless of how the engine accounts for the scrollbar. */
 html {
   overflow-y: scroll;
-  /* Disable scroll anchoring: the browser silently re-scrolls the page
-     when content above the viewport changes height (e.g. web fonts
-     swapping in), which reads as random "window movement". */
   overflow-anchor: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--aberration-b) transparent;
 }
 
 @supports (scrollbar-gutter: stable) {
   html {
     overflow-y: auto;
-    scrollbar-gutter: stable;
+    scrollbar-gutter: stable both-edges;
   }
 }
 

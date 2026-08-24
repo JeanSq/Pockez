@@ -430,6 +430,34 @@ if (DEBUG_ENABLED) {
   });
 }
 
+// (?debug) Scroll-geometry probe: logs the exact numbers that expose any
+// horizontal shift - scrollbar width, column edges and centering error.
+// If the column truly never moves, every entry shows identical values.
+let __lastScrollProbe = 0;
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!DEBUG_ENABLED) return;
+    const now = performance.now();
+    if (now - __lastScrollProbe < 250) return;
+    __lastScrollProbe = now;
+
+    const root = document.documentElement;
+    const bodyRect = document.body.getBoundingClientRect();
+    const round1 = (n) => Math.round(n * 10) / 10;
+    debugLog("scroll geometry", {
+      scrollTop: Math.round(window.scrollY),
+      innerWidth: window.innerWidth,
+      rootClientWidth: root.clientWidth,
+      scrollbarWidth: window.innerWidth - root.clientWidth,
+      bodyLeftGap: round1(bodyRect.left),
+      bodyRightGap: round1(window.innerWidth - bodyRect.right),
+      centerDeviation: round1((bodyRect.left + bodyRect.right) / 2 - window.innerWidth / 2),
+    });
+  },
+  { passive: true }
+);
+
 debugLog('startup: added splash/no-js handling');
 
 // Hook title animation events to log and ensure we don't reveal content early
