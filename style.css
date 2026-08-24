@@ -112,12 +112,24 @@ body.dark-mode.background-graffiti {
   overflow: hidden;
 }
 
-/* Reserve the vertical scrollbar space on the root so that the centered
-   page column never shifts horizontally when the scrollbar appears or
-   disappears (e.g. while scrolling or when widgets render more content). */
+/* Always-reserved scrollbar space so the centered page column never
+   shifts horizontally when the vertical scrollbar appears or disappears
+   (while scrolling, when tabs render more content, etc.).
+   `overflow-y: scroll` is the deterministic fallback for engines that
+   lack scrollbar-gutter support. */
 html {
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+  overflow-y: scroll;
+  /* Disable scroll anchoring: the browser silently re-scrolls the page
+     when content above the viewport changes height (e.g. web fonts
+     swapping in), which reads as random "window movement". */
+  overflow-anchor: none;
+}
+
+@supports (scrollbar-gutter: stable) {
+  html {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
 }
 
 body {
@@ -130,6 +142,7 @@ body {
   font-family: var(--font-body);
   /* Tilted cards must never create a horizontal scrollbar */
   overflow-x: clip;
+  overflow-anchor: none;
 }
 
 /* --- Header --- */
@@ -158,34 +171,22 @@ body.reveal-header .header-text {
     opacity: 0;
     text-shadow: 0 0 0 transparent;
   }
-  50% {
-    /* During reveal keep the header visually centered (fixed) and fade it in
-       at the same time as the widgets. After the fade completes the header is
-       moved back into the document flow (see `.header-in-flow` class added by JS). */
-    body.reveal-header .header-text {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 200;
-      opacity: 0;
-      transition: opacity 320ms ease;
-    }
-
-    /* Fade header in together with content */
-    body.reveal-header.content-visible .header-text {
-      opacity: 1;
-    }
-
-    /* After fade, move the header into normal flow to prevent overlap */
-    body.header-in-flow .header-text {
-      position: static;
-      top: auto;
-      left: auto;
-      transform: none;
-      width: 100%;
-    }
+  100% {
+    transform: scale(1) rotate(-0.8deg);
+    opacity: 1;
   }
+}
+
+/* JS adds `header-in-flow` shortly after the reveal fade finishes; the
+   header must live in normal flow from that point on (it already does
+   thanks to the reveal-header rule above - this keeps the contract
+   explicit and guards against ordering changes). */
+body.header-in-flow .header-text {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
 }
 
 @keyframes fade-out-shrink {
@@ -623,8 +624,11 @@ body.dark-mode .settings-dialog::backdrop {
   border-bottom: 2.5px solid var(--nav-border-bottom);
   border-radius: 9999px;
   box-shadow: var(--nav-shadow);
-  
+
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Own compositor layer: stops the blurred glass from "swimming"
+     against the background while the page scrolls */
+  will-change: transform;
 }
 
 body.background-paper .app-nav {
