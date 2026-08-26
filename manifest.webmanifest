@@ -1,13 +1,17 @@
 {
+  "id": "./",
   "name": "Pockez — personal dashboard",
   "short_name": "Pockez",
   "description": "Notes, body stats, weight log and training - all in one place.",
   "lang": "en",
+  "categories": ["lifestyle", "productivity"],
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#2b2d31",
   "theme_color": "#2b2d31",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon.svg",

@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=10";
-import { translations } from "./i18n.js?v=9";
+import { translations } from "./i18n.js?v=10";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -115,7 +115,7 @@ window.addEventListener(
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("./sw.js")
+      .register("./sw.js", { scope: "./" })
       .then((registration) => {
         // Check for updates whenever the app returns to the foreground
         document.addEventListener("visibilitychange", () => {
@@ -141,6 +141,85 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     }
   });
 }
+
+// --- PWA: install UX ---
+// Android/Chrome fire `beforeinstallprompt` when the app meets the install
+// criteria (HTTPS, manifest + icons, active service worker). Capture it and
+// offer a custom "Install app" button (footer + Settings) instead of relying
+// only on the browser's built-in UI. iOS Safari has no such event at all, so
+// it gets a small manual "Add to Home Screen" hint instead.
+const installButtons = document.querySelectorAll(".install-app-button");
+const iosHintEls = document.querySelectorAll(".install-ios-hint");
+const isStandalone =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+const isFileProtocol = location.protocol === "file:";
+const isIos =
+  /ipad|iphone|ipod/i.test(navigator.userAgent || "") && !window.MSStream;
+
+let deferredInstallPrompt = null;
+
+function showInstallButtons() {
+  installButtons.forEach((btn) => btn.removeAttribute("hidden"));
+  const footerWrap = document.querySelector(".footer-install");
+  if (footerWrap) footerWrap.removeAttribute("hidden");
+}
+
+function hideInstallButtons() {
+  installButtons.forEach((btn) => btn.setAttribute("hidden", ""));
+  const footerWrap = document.querySelector(".footer-install");
+  if (footerWrap) footerWrap.setAttribute("hidden", "");
+}
+
+function showIosHints() {
+  iosHintEls.forEach((el) => el.removeAttribute("hidden"));
+}
+
+function showInstalledToast() {
+  const strings = translations[languageSelect.value] || translations.en;
+  const toast = document.createElement("div");
+  toast.className = "install-toast";
+  toast.textContent = strings.appInstalled;
+  toast.setAttribute("role", "status");
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("is-hiding");
+    setTimeout(() => toast.remove(), 400);
+  }, 2600);
+}
+
+// Already running as an installed app (home-screen shortcut / standalone
+// window) or from file:// (no SW, no install): never show install UI.
+if (isStandalone || isFileProtocol) {
+  hideInstallButtons();
+} else if (isIos) {
+  // iOS: no beforeinstallprompt — show the manual home-screen hint.
+  showIosHints();
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  // Prevent the browser's default mini-infobar so the prompt moment and
+  // styling stay ours (a deliberate in-app button converts better).
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  if (!isStandalone && !isFileProtocol) showInstallButtons();
+});
+
+installButtons.forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    // prompt() must be triggered from the same user gesture.
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === "accepted") deferredInstallPrompt = null;
+  });
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  hideInstallButtons();
+  showInstalledToast();
+});
 
 debugLog('startup: added splash/no-js handling');
 

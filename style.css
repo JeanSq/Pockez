@@ -2133,6 +2133,70 @@ body.animations-off .widget-title {
   font-size: 0.82rem;
 }
 
+/* --- PWA install UI --- */
+.footer-install {
+  margin: 0.6rem 0 0;
+}
+
+.install-app-button {
+  appearance: none;
+  border: 1.5px solid var(--aberration-b);
+  border-radius: 8px;
+  background: rgba(74, 109, 140, 0.12);
+  color: var(--text-muted-on-dark);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.install-app-button:hover,
+.install-app-button:focus-visible {
+  background: var(--aberration-b);
+  color: var(--text-on-dark);
+  box-shadow: 2px 2px 0 var(--aberration-a);
+}
+
+.install-ios-hint {
+  margin: 0.6rem auto 0;
+  max-width: 26rem;
+  color: var(--text-muted-on-dark);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.install-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--bg-deep);
+  color: var(--text-on-dark);
+  border: 1.5px solid var(--aberration-b);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.install-toast.is-hiding {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* The `hidden` attribute must always win over any display rule from
+   .data-tool-button (Settings panel) so the install button stays invisible
+   until beforeinstallprompt actually fires. */
+.install-app-button[hidden],
+.install-ios-hint[hidden],
+.footer-install[hidden] {
+  display: none;
+}
+
 @media (max-width: 520px) {
   /* iOS Safari auto-zooms the whole page when focusing any control whose
      font-size is under 16px - keep every control at 1rem on phones */
