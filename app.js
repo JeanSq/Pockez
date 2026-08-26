@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=10";
-import { translations } from "./i18n.js?v=10";
+import { translations } from "./i18n.js?v=11";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -261,6 +261,7 @@ const exportDataButton = document.getElementById("export-data");
 const importDataButton = document.getElementById("import-data-button");
 const importDataInput = document.getElementById("import-data-input");
 const clearDataButton = document.getElementById("clear-data");
+const resetOfflineCacheButton = document.getElementById("reset-offline-cache");
 const profileSelect = document.getElementById("profile-select");
 const profileCount = document.getElementById("profile-count");
 const profileAddButton = document.getElementById("profile-add");
@@ -1831,6 +1832,31 @@ function clearAllData() {
   window.location.reload();
 }
 
+/* Reset the offline app shell so a stale cached copy can never strand the
+   user. Deletes every service-worker cache, then re-registers the worker so
+   it re-downloads the current shell. Notes (localStorage) are untouched. */
+async function resetOfflineCache() {
+  const strings = translations[languageSelect.value] || translations.en;
+  if (!window.confirm(strings.clearAppCacheConfirm)) return;
+  try {
+    showSaveStatus("saving"); // brief "working..." feedback
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+    showSaveStatus("saved");
+    // Re-download the fresh appearance shell, then load it.
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) await registration.update();
+    }
+    window.location.reload();
+  } catch (error) {
+    console.warn("Could not reset offline cache:", error);
+    showSaveStatus("error");
+  }
+}
+
 exportDataButton.addEventListener("click", exportData);
 importDataButton.addEventListener("click", () => importDataInput.click());
 importDataInput.addEventListener("change", () => {
@@ -1838,6 +1864,7 @@ importDataInput.addEventListener("change", () => {
   importDataInput.value = "";
 });
 clearDataButton.addEventListener("click", clearAllData);
+resetOfflineCacheButton.addEventListener("click", resetOfflineCache);
 
 trainerForm.addEventListener("submit", (event) => {
   event.preventDefault();

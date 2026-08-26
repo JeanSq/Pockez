@@ -278,9 +278,11 @@
               <button type="button" class="data-tool-button" id="export-data" data-i18n="exportData">Export data</button>
               <button type="button" class="data-tool-button" id="import-data-button" data-i18n="importData">Import data</button>
               <button type="button" class="data-tool-button data-tool-danger" id="clear-data" data-i18n="clearData">Clear all data</button>
+              <button type="button" class="data-tool-button" id="reset-offline-cache" data-i18n="clearAppCache">Reset offline data</button>
             </div>
             <input id="import-data-input" type="file" accept="application/json" hidden />
             <p class="setting-help" data-i18n="dataToolsHint">Keep a backup or move your dashboard to another browser.</p>
+            <p class="setting-help" data-i18n="clearAppCacheHint">Re-download the app shell if a stale offline copy ever looks stuck. Your notes are kept.</p>
           </fieldset>
 
         </div>
@@ -652,7 +654,7 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v13</p>
+        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v14</p>
         <p class="footer-install" hidden>
           <button type="button" class="install-app-button" id="install-app-footer" data-i18n="installApp" hidden>
             Install app
@@ -664,6 +666,6 @@
       </footer>
     </div>
 
-    <script type="module" src="app.js?v=11"></script>
+    <script type="module" src="app.js?v=12"></script>
   </body>
 </html>
