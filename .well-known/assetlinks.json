@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jeansq.pockez",
+      "sha256_cert_fingerprints": [
+        "7D:28:BD:AE:01:21:39:AC:C8:0A:5C:AE:54:0D:90:DB:5D:20:36:14:1B:D9:0B:51:4A:8F:B8:B8:C3:74:7B:6B"
+      ]
+    }
+  }
+]
