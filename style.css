@@ -73,9 +73,14 @@
      The relief shadows are ACCENT-colored (Spider-Verse ink relief) and
      follow the active accent theme - never plain black. */
   --border-w: 3px;
-  --shadow-rest: 6px 6px 0 var(--aberration-a);
-  --shadow-split: 6px 6px 0 var(--aberration-a), -6px -6px 0 var(--aberration-b);
-  --shadow-press: 2px 2px 0 var(--aberration-a);
+  --shadow-rest: 6px 6px 0 var(--relief);
+  --shadow-split: 6px 6px 0 var(--relief), -6px -6px 0 var(--relief-alt);
+  --shadow-press: 2px 2px 0 var(--relief);
+  /* Relief colors for drop shadows. Default to the active accent pair
+     (Spider-Verse ink relief); the "True shadows" setting flips these to
+     plain black / dark grey without touching accent text or fills. */
+  --relief: var(--aberration-a);
+  --relief-alt: var(--aberration-b);
 
   /* Type: Bangers = giant display (TODAY), mono = labels/UI, Kalam = notes */
   --font-title: "Caveat", cursive;
@@ -91,7 +96,7 @@
   --nav-bg: var(--paper);
   --nav-border: var(--ink);
   --nav-border-bottom: var(--ink);
-  --nav-shadow: 5px 5px 0 var(--aberration-a);
+  --nav-shadow: 5px 5px 0 var(--relief);
 }
 
 /* Base page tone for every variant (paper w/ faint dot grid = Variant 1) */
@@ -168,7 +173,7 @@ body.dark-mode {
   --nav-bg: var(--paper);
   --nav-border: var(--ink);
   --nav-border-bottom: var(--ink);
-  --nav-shadow: 5px 5px 0 var(--aberration-a);
+  --nav-shadow: 5px 5px 0 var(--relief);
 }
 
 body.dark-mode.background-graffiti {
@@ -181,6 +186,45 @@ body.dark-mode.background-graffiti {
       transparent 71%),
     radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.4px);
   background-size: auto, 22px 22px;
+}
+
+/* True shadows: plain black/dark-grey relief instead of the chromatic
+   accent pair, plus the perpetual Spider-Verse loops (glitching nav icon,
+   pulsing panel shadow) switch off. Accent text and fills keep colors. */
+body.true-shadows {
+  --relief: #101012;
+  --relief-alt: #45454c;
+  --shadow-rest: 6px 6px 0 var(--relief);
+  --shadow-split: 6px 6px 0 var(--relief), -6px -6px 0 var(--relief-alt);
+  --shadow-press: 2px 2px 0 var(--relief);
+  --nav-shadow: 5px 5px 0 var(--relief);
+}
+
+body.dark-mode.true-shadows {
+  --relief: #050506;
+  --relief-alt: #3a3a40;
+  --shadow-rest: 6px 6px 0 var(--relief);
+  --shadow-split: 6px 6px 0 var(--relief), -6px -6px 0 var(--relief-alt);
+  --shadow-press: 2px 2px 0 var(--relief);
+  --nav-shadow: 5px 5px 0 var(--relief);
+}
+
+/* Stop the perpetual Spider-Verse loops AND any retriggered box-shadow
+   transition from freezing a shadow mid-fade on its accent color. One-shot
+   entrance pops / focus rings aren't targeted here. */
+body.true-shadows .rugged-paper,
+body.true-shadows .nav-btn.is-active .nav-icon,
+body.true-shadows .quick-link,
+body.true-shadows .form-submit,
+body.true-shadows .summary-card,
+body.true-shadows .result-card,
+body.true-shadows .target-card,
+body.true-shadows .exercise-visual,
+body.true-shadows .note-list-item.is-active,
+body.true-shadows .install-app-button,
+body.true-shadows .dash-add {
+  animation: none !important;
+  transition: none !important;
 }
 
 *,
@@ -425,7 +469,7 @@ body.reveal-header:not(.animations-ready) .widget-panel * {
   border-radius: 0;
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 8px 8px 0 var(--aberration-a);
+  box-shadow: 8px 8px 0 var(--relief);
 }
 
 .settings-dialog::backdrop {
@@ -586,21 +630,21 @@ body.dark-mode .settings-dialog::backdrop {
   .data-tool-button:hover {
     background: var(--accent-yellow);
     color: var(--text-on-dark);
-    box-shadow: 3px 3px 0 var(--aberration-a);
+    box-shadow: 3px 3px 0 var(--relief);
   }
 }
 
 .data-tool-button:focus-visible {
   background: var(--accent-yellow);
   color: var(--text-on-dark);
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
 }
 
 .data-tool-button:active {
   background: var(--accent-yellow);
   color: var(--text-on-dark);
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 @media (hover: hover) {
@@ -657,7 +701,7 @@ body.dark-mode .settings-dialog::backdrop {
 .choice-option input:checked + .swatch,
 .choice-option input:checked + .background-choice {
   border-color: var(--ink);
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
 }
 
 .swatch-red-blue { background: linear-gradient(110deg, #ef4444 0 50%, #3b5bdb 50%); }
@@ -833,8 +877,8 @@ body.background-paper .nav-btn {
   background: var(--ink);
   color: var(--bg);
   box-shadow:
-    3px 3px 0 var(--aberration-a),
-    -3px -3px 0 var(--aberration-b);
+    3px 3px 0 var(--relief),
+    -3px -3px 0 var(--relief-alt);
 }
 
 .nav-btn:focus-visible {
@@ -873,17 +917,17 @@ body.background-paper .nav-btn {
 
 @keyframes spiderverse-paper {
   0% {
-    box-shadow: 7px 7px 0 var(--aberration-a);
+    box-shadow: 7px 7px 0 var(--relief);
   }
   50% {
     box-shadow:
-      6px 8px 0 var(--aberration-a),
-      -3px -3px 0 var(--aberration-b);
+      6px 8px 0 var(--relief),
+      -3px -3px 0 var(--relief-alt);
   }
   100% {
     box-shadow:
-      8px 5px 0 var(--aberration-a),
-      3px -3px 0 var(--aberration-a);
+      8px 5px 0 var(--relief),
+      3px -3px 0 var(--relief);
   }
 }
 
@@ -1037,7 +1081,7 @@ body.animations-off .widget-title {
   .profile-action:focus-visible:not(:disabled) {
     background: var(--accent-yellow);
     color: var(--text-on-dark);
-    box-shadow: 3px 3px 0 var(--aberration-a);
+    box-shadow: 3px 3px 0 var(--relief);
   }
 }
 
@@ -1127,7 +1171,7 @@ body.animations-off .widget-title {
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  box-shadow: 4px 4px 0 var(--relief);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1137,7 +1181,7 @@ body.animations-off .widget-title {
 @media (hover: hover) {
   .dash-add:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 5px 5px 0 var(--aberration-a);
+    box-shadow: 5px 5px 0 var(--relief);
   }
 }
 
@@ -1149,7 +1193,7 @@ body.animations-off .widget-title {
 /* Instant tap feedback: press the tile into the page */
 .dash-add:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 /* Hero progress card (Variant 1 "OVERALL PROGRESS 62%") */
@@ -1162,7 +1206,7 @@ body.animations-off .widget-title {
   border: var(--border-w) solid var(--ink);
   border-radius: 0;
   background: var(--accent-blue);
-  box-shadow: 6px 6px 0 var(--aberration-a);
+  box-shadow: 6px 6px 0 var(--relief);
 }
 
 .dash-hero-text {
@@ -1274,7 +1318,7 @@ body.animations-off .widget-title {
   text-align: left;
   font: inherit;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  box-shadow: 4px 4px 0 var(--relief);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1284,7 +1328,7 @@ body.animations-off .widget-title {
 @media (hover: hover) {
   .summary-card:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--aberration-a);
+    box-shadow: 6px 6px 0 var(--relief);
   }
 }
 
@@ -1292,13 +1336,13 @@ body.animations-off .widget-title {
   outline: 2px dashed var(--aberration-b);
   outline-offset: 3px;
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--aberration-a);
+  box-shadow: 6px 6px 0 var(--relief);
 }
 
 /* Instant tap feedback: press the row into the page */
 .summary-card:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 .dash-tile {
@@ -1391,7 +1435,7 @@ body.animations-off .widget-title {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 5px 5px 0 var(--aberration-a);
+  box-shadow: 5px 5px 0 var(--relief);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1407,7 +1451,7 @@ body.animations-off .widget-title {
 @media (hover: hover) {
   .quick-link:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0 var(--aberration-a);
+    box-shadow: 7px 7px 0 var(--relief);
   }
 }
 
@@ -1415,13 +1459,13 @@ body.animations-off .widget-title {
   outline: 2px dashed var(--aberration-b);
   outline-offset: 3px;
   transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0 var(--aberration-a);
+  box-shadow: 7px 7px 0 var(--relief);
 }
 
 /* Instant tap feedback: press the button into the page. */
 .quick-link:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 .placeholder-text {
@@ -1464,8 +1508,8 @@ body.animations-off .widget-title {
 .form-field select:focus {
   outline: none;
   box-shadow:
-    3px 2px 0 var(--aberration-a),
-    -3px -2px 0 var(--aberration-b);
+    3px 2px 0 var(--relief),
+    -3px -2px 0 var(--relief-alt);
 }
 
 .field-description {
@@ -1518,7 +1562,7 @@ body.animations-off .widget-title {
 .mode-option input:checked + span {
   background: var(--accent-blue);
   color: var(--text-on-dark);
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
 }
 
 .form-submit {
@@ -1533,7 +1577,7 @@ body.animations-off .widget-title {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  box-shadow: 4px 4px 0 var(--relief);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1544,18 +1588,18 @@ body.animations-off .widget-title {
 @media (hover: hover) {
   .form-submit:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--aberration-a);
+    box-shadow: 6px 6px 0 var(--relief);
   }
 }
 
 .form-submit:focus-visible {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--aberration-a);
+  box-shadow: 6px 6px 0 var(--relief);
 }
 
 .form-submit:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 .body-results {
@@ -1578,7 +1622,7 @@ body.animations-off .widget-title {
   background: var(--paper);
   text-align: center;
   cursor: help;
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
 }
 
 .weight-summary .result-card {
@@ -1591,8 +1635,8 @@ body.animations-off .widget-title {
   color: var(--text-on-dark);
   transform: translate(-2px, -2px);
   box-shadow:
-    5px 5px 0 var(--aberration-a),
-    -3px -3px 0 var(--aberration-a);
+    5px 5px 0 var(--relief),
+    -3px -3px 0 var(--relief);
 }
 
 .weight-summary .result-card:hover span,
@@ -1689,7 +1733,7 @@ body.animations-off .widget-title {
   height: 13px;
   border: 1px solid var(--paper);
   background: var(--ink);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
   transform: translateX(-1px);
 }
 
@@ -1744,7 +1788,7 @@ body.animations-off .widget-title {
   background: var(--paper);
   text-align: center;
   cursor: help;
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -1754,8 +1798,8 @@ body.animations-off .widget-title {
   color: var(--text-on-dark);
   transform: translate(-2px, -2px);
   box-shadow:
-    5px 5px 0 var(--aberration-a),
-    -3px -3px 0 var(--aberration-b);
+    5px 5px 0 var(--relief),
+    -3px -3px 0 var(--relief-alt);
   outline: none;
 }
 
@@ -2035,8 +2079,8 @@ body.animations-off .widget-title {
   background: var(--paper);
   transform: translate(-2px, -2px);
   box-shadow:
-    4px 4px 0 var(--aberration-a),
-    -2px -2px 0 var(--aberration-a);
+    4px 4px 0 var(--relief),
+    -2px -2px 0 var(--relief);
 }
 
 @keyframes trainer-variable-highlight {
@@ -2045,7 +2089,7 @@ body.animations-off .widget-title {
   }
   45% {
     background: rgba(74, 109, 140, 0.22);
-    box-shadow: 4px 3px 0 var(--aberration-b);
+    box-shadow: 4px 3px 0 var(--relief-alt);
   }
 }
 
@@ -2296,7 +2340,7 @@ body.animations-off .widget-title {
 .measurement-cancel:focus-visible {
   background: var(--ink);
   color: var(--paper);
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
 }
 
 .measurement-item:hover {
@@ -2479,8 +2523,8 @@ body.animations-off .widget-title {
   outline: none;
   border-color: var(--ink);
   box-shadow:
-    2px 1px 0 var(--aberration-a),
-    -2px -1px 0 var(--aberration-b);
+    2px 1px 0 var(--relief),
+    -2px -1px 0 var(--relief-alt);
 }
 
 .notes-area::placeholder {
@@ -2529,7 +2573,7 @@ body.animations-off .widget-title {
   text-transform: uppercase;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  box-shadow: 3px 3px 0 var(--relief);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -2542,21 +2586,21 @@ body.animations-off .widget-title {
     background: var(--accent-yellow);
     color: var(--text-on-dark);
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--aberration-a);
+    box-shadow: 4px 4px 0 var(--relief);
   }
 }
 
 .install-app-button:focus-visible {
   background: var(--accent-yellow);
   color: var(--text-on-dark);
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  box-shadow: 4px 4px 0 var(--relief);
 }
 
 .install-app-button:active {
   background: var(--accent-yellow);
   color: var(--text-on-dark);
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--relief);
 }
 
 .install-ios-hint {
@@ -2576,7 +2620,7 @@ body.animations-off .widget-title {
   color: var(--ink);
   border: 2.5px solid var(--ink);
   border-radius: 0;
-  box-shadow: 5px 5px 0 var(--aberration-a);
+  box-shadow: 5px 5px 0 var(--relief);
   padding: 0.6rem 1.1rem;
   font-family: var(--font-label);
   font-size: 0.85rem;

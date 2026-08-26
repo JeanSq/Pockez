@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   goalWeight: `${STORAGE_PREFIX}goal-weight`,
   animations: `${STORAGE_PREFIX}animations`,
   darkMode: `${STORAGE_PREFIX}dark-mode`,
+  trueShadows: `${STORAGE_PREFIX}true-shadows`,
   profiles: `${STORAGE_PREFIX}profiles`,
   activeProfile: `${STORAGE_PREFIX}active-profile`,
   trainerPlan: `${STORAGE_PREFIX}trainer-plan`,

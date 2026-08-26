@@ -2,8 +2,8 @@
  * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
-import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=10";
-import { translations } from "./i18n.js?v=13";
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=12";
+import { translations } from "./i18n.js?v=15";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -257,6 +257,8 @@ const animationsToggle = document.getElementById("animations-toggle");
 const animationsState = document.querySelector(".toggle-state");
 const darkModeToggle = document.getElementById("dark-mode-toggle");
 const darkModeState = darkModeToggle?.closest(".animation-setting")?.querySelector(".toggle-state");
+const trueShadowsToggle = document.getElementById("true-shadows-toggle");
+const trueShadowsState = trueShadowsToggle?.closest(".animation-setting")?.querySelector(".toggle-state");
 const exportDataButton = document.getElementById("export-data");
 const importDataButton = document.getElementById("import-data-button");
 const importDataInput = document.getElementById("import-data-input");
@@ -447,6 +449,11 @@ function applyTranslations(lang) {
       ? strings.darkModeOn
       : strings.darkModeOff;
   }
+  if (trueShadowsToggle && trueShadowsState) {
+    trueShadowsState.textContent = trueShadowsToggle.checked
+      ? strings.trueShadowsOn
+      : strings.trueShadowsOff;
+  }
   renderWeightLog();
   renderNotes();
   renderProfiles();
@@ -545,11 +552,22 @@ function setDarkModeEnabled(enabled) {
   savePreference(STORAGE_KEYS.darkMode, String(safeEnabled));
 }
 
+function setTrueShadowsEnabled(enabled) {
+  const safeEnabled = enabled === true;
+  document.body.classList.toggle("true-shadows", safeEnabled);
+  trueShadowsToggle.checked = safeEnabled;
+  trueShadowsState.textContent = safeEnabled
+    ? (translations[languageSelect.value] || translations.en).trueShadowsOn
+    : (translations[languageSelect.value] || translations.en).trueShadowsOff;
+  savePreference(STORAGE_KEYS.trueShadows, String(safeEnabled));
+}
+
 function loadSettings() {
   setAccent(loadPreference(STORAGE_KEYS.accent, "red-blue"));
   setBackground(loadPreference(STORAGE_KEYS.background, "graffiti"));
   setAnimationsEnabled(loadPreference(STORAGE_KEYS.animations, "true") !== "false");
   setDarkModeEnabled(loadPreference(STORAGE_KEYS.darkMode, "false") === "true");
+  setTrueShadowsEnabled(loadPreference(STORAGE_KEYS.trueShadows, "false") === "true");
 }
 
 function makeProfile(name, data = {}) {
@@ -1781,6 +1799,10 @@ animationsToggle.addEventListener("change", () => {
 
 darkModeToggle.addEventListener("change", () => {
   setDarkModeEnabled(darkModeToggle.checked);
+});
+
+trueShadowsToggle.addEventListener("change", () => {
+  setTrueShadowsEnabled(trueShadowsToggle.checked);
 });
 
 profileSelect.addEventListener("change", () => switchProfile(profileSelect.value));

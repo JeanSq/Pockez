@@ -24,7 +24,7 @@
     <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="fonts/kalam-400.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link rel="stylesheet" href="style.css?v=14" />
+    <link rel="stylesheet" href="style.css?v=16" />
 
     <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
          during a site rebuild), force the app visible instead of sticking on
@@ -223,6 +223,14 @@
                   <input id="dark-mode-toggle" type="checkbox" />
                   <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
                   <span class="toggle-state" data-i18n="darkModeOff">Off</span>
+                </span>
+              </label>
+              <label class="animation-setting">
+                <span class="setting-label" data-i18n="trueShadowsLabel">True shadows</span>
+                <span class="toggle-control">
+                  <input id="true-shadows-toggle" type="checkbox" />
+                  <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-state" data-i18n="trueShadowsOff">Off</span>
                 </span>
               </label>
             </div>
@@ -726,7 +734,7 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard â€” learning project</span> Â· v16</p>
+        <p><span data-i18n="footerNote">Personal dashboard — learning project</span> · v18</p>
         <p class="footer-install" hidden>
           <button type="button" class="install-app-button" id="install-app-footer" data-i18n="installApp" hidden>
             Install app
@@ -738,6 +746,6 @@
       </footer>
     </div>
 
-    <script type="module" src="app.js?v=14"></script>
+        <script type="module" src="app.js?v=16"></script>
   </body>
 </html>
