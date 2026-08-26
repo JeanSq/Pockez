@@ -114,10 +114,18 @@ window.addEventListener(
 // --- PWA: service worker (offline + installable when served over http[s]) ---
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
+    // `updateViaCache: "none"` is the key to reliable updates: the browser is
+    // forced to re-check sw.js against the network on every update check
+    // instead of serving a possibly-stale copy out of its HTTP cache. Without
+    // it, a freshly pushed service worker can go unnoticed for a long time.
     navigator.serviceWorker
-      .register("./sw.js", { scope: "./" })
+      .register("./sw.js", { scope: "./", updateViaCache: "none" })
       .then((registration) => {
-        // Check for updates whenever the app returns to the foreground
+        // Check right away on load (not only when the app returns to the
+        // foreground) so a new deploy is picked up on the very next visit.
+        registration.update().catch(() => {});
+
+        // ...and re-check whenever the app comes back to the foreground.
         document.addEventListener("visibilitychange", () => {
           if (!document.hidden) registration.update().catch(() => {});
         });
