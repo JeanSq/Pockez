@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=10";
-import { translations } from "./i18n.js?v=11";
+import { translations } from "./i18n.js?v=13";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -327,6 +327,11 @@ const summaryBmi = document.getElementById("summary-bmi");
 const summaryCalories = document.getElementById("summary-calories");
 const summaryCalorieMode = document.getElementById("summary-calorie-mode");
 const quickLinks = document.querySelectorAll("[data-widget-target]");
+const dashDateEl = document.getElementById("dash-date");
+const dashProgressEl = document.getElementById("dash-progress");
+const dashProgressFill = document.getElementById("dash-progress-fill");
+const dashProgressMeta = document.getElementById("dash-progress-meta");
+const dashNotesCount = document.getElementById("dash-notes-count");
 let editingMeasurementId = null;
 let bodyStatsCalculated = false;
 const trainerForm = document.getElementById("trainer-form");
@@ -446,6 +451,7 @@ function applyTranslations(lang) {
   renderNotes();
   renderProfiles();
   loadTrainerPlan();
+  renderDashDate();
 
   document.documentElement.lang = lang;
 }
@@ -484,9 +490,9 @@ function loadLanguage() {
 }
 
 const accentThemes = {
-  "red-blue": ["#b54a4a", "#4a6d8c"],
-  "orange-teal": ["#d97941", "#3d8c87"],
-  "yellow-pink": ["#d5ad38", "#bd5772"],
+  "red-blue": ["#ef4444", "#3b5bdb"],
+  "orange-teal": ["#f59b2c", "#0e9f9a"],
+  "yellow-pink": ["#f6d80b", "#e84393"],
 };
 
 function setAccent(accentId) {
@@ -848,6 +854,14 @@ function getTodayDateValue() {
   return new Date(today.getTime() - offset).toISOString().split("T")[0];
 }
 
+// Home header date line ("AUGUST 26, 2026"), locale-aware
+function renderDashDate() {
+  if (!dashDateEl) return;
+  dashDateEl.textContent = new Date()
+    .toLocaleDateString(languageSelect.value, { year: "numeric", month: "long", day: "numeric" })
+    .toUpperCase();
+}
+
 function getWeightChartRange(values) {
   if (values.length === 0) return { minimum: 0, maximum: 1 };
   const sex = bodyInputs.sex.value || loadBodyStatsProfile()?.sex || "female";
@@ -1188,6 +1202,28 @@ function renderDashboardSummary() {
     ? `${Number(latestEntry.weight) - Number(firstEntry.weight) > 0 ? "+" : ""}${formatWeight(Number(latestEntry.weight) - Number(firstEntry.weight))} kg`
     : strings.noData;
 
+  // Hero "overall progress": how far the latest weight has moved from the
+  // first entry toward the profile's goal weight. Direction-aware, so both
+  // cutting and bulking read correctly; clamped to 0-100%.
+  const goalWeight = getGoalWeight();
+  if (latestEntry && goalWeight !== null) {
+    const startWeight = firstEntry ? Number(firstEntry.weight) : Number(latestEntry.weight);
+    const currentWeight = Number(latestEntry.weight);
+    const totalDistance = startWeight - goalWeight;
+    const doneDistance = startWeight - currentWeight;
+    const rawPct = totalDistance === 0
+      ? (Math.abs(doneDistance) < 0.05 ? 100 : 0)
+      : (doneDistance / totalDistance) * 100;
+    const pct = Math.max(0, Math.min(100, Math.round(rawPct)));
+    if (dashProgressEl) dashProgressEl.textContent = String(pct);
+    if (dashProgressFill) dashProgressFill.style.width = `${pct}%`;
+    if (dashProgressMeta) dashProgressMeta.textContent = `${strings.dashGoalLabel}: ${formatWeight(goalWeight)} kg`;
+  } else {
+    if (dashProgressEl) dashProgressEl.textContent = "—";
+    if (dashProgressFill) dashProgressFill.style.width = "0%";
+    if (dashProgressMeta) dashProgressMeta.textContent = latestEntry ? strings.dashNoGoal : strings.noData;
+  }
+
   if (!profile) {
     summaryBmi.textContent = "—";
     summaryCalories.textContent = "—";
@@ -1503,7 +1539,22 @@ for (const button of navButtons) {
 }
 
 for (const link of quickLinks) {
-  link.addEventListener("click", () => showWidget(link.dataset.widgetTarget));
+  link.addEventListener("click", () => {
+    showWidget(link.dataset.widgetTarget);
+    // Jump straight into logging when the CTA targets the weight log
+    if (link.dataset.widgetTarget === "weight") {
+      document.getElementById("measurement-weight-input")?.focus();
+    }
+  });
+}
+
+// Home "+" tile: same as "New note" in the Notes sidebar
+const dashAddButton = document.getElementById("dash-add");
+if (dashAddButton) {
+  dashAddButton.addEventListener("click", () => {
+    showWidget("notes");
+    createNote();
+  });
 }
 
 // --- Notes save / load ---
@@ -1609,6 +1660,9 @@ function renderNoteList(notes, activeNoteId) {
 function renderNotes() {
   const notes = getNotes();
   const activeNote = notes.find((note) => note.id === activeNoteId);
+
+  // Home "Notes" row counter
+  if (dashNotesCount) dashNotesCount.textContent = String(notes.length);
 
   renderNoteList(notes, activeNoteId);
   setEditorVisible(Boolean(activeNote));
