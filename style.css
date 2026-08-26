@@ -535,17 +535,44 @@ body.dark-mode .settings-dialog::backdrop {
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.data-tool-button:hover,
+/* Hover = pointer devices only; touch gets the instant :active below instead
+   of the delayed, sticking touch-hover. */
+@media (hover: hover) {
+  .data-tool-button:hover {
+    background: var(--aberration-b);
+    color: var(--text-on-dark);
+    box-shadow: 2px 2px 0 var(--aberration-a);
+  }
+}
+
 .data-tool-button:focus-visible {
   background: var(--aberration-b);
   color: var(--text-on-dark);
   box-shadow: 2px 2px 0 var(--aberration-a);
 }
 
-.data-tool-danger:hover,
+.data-tool-button:active {
+  background: var(--aberration-b);
+  color: var(--text-on-dark);
+  box-shadow: 2px 2px 0 var(--aberration-a);
+}
+
+@media (hover: hover) {
+  .data-tool-danger:hover {
+    background: var(--aberration-a);
+  }
+}
+
 .data-tool-danger:focus-visible {
+  background: var(--aberration-a);
+}
+
+.data-tool-danger:active {
   background: var(--aberration-a);
 }
 
@@ -717,6 +744,10 @@ body.background-paper .app-nav {
   color: var(--text-muted-on-dark);
   opacity: 0.45;
   transition: none;
+  /* Instant taps, no double-tap-zoom delay, no text selection */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Icon sizing: base 36px, scaled down to 32px in the small-screen media query */
@@ -749,6 +780,12 @@ body.background-paper .nav-btn.is-active {
 .nav-btn:focus-visible {
   outline: 2px dashed var(--aberration-b);
   outline-offset: 4px;
+  opacity: 1;
+}
+
+/* Instant touch feedback: the pressed icon lights up while the finger is
+   down (and does not stick after release, unlike touch-hover). */
+.nav-btn:active {
   opacity: 1;
 }
 
@@ -1085,10 +1122,22 @@ body.animations-off .widget-title {
   font: inherit;
   cursor: pointer;
   box-shadow: 3px 2px 0 var(--aberration-b);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
-.quick-link:hover,
+/* Hover = pointer devices only; touch uses the instant :active below. */
+@media (hover: hover) {
+  .quick-link:hover {
+    background: var(--aberration-b);
+    color: var(--text-on-dark);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 4px 5px 0 var(--aberration-a);
+  }
+}
+
 .quick-link:focus-visible {
   background: var(--aberration-b);
   color: var(--text-on-dark);
@@ -1096,7 +1145,10 @@ body.animations-off .widget-title {
   box-shadow: 4px 5px 0 var(--aberration-a);
 }
 
+/* Instant tap feedback: color the link while the finger is down. */
 .quick-link:active {
+  background: var(--aberration-b);
+  color: var(--text-on-dark);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--aberration-a);
 }
@@ -1206,10 +1258,20 @@ body.animations-off .widget-title {
   font: inherit;
   cursor: pointer;
   box-shadow: 3px 3px 0 var(--aberration-b);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
-.form-submit:hover,
+/* Hover = pointer devices only; touch uses the instant :active below. */
+@media (hover: hover) {
+  .form-submit:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 4px 5px 0 var(--aberration-b);
+  }
+}
+
 .form-submit:focus-visible {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 4px 5px 0 var(--aberration-b);
@@ -2029,6 +2091,10 @@ body.animations-off .widget-title {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+  /* Taps respond instantly + never select the row text on a touch */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .note-list-item.is-active {
@@ -2037,9 +2103,24 @@ body.animations-off .widget-title {
   font-weight: 700;
 }
 
-.note-list-item:hover,
+/* Hover is reserved for real pointer (mouse) devices. On touch the browser's
+   sticky :hover fires ~1s late and lingers - which was the "wait, then it
+   highlights / underlines the row" behaviour. Touch now relies on :active. */
+@media (hover: hover) {
+  .note-list-item:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+}
+
 .note-list-item:focus-visible {
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* Instant touch feedback: tint + slight bold the moment the finger lands. */
+.note-list-item:active {
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .note-delete {
@@ -2049,10 +2130,19 @@ body.animations-off .widget-title {
   color: var(--ink-faint);
   font-size: 1.1rem;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.note-delete:hover,
-.note-delete:focus-visible {
+@media (hover: hover) {
+  .note-delete:hover {
+    color: var(--aberration-a);
+  }
+}
+
+.note-delete:focus-visible,
+.note-delete:active {
   color: var(--aberration-a);
 }
 
@@ -2148,11 +2238,23 @@ body.animations-off .widget-title {
   font-size: 0.85rem;
   padding: 0.45rem 1rem;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.install-app-button:hover,
-.install-app-button:focus-visible {
+/* Hover = pointer devices only; touch uses the instant :active below. */
+@media (hover: hover) {
+  .install-app-button:hover {
+    background: var(--aberration-b);
+    color: var(--text-on-dark);
+    box-shadow: 2px 2px 0 var(--aberration-a);
+  }
+}
+
+.install-app-button:focus-visible,
+.install-app-button:active {
   background: var(--aberration-b);
   color: var(--text-on-dark);
   box-shadow: 2px 2px 0 var(--aberration-a);
