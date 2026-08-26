@@ -585,20 +585,20 @@ body.dark-mode .settings-dialog::backdrop {
 @media (hover: hover) {
   .data-tool-button:hover {
     background: var(--accent-yellow);
-    color: var(--ink);
+    color: var(--text-on-dark);
     box-shadow: 3px 3px 0 var(--aberration-a);
   }
 }
 
 .data-tool-button:focus-visible {
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   box-shadow: 3px 3px 0 var(--aberration-a);
 }
 
 .data-tool-button:active {
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--aberration-a);
 }
@@ -1036,7 +1036,7 @@ body.animations-off .widget-title {
   .profile-action:hover:not(:disabled),
   .profile-action:focus-visible:not(:disabled) {
     background: var(--accent-yellow);
-    color: var(--ink);
+    color: var(--text-on-dark);
     box-shadow: 3px 3px 0 var(--aberration-a);
   }
 }
@@ -1044,6 +1044,7 @@ body.animations-off .widget-title {
 .profile-action-danger:hover:not(:disabled),
 .profile-action-danger:focus-visible:not(:disabled) {
   background: var(--accent-red);
+  color: var(--text-on-dark);
 }
 
 .profile-action:disabled {
@@ -1120,7 +1121,7 @@ body.animations-off .widget-title {
   border: var(--border-w) solid var(--ink);
   border-radius: 0;
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-family: var(--font-label);
   font-size: 1.7rem;
   font-weight: 700;
@@ -1171,7 +1172,7 @@ body.animations-off .widget-title {
 
 .dash-hero-label {
   display: block;
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-family: var(--font-label);
   font-size: 0.72rem;
   font-weight: 700;
@@ -1186,7 +1187,7 @@ body.animations-off .widget-title {
   font-size: 2.9rem;
   font-weight: 400;
   line-height: 1;
-  color: var(--ink);
+  color: var(--text-on-dark);
 }
 
 .dash-hero-unit {
@@ -1305,7 +1306,7 @@ body.animations-off .widget-title {
   display: grid;
   place-items: center;
   border-right: 2.5px solid var(--ink);
-  color: var(--ink);
+  color: var(--text-on-dark);
 }
 
 .dash-tile .icon-svg {
@@ -1383,7 +1384,7 @@ body.animations-off .widget-title {
   border: 2.5px solid var(--ink);
   border-radius: 0;
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-family: var(--font-label);
   font-size: 0.9rem;
   font-weight: 800;
@@ -1516,7 +1517,7 @@ body.animations-off .widget-title {
 
 .mode-option input:checked + span {
   background: var(--accent-blue);
-  color: var(--ink);
+  color: var(--text-on-dark);
   box-shadow: 3px 3px 0 var(--aberration-a);
 }
 
@@ -1526,7 +1527,7 @@ body.animations-off .widget-title {
   border: 3px solid var(--ink);
   border-radius: 0;
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-family: var(--font-label);
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -1587,7 +1588,7 @@ body.animations-off .widget-title {
 .weight-summary .result-card:hover,
 .weight-summary .result-card:focus-within {
   background: var(--accent-blue);
-  color: var(--ink);
+  color: var(--text-on-dark);
   transform: translate(-2px, -2px);
   box-shadow:
     5px 5px 0 var(--aberration-a),
@@ -1598,7 +1599,7 @@ body.animations-off .widget-title {
 .weight-summary .result-card:focus-within span,
 .weight-summary .result-card:hover small,
 .weight-summary .result-card:focus-within small {
-  color: rgba(232, 228, 220, 0.82);
+  color: var(--text-muted-on-dark);
 }
 
 .weight-summary .result-card:hover strong,
@@ -1750,7 +1751,7 @@ body.animations-off .widget-title {
 .target-card:hover,
 .target-card:focus-visible {
   background: var(--accent-blue);
-  color: var(--ink);
+  color: var(--text-on-dark);
   transform: translate(-2px, -2px);
   box-shadow:
     5px 5px 0 var(--aberration-a),
@@ -1760,7 +1761,7 @@ body.animations-off .widget-title {
 
 .target-card:hover span,
 .target-card:focus-visible span {
-  color: rgba(232, 228, 220, 0.82);
+  color: var(--text-muted-on-dark);
 }
 
 .target-card:hover strong,
@@ -2075,7 +2076,7 @@ body.animations-off .widget-title {
   aspect-ratio: 1;
   border: 2px solid var(--ink);
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-family: var(--font-app-title);
   font-size: 0.9rem;
   transform: rotate(-3deg);
@@ -2386,7 +2387,7 @@ body.animations-off .widget-title {
 .note-list-item.is-active {
   border-left: 6px solid var(--accent-blue);
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   font-weight: 700;
 }
 
@@ -2539,7 +2540,7 @@ body.animations-off .widget-title {
 @media (hover: hover) {
   .install-app-button:hover {
     background: var(--accent-yellow);
-    color: var(--ink);
+    color: var(--text-on-dark);
     transform: translate(-1px, -1px);
     box-shadow: 4px 4px 0 var(--aberration-a);
   }
@@ -2547,13 +2548,13 @@ body.animations-off .widget-title {
 
 .install-app-button:focus-visible {
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   box-shadow: 4px 4px 0 var(--aberration-a);
 }
 
 .install-app-button:active {
   background: var(--accent-yellow);
-  color: var(--ink);
+  color: var(--text-on-dark);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--aberration-a);
 }
