@@ -484,9 +484,9 @@ function loadLanguage() {
 }
 
 const accentThemes = {
-  "red-blue": ["#b54a4a", "#4a6d8c"],
-  "orange-teal": ["#d97941", "#3d8c87"],
-  "yellow-pink": ["#d5ad38", "#bd5772"],
+  "red-blue": ["#ef4444", "#3b5bdb"],
+  "orange-teal": ["#f59b2c", "#0e9f9a"],
+  "yellow-pink": ["#f6d80b", "#e84393"],
 };
 
 function setAccent(accentId) {

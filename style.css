@@ -42,107 +42,143 @@
   src: url("fonts/kalam-700.woff2") format("woff2");
 }
 
-/* --- Muted palette + Spider-Verse accent pair --- */
+/* --- Neo-Brutalist tokens (ref: Variant 1) + Spider-Verse chromatic pair --- */
 :root {
-  --bg: #34383d;
-  --bg-deep: #2a2d31;
-  --paper: #ebe4d8;
-  --paper-shadow: #cfc6b8;
-  --ink: #3f434b;
-  --ink-muted: #555;
-  --ink-faint: #888;
-  --text-on-dark: #e8e4dc;
-  --text-muted-on-dark: #a8a49c;
-  /* Chromatic aberration pair (Into the Spider-Verse style) */
-  --aberration-a: #b54a4a;
-  --aberration-b: #4a6d8c;
+  /* Surfaces: warm paper page, near-white cards, near-black ink */
+  --bg: #e9e7e2;
+  --bg-deep: #dedcd6;
+  --paper: #f7f6f2;
+  --paper-shadow: #d8d5ce;
+  --ink: #161616;
+  --ink-muted: #454545;
+  --ink-faint: #737373;
+  /* "on accent" text: black ink on bright fills (yellow / periwinkle / etc.) */
+  --text-on-dark: #161616;
+  --text-muted-on-dark: #454545;
+
+  /* Chromatic aberration pair (Into the Spider-Verse style) - hover/active
+     split shadows, title RGB split, active-nav shimmer */
+  --aberration-a: #ef4444;
+  --aberration-b: #3b5bdb;
+
+  /* Brutalist accent palette (Variant 1 icon tiles + CTAs) */
+  --accent-blue: #6c7ce6;
+  --accent-yellow: #f6d80b;
+  --accent-red: #f0544f;
+  --accent-purple: #9b7ede;
+  --accent-orange: #f59b2c;
+  --accent-green: #27a05a;
+
+  /* Structure: thick borders + hard, unblurred offset shadows */
+  --border-w: 3px;
+  --shadow-rest: 6px 6px 0 var(--ink);
+  --shadow-split: 6px 6px 0 var(--aberration-a), -6px -6px 0 var(--aberration-b);
+  --shadow-press: 2px 2px 0 var(--ink);
+
+  /* Type: Bangers = giant display (TODAY), mono = labels/UI, Kalam = notes */
   --font-title: "Caveat", cursive;
   --font-app-title: "Bangers", cursive;
+  --font-display: var(--font-app-title);
   --font-body: "Kalam", cursive;
+  --font-label: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+
   --spider-duration: 1.45s;
   --spider-steps: 2;
 
-  /* Glassmorphism nav variables (Default / Darkish fallback) */
-  --nav-bg: rgba(42, 45, 49, 0.25);
-  --nav-border: rgba(255, 255, 255, 0.08);
-  --nav-border-bottom: rgba(255, 255, 255, 0.16);
-  --nav-shadow: 
-    0 12px 24px -10px rgba(0, 0, 0, 0.5), 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  /* Nav vars kept for compatibility; restyled to the brutalist bar */
+  --nav-bg: var(--paper);
+  --nav-border: var(--ink);
+  --nav-border-bottom: var(--ink);
+  --nav-shadow: 5px 5px 0 var(--ink);
+}
+
+/* Base page tone for every variant (paper w/ faint dot grid = Variant 1) */
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(22, 22, 22, 0.075) 1px, transparent 1.4px);
+  background-size: 22px 22px;
 }
 
 body.background-paper {
-  --nav-bg: rgba(235, 228, 216, 0.25);
-  --nav-border: rgba(26, 26, 26, 0.06);
-  --nav-border-bottom: rgba(26, 26, 26, 0.12);
-  --nav-shadow: 
-    0 12px 24px -10px rgba(0, 0, 0, 0.15), 
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.5),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(22, 22, 22, 0.075) 1px, transparent 1.4px);
+  background-size: 22px 22px;
 }
 
 body.background-dark-paper {
-  --bg-deep: #202125;
-  --bg: #2c2d32;
-  background-color: var(--bg-deep);
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 28px),
-    linear-gradient(135deg, #34343a 0%, #1d1e22 100%);
+  --bg: #141416;
+  --bg-deep: #101012;
+  --paper: #1e1e21;
+  --paper-shadow: #0b0b0c;
+  --ink: #f0ede6;
+  --ink-muted: #c9c5bc;
+  --ink-faint: #8f8b83;
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.045) 0 2px,
+    transparent 2px 26px
+  );
 }
 
 body.background-graffiti {
-  background-color: #46484d;
+  background-color: var(--bg);
   background-image:
-    linear-gradient(120deg, transparent 0 18%, rgba(181, 74, 74, 0.24) 18% 20%, transparent 20% 54%, rgba(74, 109, 140, 0.3) 54% 56%, transparent 56%),
-    repeating-linear-gradient(165deg, transparent 0 46px, rgba(255, 255, 255, 0.06) 47px 49px, transparent 50px 94px),
-    linear-gradient(145deg, #55585c 0%, #303238 100%);
+    /* Hard-edged angular blocks: Spider-Verse graffiti wall, brutalist cut */
+    linear-gradient(115deg,
+      transparent 0 12%,
+      rgba(239, 68, 68, 0.18) 12% 24%,
+      transparent 24% 57%,
+      rgba(59, 91, 219, 0.2) 57% 71%,
+      transparent 71%),
+    linear-gradient(65deg,
+      transparent 0 30%,
+      rgba(246, 216, 11, 0.14) 30% 38%,
+      transparent 38%),
+    radial-gradient(rgba(22, 22, 22, 0.075) 1px, transparent 1.4px);
+  background-size: auto, auto, 22px 22px;
 }
 
 body.background-blueprint {
-  background-color: #31566d;
+  background-color: #eef0f4;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(135deg, #3b6c82 0%, #254455 100%);
-  background-size: 28px 28px, 28px 28px, auto;
+    linear-gradient(rgba(22, 22, 22, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 22, 22, 0.14) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
 }
 
 body.dark-mode {
-  /* Contrast-tuned palette: brighter warm inks on a slightly deeper paper
-     so the handwritten fonts stay crisp on the grey surfaces */
-  --paper: #414349;
-  --paper-shadow: #313338;
-  --ink: #f7f3ea;
-  --ink-muted: #ddd8ce;
-  --ink-faint: #b5b0a6;
-  --text-on-dark: #f7f3ea;
-  --text-muted-on-dark: #cdc8bf;
-  --bg: #35373b;
-  --bg-deep: #2b2d31;
-  background-color: var(--bg-deep);
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 28px),
-    linear-gradient(175deg, #3a3c42 0%, #2b2d31 100%);
+  /* Inverted brutalism: near-black canvas, bone-ink borders & text.
+     Every border/shadow that references var(--ink) flips automatically. */
+  --bg: #151517;
+  --bg-deep: #101012;
+  --paper: #202023;
+  --paper-shadow: #0b0b0c;
+  --ink: #f0ede6;
+  --ink-muted: #c9c5bc;
+  --ink-faint: #8f8b83;
+  --text-on-dark: #161616;
+  --text-muted-on-dark: #c9c5bc;
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.4px);
+  background-size: 22px 22px;
 
-  /* Glassmorphism dark mode overrides */
-  --nav-bg: rgba(48, 50, 54, 0.25);
-  --nav-border: rgba(255, 255, 255, 0.08);
-  --nav-border-bottom: rgba(255, 255, 255, 0.16);
-  --nav-shadow: 
-    0 12px 24px -10px rgba(0, 0, 0, 0.5), 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  --nav-bg: var(--paper);
+  --nav-border: var(--ink);
+  --nav-border-bottom: var(--ink);
+  --nav-shadow: 5px 5px 0 rgba(240, 237, 230, 0.28);
 }
 
 body.dark-mode.background-graffiti {
   background-image:
-    linear-gradient(120deg, transparent 0 18%, rgba(181, 74, 74, 0.18) 18% 20%, transparent 20% 54%, rgba(74, 109, 140, 0.2) 54% 56%, transparent 56%),
-    repeating-linear-gradient(165deg, transparent 0 46px, rgba(255, 255, 255, 0.04) 47px 49px, transparent 50px 94px),
-    linear-gradient(145deg, #4b4e52 0%, #303236 100%);
+    linear-gradient(115deg,
+      transparent 0 12%,
+      rgba(239, 68, 68, 0.14) 12% 24%,
+      transparent 24% 57%,
+      rgba(59, 91, 219, 0.16) 57% 71%,
+      transparent 71%),
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.4px);
+  background-size: auto, 22px 22px;
 }
 
 *,
@@ -212,9 +248,10 @@ body {
 }
 
 .header-text {
-  padding: 0 3.5rem;
+  padding: 0 1rem 0.9rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 4px solid var(--ink);
 }
 
 /* Remove padding during splash so the centered title is exactly centered */
@@ -275,10 +312,11 @@ body.header-in-flow .header-text {
   font-family: var(--font-app-title);
   font-size: clamp(3.8rem, 11vw, 5.8rem); /* Massive Spectacular Title */
   font-weight: 400;
+  letter-spacing: 0.015em;
   line-height: 1.05;
-  color: var(--text-on-dark);
+  color: var(--ink);
   transform: rotate(-0.8deg);
-  /* Static subtle chromatic title */
+  /* Static chromatic title: the Spider-Verse signature lives on */
   text-shadow:
     3px 2px 0 var(--aberration-a),
     -3px -2px 0 var(--aberration-b);
@@ -287,8 +325,11 @@ body.header-in-flow .header-text {
 
 .subtitle {
   margin: 0.4rem 0 0;
-  color: var(--text-muted-on-dark);
-  font-size: 0.95rem;
+  color: var(--ink-muted);
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   animation: fade-out-shrink 4.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   overflow: hidden;
 }
@@ -378,23 +419,20 @@ body.reveal-header:not(.animations-ready) .widget-panel * {
 .settings-dialog {
   width: min(92vw, 430px);
   padding: 0;
-  border: 2.5px solid var(--ink);
-  border-radius: 10px;
+  border: var(--border-w) solid var(--ink);
+  border-radius: 0;
   background: var(--paper);
   color: var(--ink);
-  box-shadow:
-    8px 9px 0 var(--aberration-a),
-    -8px -9px 0 var(--aberration-b),
-    6px 7px 0 var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
 }
 
 .settings-dialog::backdrop {
-  background: rgba(18, 20, 22, 0.72);
+  background: rgba(22, 22, 22, 0.72);
 }
 
 .settings-content {
   padding: 1.35rem 1.4rem 1.5rem;
-  background-image: repeating-linear-gradient(-2deg, transparent 0 22px, rgba(0, 0, 0, 0.035) 22px 23px);
+  background-image: none;
 }
 
 .settings-heading {
@@ -507,9 +545,9 @@ body.dark-mode .settings-dialog::backdrop {
 .setting-group select {
   width: 100%;
   padding: 0.45rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
 }
@@ -528,9 +566,9 @@ body.dark-mode .settings-dialog::backdrop {
 
 .data-tool-button {
   padding: 0.5rem 0.35rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
   font-size: 0.8rem;
@@ -544,22 +582,23 @@ body.dark-mode .settings-dialog::backdrop {
    of the delayed, sticking touch-hover. */
 @media (hover: hover) {
   .data-tool-button:hover {
-    background: var(--aberration-b);
-    color: var(--text-on-dark);
-    box-shadow: 2px 2px 0 var(--aberration-a);
+    background: var(--accent-yellow);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
   }
 }
 
 .data-tool-button:focus-visible {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  box-shadow: 2px 2px 0 var(--aberration-a);
+  background: var(--accent-yellow);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .data-tool-button:active {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  box-shadow: 2px 2px 0 var(--aberration-a);
+  background: var(--accent-yellow);
+  color: var(--ink);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 @media (hover: hover) {
@@ -616,24 +655,24 @@ body.dark-mode .settings-dialog::backdrop {
 .choice-option input:checked + .swatch,
 .choice-option input:checked + .background-choice {
   border-color: var(--ink);
-  box-shadow: 2px 2px 0 var(--aberration-a), -2px -2px 0 var(--aberration-b);
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
-.swatch-red-blue { background: linear-gradient(110deg, #b54a4a 0 50%, #4a6d8c 50%); }
-.swatch-orange-teal { background: linear-gradient(110deg, #d97941 0 50%, #3d8c87 50%); }
-.swatch-yellow-pink { background: linear-gradient(110deg, #d5ad38 0 50%, #bd5772 50%); }
+.swatch-red-blue { background: linear-gradient(110deg, #ef4444 0 50%, #3b5bdb 50%); }
+.swatch-orange-teal { background: linear-gradient(110deg, #f59b2c 0 50%, #0e9f9a 50%); }
+.swatch-yellow-pink { background: linear-gradient(110deg, #f6d80b 0 50%, #e84393 50%); }
 
 .background-choice {
   background-position: center;
   background-size: cover;
-  color: white;
-  text-shadow: 1px 1px 2px #111;
+  color: var(--ink);
+  text-shadow: none;
 }
 
-.background-paper { background: linear-gradient(135deg, #eee8dc, #d8d0c1); }
-.background-dark-paper { background: linear-gradient(135deg, #55565b, #25262a); }
-.background-graffiti { background: linear-gradient(135deg, #a65362, #3d7177); }
-.background-blueprint { background: linear-gradient(135deg, #4b8395, #294c60); }
+.background-paper { background: radial-gradient(rgba(22, 22, 22, 0.3) 1px, transparent 1.4px) #e9e7e2; background-size: 8px 8px; }
+.background-dark-paper { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.14) 0 2px, transparent 2px 10px) #141416; }
+.background-graffiti { background: linear-gradient(115deg, rgba(239,68,68,0.75) 0 26%, #e9e7e2 26% 60%, rgba(59,91,219,0.75) 60% 82%, #e9e7e2 82%); }
+.background-blueprint { background: linear-gradient(rgba(22,22,22,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(22,22,22,0.35) 1px, transparent 1px) #eef0f4; background-size: 9px 9px, 9px 9px; }
 
 /* Keyboard focus for selects in settings (e.g. the language picker) */
 .setting-group select:focus-visible {
@@ -671,9 +710,9 @@ body.dark-mode .settings-dialog::backdrop {
   display: inline-block;
   width: 42px;
   height: 22px;
-  border: 1.5px solid var(--ink);
-  border-radius: 11px;
-  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
 }
 
 .toggle-thumb {
@@ -682,13 +721,13 @@ body.dark-mode .settings-dialog::backdrop {
   left: 2px;
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--ink);
   transition: transform 160ms ease, background-color 160ms ease;
 }
 
 .toggle-control input:checked + .toggle-track {
-  background: var(--aberration-b);
+  background: var(--accent-yellow);
 }
 
 .toggle-control input:checked + .toggle-track .toggle-thumb {
@@ -701,7 +740,7 @@ body.dark-mode .settings-dialog::backdrop {
   outline-offset: 3px;
 }
 
-/* --- Icon nav: bare icons, no boxes --- */
+/* --- Icon nav: brutalist bar, active = solid ink tile --- */
 .app-nav {
   position: fixed;
   /* Floats on the lower zone of the app; lifts above the iPhone gesture bar */
@@ -713,24 +752,17 @@ body.dark-mode .settings-dialog::backdrop {
   width: fit-content;
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.1rem;
   margin: 0;
-  padding: 0.4rem 2rem; /* Thinner vertically */
-  
-  /* Glassmorphism background and borders */
+  padding: 0.45rem 1.1rem;
+
+  /* Neo-brutalist bar: paper slab, thick ink frame, hard shadow */
   background: var(--nav-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--nav-border);
-  border-bottom: 2.5px solid var(--nav-border-bottom);
-  border-radius: 9999px;
+  border: var(--border-w) solid var(--nav-border);
+  border-radius: 0;
   box-shadow: var(--nav-shadow);
 
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-body.background-paper .app-nav {
-  /* Inherited via variables */
 }
 
 .nav-btn {
@@ -739,10 +771,11 @@ body.background-paper .app-nav {
   justify-content: center;
   padding: 0.35rem;
   border: none;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
   color: var(--text-muted-on-dark);
-  opacity: 0.45;
+  opacity: 0.5;
   transition: none;
   /* Instant taps, no double-tap-zoom delay, no text selection */
   touch-action: manipulation;
@@ -774,7 +807,11 @@ body.background-paper .nav-btn.is-active {
 
 .nav-btn.is-active {
   opacity: 1;
-  color: var(--text-on-dark);
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow:
+    3px 3px 0 var(--aberration-a),
+    -3px -3px 0 var(--aberration-b);
 }
 
 .nav-btn:focus-visible {
@@ -813,22 +850,17 @@ body.background-paper .nav-btn.is-active {
 
 @keyframes spiderverse-paper {
   0% {
-    box-shadow:
-      4px 4px 0 var(--aberration-a),
-      -4px -4px 0 var(--aberration-b),
-      4px 5px 0 var(--ink);
+    box-shadow: 7px 7px 0 var(--ink);
   }
   50% {
     box-shadow:
-      7px 2px 0 var(--aberration-a),
-      -7px -2px 0 var(--aberration-b),
-      5px 6px 0 var(--ink);
+      6px 8px 0 var(--ink),
+      -3px -3px 0 var(--aberration-b);
   }
   100% {
     box-shadow:
-      3px 6px 0 var(--aberration-a),
-      -3px -6px 0 var(--aberration-b),
-      4px 5px 0 var(--ink);
+      8px 5px 0 var(--ink),
+      3px -3px 0 var(--aberration-a);
   }
 }
 
@@ -890,54 +922,45 @@ body.animations-off .widget-title {
   position: relative;
   padding: 1.35rem 1.4rem 1.5rem;
   background-color: var(--paper);
-  background-image: repeating-linear-gradient(
-    -2deg,
-    transparent 0 22px,
-    rgba(0, 0, 0, 0.035) 22px 23px
-  );
-  border: 2.5px solid var(--ink);
-  border-radius: 10px;
-  box-shadow:
-    8px 9px 0 var(--aberration-a),
-    -8px -9px 0 var(--aberration-b),
-    6px 7px 0 var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 0;
+  box-shadow: var(--shadow-rest);
   animation: spiderverse-paper var(--spider-duration) steps(var(--spider-steps))
     infinite;
-  /* Long containers stay straight ON PURPOSE: a -0.5deg tilt on a
-     ~2200px-tall panel makes its edges drift ~10px horizontally across
-     the viewport while scrolling, which reads as the whole window
-     sliding. The hand-drawn tilt lives on short accents instead
-     (titles, buttons, small cards). */
+  /* Long containers stay straight ON PURPOSE (see git history): the
+     hand-drawn tilt lives on short accents instead (titles, buttons,
+     small cards). */
 }
 
 .widget-title {
-  margin: 0 0 0.35rem;
-  font-family: var(--font-title);
-  font-size: 1.9rem;
-  font-weight: 700;
+  margin: 0 0 0.6rem;
+  font-family: var(--font-label);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--ink);
-  border-bottom: 2px solid var(--ink);
-  padding-bottom: 0.15rem;
-  transform: rotate(-0.4deg);
-  text-align: center;
-  text-shadow:
-    1px 1px 0 var(--aberration-a),
-    -1px -1px 0 var(--aberration-b);
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 0.35rem;
+  transform: none;
+  text-align: left;
+  text-shadow: none;
 }
 
 .widget-hint {
   margin: 0 0 0.75rem;
   color: var(--ink-muted);
-  font-size: 0.92rem;
+  font-family: var(--font-label);
+  font-size: 0.78rem;
   text-align: center;
 }
 
 .profile-manager {
   margin: 1rem 0 0.25rem;
   padding: 0.7rem 0.75rem 0.55rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: rgba(22, 22, 22, 0.04);
 }
 
 .profile-manager-heading {
@@ -970,9 +993,9 @@ body.animations-off .widget-title {
 .profile-action {
   min-height: 34px;
   padding: 0.35rem 0.5rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
   font-size: 0.78rem;
@@ -986,16 +1009,18 @@ body.animations-off .widget-title {
   cursor: pointer;
 }
 
-.profile-action:hover:not(:disabled),
-.profile-action:focus-visible:not(:disabled) {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  box-shadow: 2px 2px 0 var(--aberration-a);
+@media (hover: hover) {
+  .profile-action:hover:not(:disabled),
+  .profile-action:focus-visible:not(:disabled) {
+    background: var(--accent-yellow);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
 }
 
 .profile-action-danger:hover:not(:disabled),
 .profile-action-danger:focus-visible:not(:disabled) {
-  background: var(--aberration-a);
+  background: var(--accent-red);
 }
 
 .profile-action:disabled {
@@ -1017,8 +1042,8 @@ body.animations-off .widget-title {
 .profile-editor input {
   min-width: 0;
   padding: 0.35rem 0.5rem;
-  border: 1.5px solid var(--ink);
-  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid var(--ink);
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
   font-size: 0.78rem;
@@ -1032,8 +1057,10 @@ body.animations-off .widget-title {
   display: block;
   margin-bottom: 0.2rem;
   color: var(--aberration-b);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-align: center;
   text-transform: uppercase;
 }
@@ -1048,21 +1075,23 @@ body.animations-off .widget-title {
 .summary-card {
   min-width: 0;
   padding: 0.9rem 0.55rem;
-  border-top: 2px solid var(--ink);
-  border-bottom: 1px solid rgba(26, 26, 26, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  border: 2.5px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   text-align: center;
+  box-shadow: 4px 4px 0 var(--ink);
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .summary-card:hover,
 .summary-card:focus-within {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  transform: translateY(-3px) scale(1.025) rotate(-0.6deg);
+  background: var(--accent-blue);
+  color: var(--ink);
+  transform: translate(-2px, -2px);
   border-color: var(--ink);
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  box-shadow:
+    6px 6px 0 var(--ink),
+    -3px -3px 0 var(--aberration-a);
 }
 
 .summary-card > span {
@@ -1113,15 +1142,18 @@ body.animations-off .widget-title {
 }
 
 .quick-link {
-  padding: 0.55rem 0.75rem;
-  border: 0;
-  border-bottom: 2px solid var(--ink);
-  border-radius: 8px;
-  background: transparent;
+  padding: 0.65rem 0.75rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 0;
+  background: var(--accent-yellow);
   color: var(--ink);
-  font: inherit;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 3px 2px 0 var(--aberration-b);
+  box-shadow: 4px 4px 0 var(--ink);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1131,26 +1163,20 @@ body.animations-off .widget-title {
 /* Hover = pointer devices only; touch uses the instant :active below. */
 @media (hover: hover) {
   .quick-link:hover {
-    background: var(--aberration-b);
-    color: var(--text-on-dark);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 4px 5px 0 var(--aberration-a);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
   }
 }
 
 .quick-link:focus-visible {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 4px 5px 0 var(--aberration-a);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
-/* Instant tap feedback: color the link while the finger is down. */
+/* Instant tap feedback: press the button into the page. */
 .quick-link:active {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-a);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 .placeholder-text {
@@ -1182,9 +1208,9 @@ body.animations-off .widget-title {
 .form-field select {
   width: 100%;
   padding: 0.55rem 0.65rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
 }
@@ -1192,7 +1218,9 @@ body.animations-off .widget-title {
 .form-field input:focus,
 .form-field select:focus {
   outline: none;
-  box-shadow: 2px 1px 0 var(--aberration-a), -2px -1px 0 var(--aberration-b);
+  box-shadow:
+    3px 2px 0 var(--aberration-a),
+    -3px -2px 0 var(--aberration-b);
 }
 
 .field-description {
@@ -1236,28 +1264,31 @@ body.animations-off .widget-title {
 .mode-option span {
   display: block;
   padding: 0.5rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.35);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   text-align: center;
 }
 
 .mode-option input:checked + span {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  box-shadow: 2px 2px 0 var(--aberration-a);
+  background: var(--accent-blue);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .form-submit {
   width: 100%;
   padding: 0.65rem 0.8rem;
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-  background: var(--aberration-a);
-  color: var(--text-on-dark);
-  font: inherit;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--accent-yellow);
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 3px 3px 0 var(--aberration-b);
+  box-shadow: 4px 4px 0 var(--ink);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
@@ -1267,19 +1298,19 @@ body.animations-off .widget-title {
 /* Hover = pointer devices only; touch uses the instant :active below. */
 @media (hover: hover) {
   .form-submit:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 4px 5px 0 var(--aberration-b);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
   }
 }
 
 .form-submit:focus-visible {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 4px 5px 0 var(--aberration-b);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .form-submit:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--aberration-b);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 .body-results {
@@ -1297,11 +1328,12 @@ body.animations-off .widget-title {
   min-width: 0;
   position: relative;
   padding: 0.65rem 0.4rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   text-align: center;
   cursor: help;
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .weight-summary .result-card {
@@ -1310,10 +1342,12 @@ body.animations-off .widget-title {
 
 .weight-summary .result-card:hover,
 .weight-summary .result-card:focus-within {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  transform: translateY(-3px) scale(1.025) rotate(-0.6deg);
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  background: var(--accent-blue);
+  color: var(--ink);
+  transform: translate(-2px, -2px);
+  box-shadow:
+    5px 5px 0 var(--ink),
+    -3px -3px 0 var(--aberration-a);
 }
 
 .weight-summary .result-card:hover span,
@@ -1460,20 +1494,23 @@ body.animations-off .widget-title {
 .target-card {
   min-width: 0;
   padding: 0.6rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.28);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   text-align: center;
   cursor: help;
+  box-shadow: 3px 3px 0 var(--ink);
   transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .target-card:hover,
 .target-card:focus-visible {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  transform: translateY(-3px) scale(1.025) rotate(-0.6deg);
-  box-shadow: 4px 4px 0 var(--aberration-a);
+  background: var(--accent-blue);
+  color: var(--ink);
+  transform: translate(-2px, -2px);
+  box-shadow:
+    5px 5px 0 var(--ink),
+    -3px -3px 0 var(--aberration-b);
   outline: none;
 }
 
@@ -1579,8 +1616,9 @@ body.animations-off .widget-title {
 
 .chart-range-select {
   padding: 0.35rem 0.5rem;
-  border: 1.5px solid var(--ink);
-  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
   font-size: 0.78rem;
@@ -1623,9 +1661,9 @@ body.animations-off .widget-title {
   position: relative;
   min-height: 180px;
   margin-top: 1.25rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
 }
 
 .trainer-form {
@@ -1684,9 +1722,9 @@ body.animations-off .widget-title {
 
 .trainer-day {
   padding: 0.75rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
 }
 
 /* Shared staggered entrance used across tabs (trainer plan, dashboard
@@ -1735,9 +1773,10 @@ body.animations-off .widget-title {
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 0.7rem;
   padding: 0.6rem;
-  border-left: 3px solid var(--aberration-b);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--accent-blue);
+  border-radius: 0;
+  background: var(--paper);
   transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -1748,9 +1787,11 @@ body.animations-off .widget-title {
 
 .exercise-card:hover,
 .exercise-card:focus-within {
-  background: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px) rotate(-0.25deg);
-  box-shadow: 3px 3px 0 var(--aberration-a);
+  background: var(--paper);
+  transform: translate(-2px, -2px);
+  box-shadow:
+    4px 4px 0 var(--ink),
+    -2px -2px 0 var(--aberration-a);
 }
 
 @keyframes trainer-variable-highlight {
@@ -1788,9 +1829,9 @@ body.animations-off .widget-title {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  border: 1.5px solid var(--ink);
-  background: var(--aberration-a);
-  color: var(--text-on-dark);
+  border: 2px solid var(--ink);
+  background: var(--accent-yellow);
+  color: var(--ink);
   font-family: var(--font-app-title);
   font-size: 0.9rem;
   transform: rotate(-3deg);
@@ -1826,8 +1867,8 @@ body.animations-off .widget-title {
 .exercise-variables input {
   width: 54px;
   padding: 0.25rem 0.3rem;
-  border: 1px solid var(--ink);
-  background: rgba(255, 255, 255, 0.55);
+  border: 2px solid var(--ink);
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
   font-size: 0.75rem;
@@ -1898,8 +1939,8 @@ body.animations-off .widget-title {
 }
 
 .chart-tooltip text {
-  fill: var(--text-on-dark);
-  font-family: var(--font-body);
+  fill: var(--paper);
+  font-family: var(--font-label);
   font-size: 11px;
   text-anchor: middle;
 }
@@ -1950,8 +1991,8 @@ body.animations-off .widget-title {
   width: 11px;
   height: 11px;
   border: 2px solid var(--paper);
-  border-radius: 50%;
-  background: var(--aberration-b);
+  border-radius: 0;
+  background: var(--accent-blue);
   box-shadow: 0 0 0 1px var(--ink);
 }
 
@@ -2033,9 +2074,9 @@ body.animations-off .widget-title {
   font-size: 1.05rem;
   line-height: 1.55;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.35);
-  border: 2px solid var(--ink);
-  border-radius: 8px;
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: 0;
 }
 
 .notes-layout {
@@ -2068,7 +2109,8 @@ body.animations-off .widget-title {
 .note-list li {
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid rgba(26, 26, 26, 0.16);
+  border: 2px solid var(--ink);
+  background: var(--paper);
 }
 
 .note-list-empty {
@@ -2098,7 +2140,8 @@ body.animations-off .widget-title {
 }
 
 .note-list-item.is-active {
-  border-left: 3px solid var(--aberration-b);
+  border-left: 6px solid var(--accent-blue);
+  background: var(--accent-yellow);
   color: var(--ink);
   font-weight: 700;
 }
@@ -2108,12 +2151,12 @@ body.animations-off .widget-title {
    highlights / underlines the row" behaviour. Touch now relies on :active. */
 @media (hover: hover) {
   .note-list-item:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: var(--paper-shadow);
   }
 }
 
 .note-list-item:focus-visible {
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--paper-shadow);
 }
 
 /* Instant touch feedback: tint + slight bold the moment the finger lands. */
@@ -2230,34 +2273,45 @@ body.animations-off .widget-title {
 
 .install-app-button {
   appearance: none;
-  border: 1.5px solid var(--aberration-b);
-  border-radius: 8px;
-  background: rgba(74, 109, 140, 0.12);
-  color: var(--text-muted-on-dark);
-  font: inherit;
-  font-size: 0.85rem;
-  padding: 0.45rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
   cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 /* Hover = pointer devices only; touch uses the instant :active below. */
 @media (hover: hover) {
   .install-app-button:hover {
-    background: var(--aberration-b);
-    color: var(--text-on-dark);
-    box-shadow: 2px 2px 0 var(--aberration-a);
+    background: var(--accent-yellow);
+    color: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ink);
   }
 }
 
-.install-app-button:focus-visible,
+.install-app-button:focus-visible {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
 .install-app-button:active {
-  background: var(--aberration-b);
-  color: var(--text-on-dark);
-  box-shadow: 2px 2px 0 var(--aberration-a);
+  background: var(--accent-yellow);
+  color: var(--ink);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 .install-ios-hint {
@@ -2273,13 +2327,14 @@ body.animations-off .widget-title {
   left: 50%;
   bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
-  background: var(--bg-deep);
-  color: var(--text-on-dark);
-  border: 1.5px solid var(--aberration-b);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 5px 5px 0 var(--ink);
   padding: 0.6rem 1.1rem;
-  font-size: 0.9rem;
+  font-family: var(--font-label);
+  font-size: 0.85rem;
   z-index: 9999;
   opacity: 1;
   transition: opacity 0.4s ease, transform 0.4s ease;
