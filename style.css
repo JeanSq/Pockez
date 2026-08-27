@@ -107,6 +107,13 @@ body {
 }
 
 body.background-paper {
+  --bg: #f7f5f1;
+  --bg-deep: #f1efe8;
+  --paper: #f0ede6;
+  --paper-shadow: #d6d3ca;
+  --ink: #0b0b0d;
+  --ink-muted: #4a4740;
+  --ink-faint: #908c84;
   background-color: var(--bg);
   background-image: radial-gradient(rgba(22, 22, 22, 0.075) 1px, transparent 1.4px);
   background-size: 22px 22px;
@@ -225,6 +232,18 @@ body.true-shadows .install-app-button,
 body.true-shadows .dash-add {
   animation: none !important;
   transition: none !important;
+}
+
+/* In true-shadows dark mode, the default --ink-muted is a dark bone tone
+   that reads poorly against dark-paper; force nav icons to bone-white so
+   inactive tabs stay legible, while the active tab stays accent-filled. */
+body.true-shadows.dark-mode .nav-icon,
+body.background-dark-paper.true-shadows .nav-icon {
+  color: #f0ede6;
+}
+body.true-shadows.dark-mode .nav-btn.is-active .nav-icon,
+body.background-dark-paper.true-shadows .nav-btn.is-active .nav-icon {
+  color: var(--ink);
 }
 
 *,
