@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=12";
-import { translations } from "./i18n.js?v=15";
+import { translations } from "./i18n.js?v=16";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -514,12 +514,13 @@ function setAccent(accentId) {
 
 function setBackground(backgroundId) {
   const normalizedBackground = backgroundId === "desk" ? "paper" : backgroundId;
-  const safeBackground = ["paper", "dark-paper", "graffiti", "blueprint"].includes(normalizedBackground)
+  // "dark-paper" was removed as an option: saved preferences for it fall
+  // through to the "graffiti" default below.
+  const safeBackground = ["paper", "graffiti", "blueprint"].includes(normalizedBackground)
     ? normalizedBackground
     : "graffiti";
   document.body.classList.remove(
     "background-paper",
-    "background-dark-paper",
     "background-graffiti",
     "background-blueprint"
   );
@@ -1758,6 +1759,16 @@ let widgetBeforeSettings = null;
 settingsOpen.addEventListener("click", () => {
   const activePanel = document.querySelector(".widget-panel.is-active");
   widgetBeforeSettings = activePanel ? activePanel.dataset.widget : null;
+
+  // Mark the settings gear as the selected tab while the dialog is open
+  // (same is-active/aria-current scheme as showWidget). The dialog's
+  // "close" handler restores the previous tab's highlight.
+  for (const button of navButtons) {
+    const isActive = button === settingsOpen;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  }
+
   settingsDialog.showModal();
   logUiState("Settings opened");
 });
