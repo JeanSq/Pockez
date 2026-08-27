@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=12";
-import { translations } from "./i18n.js?v=16";
+import { translations } from "./i18n.js?v=17";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -321,6 +321,9 @@ const goalWeightResult = document.getElementById("goal-weight-result");
 const weightGoalLine = document.getElementById("weight-goal-line");
 const weightTrendLine = document.getElementById("weight-trend-line");
 const goalHint = document.getElementById("goal-hint");
+const weightHeroProgress = document.getElementById("weight-hero-progress");
+const weightHeroMeta = document.getElementById("weight-hero-meta");
+const weightHeroFill = document.getElementById("weight-hero-fill");
 const chartRangeSelect = document.getElementById("chart-range-select");
 const chartSummary = document.getElementById("chart-summary");
 const summaryWeight = document.getElementById("summary-weight");
@@ -1130,7 +1133,10 @@ function renderWeightLog() {
   goalWeightInput.value = goalWeight === null ? "" : formatWeight(goalWeight);
   goalWeightResult.textContent = goalWeight === null ? "—" : formatWeight(goalWeight);
   const strings = translations[languageSelect.value] || translations.en;
-  if (goalWeight === null || latestEntry === null) {
+  // Null-ish (not ===null) on purpose: entries[...] is undefined when the
+  // log is empty, and the old check let goal-without-measurements through.
+  let progress = null;
+  if (goalWeight === null || !firstEntry || !latestEntry) {
     goalHint.textContent = strings.goalWeightHint;
   } else {
     const startingWeight = Number(firstEntry.weight);
@@ -1141,12 +1147,25 @@ function renderWeightLog() {
     const traveledDistance = goalWeight < startingWeight
       ? startingWeight - latestWeight
       : latestWeight - startingWeight;
-    const progress = totalDistance === 0
+    progress = totalDistance === 0
       ? 100
       : Math.min(100, Math.max(0, (traveledDistance / totalDistance) * 100));
     goalHint.textContent = progress >= 100
       ? strings.progressGoalReached
       : strings.progressToGoal.replace("{percent}", Math.round(progress));
+  }
+
+  // Goal-progress hero strip: same computation as above, home-tab styling.
+  if (progress === null) {
+    weightHeroProgress.textContent = "—";
+    weightHeroMeta.textContent = strings.weightHeroNoGoal;
+    weightHeroFill.style.width = "0%";
+  } else {
+    weightHeroProgress.textContent = String(Math.round(progress));
+    weightHeroMeta.textContent = progress >= 100
+      ? strings.progressGoalReached
+      : strings.progressToGoal.replace("{percent}", Math.round(progress));
+    weightHeroFill.style.width = `${progress}%`;
   }
   measurementList.innerHTML = "";
 
