@@ -22,9 +22,8 @@
          immediately - no flash of fallback font -->
     <link rel="preload" href="fonts/bangers-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/kalam-400.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link rel="stylesheet" href="style.css?v=19" />
+    <link rel="stylesheet" href="style.css?v=20" />
 
     <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
          during a site rebuild), force the app visible instead of sticking on
@@ -725,16 +724,23 @@
           <div class="weight-chart-wrap">
             <svg class="weight-chart" id="weight-chart" viewBox="0 0 600 240" role="img" aria-labelledby="weight-chart-description">
               <desc id="weight-chart-description">A line chart showing weight measurements over time.</desc>
+              <defs>
+                <pattern id="weight-chart-dots" width="9" height="9" patternUnits="userSpaceOnUse">
+                  <circle cx="2" cy="2" r="1.4" fill="var(--aberration-a)"></circle>
+                </pattern>
+              </defs>
               <g id="weight-chart-grid"></g>
               <g id="weight-chart-y-labels"></g>
-              <polygon id="weight-chart-area" points="" fill="var(--aberration-a)" opacity="0.16"></polygon>
-              <line id="weight-goal-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--aberration-b)" stroke-width="2" stroke-dasharray="6 5"></line>
-              <polyline id="weight-trend-line" points="" fill="none" stroke="var(--aberration-b)" stroke-width="2.5" stroke-dasharray="3 4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <polygon id="weight-chart-area" points="" fill="url(#weight-chart-dots)" opacity="0.5"></polygon>
+              <line id="weight-chart-baseline" x1="0" y1="0" x2="0" y2="0" stroke="var(--ink)" stroke-width="2.5"></line>
+              <line id="weight-goal-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="8 6"></line>
+              <polyline id="weight-trend-line" points="" fill="none" stroke="var(--aberration-b)" stroke-width="3" stroke-dasharray="7 5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <polyline id="weight-chart-line-underlay" points="" fill="none" stroke="var(--ink)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(3 3)" opacity="0.85"></polyline>
               <polyline id="weight-chart-line" points="" fill="none" stroke="var(--aberration-a)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
               <g id="weight-chart-points"></g>
               <g id="weight-chart-x-labels"></g>
               <g id="weight-chart-tooltip" class="chart-tooltip" hidden>
-                <rect id="weight-chart-tooltip-box" rx="3" ry="3"></rect>
+                <rect id="weight-chart-tooltip-box"></rect>
                 <text id="weight-chart-tooltip-text"></text>
               </g>
             </svg>
@@ -813,7 +819,7 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard &mdash; learning project</span> &middot; v21</p>
+        <p><span data-i18n="footerNote">Personal dashboard &mdash; learning project</span> &middot; v22</p>
         <p class="footer-install" hidden>
           <button type="button" class="install-app-button" id="install-app-footer" data-i18n="installApp" hidden>
             Install app
@@ -825,6 +831,6 @@
       </footer>
     </div>
 
-            <script type="module" src="app.js?v=19"></script>
+            <script type="module" src="app.js?v=20"></script>
   </body>
 </html>

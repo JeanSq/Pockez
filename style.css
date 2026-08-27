@@ -18,30 +18,6 @@
   src: url("fonts/caveat.woff2") format("woff2");
 }
 
-@font-face {
-  font-family: "Kalam";
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("fonts/kalam-300.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Kalam";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("fonts/kalam-400.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Kalam";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("fonts/kalam-700.woff2") format("woff2");
-}
-
 /* --- Neo-Brutalist tokens (ref: Variant 1) + Spider-Verse chromatic pair --- */
 :root {
   /* Surfaces: warm paper page, near-white cards, near-black ink */
@@ -82,11 +58,12 @@
   --relief: var(--aberration-a);
   --relief-alt: var(--aberration-b);
 
-  /* Type: Bangers = giant display (TODAY), mono = labels/UI, Kalam = notes */
+  /* Type: Bangers = giant display (TODAY), mono = everything textual,
+     Caveat = small handwritten accents */
   --font-title: "Caveat", cursive;
   --font-app-title: "Bangers", cursive;
   --font-display: var(--font-app-title);
-  --font-body: "Kalam", cursive;
+  --font-body: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
   --font-label: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
 
   --spider-duration: 1.45s;
@@ -1815,22 +1792,21 @@ body.animations-off .widget-title {
   font-weight: 400;
 }
 
-/* Accent tints so the suggested targets pop like the home tiles */
-.target-card-blue {
-  background: var(--accent-blue);
-  color: var(--text-on-dark);
-}
-
-.target-card-blue > span {
-  color: var(--text-on-dark);
-}
-
-.target-card-yellow {
+/* Cards rest neutral so the form stays calm; the accent identity appears
+   on hover/focus - conservative flips blue (the shared .target-card:hover
+   default) and aggressive flips yellow */
+.target-card-yellow:hover,
+.target-card-yellow:focus-visible {
   background: var(--accent-yellow);
-  color: var(--text-on-dark);
 }
 
-.target-card-yellow > span {
+.target-card-yellow:hover span,
+.target-card-yellow:focus-visible span {
+  color: rgba(22, 22, 22, 0.72);
+}
+
+.target-card-yellow:hover strong,
+.target-card-yellow:focus-visible strong {
   color: var(--text-on-dark);
 }
 
@@ -1940,8 +1916,8 @@ body.animations-off .widget-title {
 }
 
 .legend-measurement { background: var(--aberration-a); }
-.legend-trend { border-top: 2px dashed var(--aberration-b); }
-.legend-goal { border-top: 2px dashed var(--ink); }
+.legend-trend { border-top: 3px dashed var(--aberration-b); }
+.legend-goal { border-top: 3px dashed var(--ink); }
 
 .weight-summary {
   display: grid;
@@ -2203,19 +2179,58 @@ body.animations-off .widget-title {
   text-anchor: middle;
 }
 
-.weight-chart circle {
+/* Diamond data points: ink-bordered squares rotated 45deg. The rotation
+   lives in CSS (not attributes) so the pop-in animation can scale around
+   the point's own center. */
+.weight-chart .chart-point {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(45deg) scale(1);
   cursor: pointer;
   outline: none;
-  transition: r 140ms ease;
 }
 
-.weight-chart circle.is-hovered,
-.weight-chart circle:focus-visible {
-  r: 10;
+.weight-chart .chart-point.is-hovered,
+.weight-chart .chart-point:focus-visible {
+  transform: rotate(45deg) scale(1.3);
+}
+
+/* Staggered pop-in for the points (per-point delay via --pop-delay) */
+.chart-pop {
+  animation: chart-pop 260ms cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation-delay: var(--pop-delay, 0ms);
+}
+
+@keyframes chart-pop {
+  from {
+    transform: rotate(45deg) scale(0);
+  }
+  to {
+    transform: rotate(45deg) scale(1);
+  }
+}
+
+/* Line draw-in: the polylines carry pathLength="1", so the stepped dash
+   reveal reads like an ink pen stroke. Restarts on every chart re-render. */
+.chart-draw {
+  animation: chart-draw 800ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@keyframes chart-draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
 }
 
 .chart-tooltip rect {
   fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: 1.5;
   stroke: var(--aberration-a);
   stroke-width: 2;
 }

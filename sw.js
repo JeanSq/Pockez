@@ -6,12 +6,12 @@
       like storage.js / i18n.js changed)
    A changed URL can never be served from a stale cache - not the phone's
    HTTP cache, not a service worker, not the GitHub Pages CDN. */
-const CACHE_VERSION = "pockez-v22";
+const CACHE_VERSION = "pockez-v23";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=19",
-  "./app.js?v=19",
+  "./style.css?v=20",
+  "./app.js?v=20",
   "./storage.js?v=12",
   "./i18n.js?v=17",
   "./manifest.webmanifest",
@@ -20,9 +20,6 @@ const APP_SHELL = [
   "./icons/icon-512.png",
   "./fonts/bangers-400.woff2",
   "./fonts/caveat.woff2",
-  "./fonts/kalam-300.woff2",
-  "./fonts/kalam-400.woff2",
-  "./fonts/kalam-700.woff2",
 ];
 
 self.addEventListener("install", (event) => {

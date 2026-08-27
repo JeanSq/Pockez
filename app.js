@@ -305,6 +305,8 @@ const weightChart = document.getElementById("weight-chart");
 const weightChartGrid = document.getElementById("weight-chart-grid");
 const weightChartYLabels = document.getElementById("weight-chart-y-labels");
 const weightChartArea = document.getElementById("weight-chart-area");
+const weightChartLineUnderlay = document.getElementById("weight-chart-line-underlay");
+const weightChartBaseline = document.getElementById("weight-chart-baseline");
 const weightChartLine = document.getElementById("weight-chart-line");
 const weightChartPoints = document.getElementById("weight-chart-points");
 const weightChartXLabels = document.getElementById("weight-chart-x-labels");
@@ -1033,6 +1035,8 @@ function renderWeightChart(entries) {
     "points",
     `${linePoints.join(" ")} ${chartWidth - padding.right},${chartHeight - padding.bottom} ${padding.left},${chartHeight - padding.bottom}`
   );
+  // Hard offset ink underlay: the chromatic-relief trick from the titles
+  weightChartLineUnderlay.setAttribute("points", linePoints.join(" "));
   weightChartGrid.innerHTML = "";
   weightChartYLabels.innerHTML = "";
   weightChartPoints.innerHTML = "";
@@ -1061,8 +1065,7 @@ function renderWeightChart(entries) {
     line.setAttribute("x2", chartWidth - padding.right);
     line.setAttribute("y1", y);
     line.setAttribute("y2", y);
-    line.setAttribute("stroke", "rgba(26, 26, 26, 0.16)");
-    line.setAttribute("stroke-dasharray", "4 5");
+    line.setAttribute("stroke", "rgba(26, 26, 26, 0.14)");
     weightChartGrid.append(line);
 
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -1074,16 +1077,30 @@ function renderWeightChart(entries) {
     weightChartYLabels.append(label);
   }
 
+  // Heavy ink baseline along the bottom of the plot (brutalist print rule)
+  weightChartBaseline.setAttribute("x1", padding.left);
+  weightChartBaseline.setAttribute("x2", chartWidth - padding.right);
+  weightChartBaseline.setAttribute("y1", chartHeight - padding.bottom);
+  weightChartBaseline.setAttribute("y2", chartHeight - padding.bottom);
+
   sortedEntries.forEach((entry, index) => {
     const x = padding.left + (index / Math.max(sortedEntries.length - 1, 1)) * plotWidth;
     const y = padding.top + ((maximum - Number(entry.weight)) / range) * plotHeight;
-    const point = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const point = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    // cx/cy ride along as data for the tooltip math; x/y place the diamond
+    // (the 45deg rotation is applied in CSS so pop-in can scale around it)
     point.setAttribute("cx", x);
     point.setAttribute("cy", y);
-    point.setAttribute("r", "6");
+    const pointSize = index === sortedEntries.length - 1 ? 13 : 11;
+    point.setAttribute("x", x - pointSize / 2);
+    point.setAttribute("y", y - pointSize / 2);
+    point.setAttribute("width", pointSize);
+    point.setAttribute("height", pointSize);
     point.setAttribute("fill", "var(--aberration-b)");
-    point.setAttribute("stroke", "var(--paper)");
-    point.setAttribute("stroke-width", "2");
+    point.setAttribute("stroke", "var(--ink)");
+    point.setAttribute("stroke-width", "2.5");
+    point.setAttribute("class", "chart-point chart-pop");
+    point.style.setProperty("--pop-delay", `${index * 70}ms`);
     point.setAttribute("tabindex", "0");
     point.setAttribute("aria-label", `${formatMeasurementDate(entry.date)}: ${formatWeight(entry.weight)} kg`);
     const showPointTooltip = (eventName) => {
@@ -1118,6 +1135,17 @@ function renderWeightChart(entries) {
     );
     weightChartXLabels.append(dateLabel);
   });
+
+  // One-shot draw-in: the yellow line and its ink underlay reveal together
+  // like a pen stroke (class re-added per render to restart the animation)
+  for (const line of [weightChartLine, weightChartLineUnderlay]) {
+    line.classList.remove("chart-draw");
+  }
+  void weightChart.getBoundingClientRect();
+  for (const line of [weightChartLineUnderlay, weightChartLine]) {
+    line.setAttribute("pathLength", "1");
+    line.classList.add("chart-draw");
+  }
 }
 
 function renderWeightLog() {
