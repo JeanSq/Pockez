@@ -883,7 +883,7 @@ body.dark-mode .settings-dialog::backdrop {
 }
 
 body.background-paper .settings-btn,
-body.background-paper .nav-btn {
+body.background-paper .nav-btn:not(.is-active) {
   color: var(--ink);
 }
 
@@ -950,7 +950,8 @@ body.background-paper .nav-btn {
   }
 }
 
-.nav-btn.is-active .nav-icon {
+.nav-btn.is-active .nav-icon,
+.nav-btn.is-active .nav-label {
   animation: spiderverse-shift var(--spider-duration) steps(var(--spider-steps))
     infinite;
 }
@@ -2570,7 +2571,7 @@ body.animations-off .widget-title {
   margin-top: auto;
   padding-top: 1rem;
   text-align: center;
-  color: var(--text-muted-on-dark);
+  color: var(--ink-muted);
   font-size: 0.82rem;
 }
 
@@ -2625,7 +2626,7 @@ body.animations-off .widget-title {
 .install-ios-hint {
   margin: 0.6rem auto 0;
   max-width: 26rem;
-  color: var(--text-muted-on-dark);
+  color: var(--ink-muted);
   font-size: 0.78rem;
   line-height: 1.3;
 }
