@@ -269,6 +269,15 @@ body {
   overflow-anchor: none;
 }
 
+/* App shell is fixed-fit on phones: no pinch or double-tap zoom. On iOS the
+   viewport meta's user-scalable=no already locks zoom; this touch-action
+   covers Android Chrome, which deliberately ignores user-scalable=no and
+   disables double-tap/quick-zoom here on the whole surface. */
+html,
+body {
+  touch-action: manipulation;
+}
+
 /* --- Header --- */
 .header {
   display: contents;
