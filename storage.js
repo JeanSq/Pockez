@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
   profiles: `${STORAGE_PREFIX}profiles`,
   activeProfile: `${STORAGE_PREFIX}active-profile`,
   trainerPlan: `${STORAGE_PREFIX}trainer-plan`,
+  workouts: `${STORAGE_PREFIX}workouts`,
 };
 
 // Migrate legacy keys (copy only if new key not set)

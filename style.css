@@ -1981,6 +1981,12 @@ body.animations-off .widget-title {
   white-space: nowrap;
 }
 
+/* The hint always sits on its own full-width row below the button */
+.trainer-custom-form .goal-hint {
+  grid-column: 1 / -1;
+  margin-top: 0.75rem;
+}
+
 .trainer-plan-heading {
   display: flex;
   align-items: end;
@@ -2907,6 +2913,315 @@ body.animations-off .widget-title {
   display: none;
 }
 
+/* --- Workout log (transformed from the Notes tab) --- */
+.workout-layout {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.32fr) 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.workout-sidebar {
+  min-width: 0;
+}
+
+.workout-new-button {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.workout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+}
+
+.workout-list li {
+  display: flex;
+  align-items: stretch;
+}
+
+.workout-list-empty {
+  padding: 0.75rem 0.35rem;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+
+.workout-list-item {
+  min-width: 0;
+  flex: 1;
+  padding: 0.5rem 0.55rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--relief);
+}
+
+.workout-list-item.is-active {
+  border-left: 6px solid var(--accent-blue);
+  background: var(--accent-yellow);
+}
+
+@media (hover: hover) {
+  .workout-list-item:hover {
+    background: var(--paper-shadow);
+  }
+}
+
+.workout-list-item:focus-visible {
+  outline: 2px dashed var(--aberration-b);
+  outline-offset: 2px;
+}
+
+.workout-list-item:active {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.workout-list-delete {
+  flex: 0 0 auto;
+  padding: 0 0.45rem;
+  border: 2px solid var(--ink);
+  border-left: none;
+  background: var(--paper);
+  color: var(--ink-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.workout-list-delete:hover,
+.workout-list-delete:focus-visible {
+  color: var(--aberration-a);
+}
+
+.workout-editor {
+  min-width: 0;
+}
+
+.workout-editor[hidden] {
+  display: none;
+}
+
+/* With the editor away, the session list uses the full row */
+.workout-layout.editor-hidden {
+  grid-template-columns: 1fr;
+}
+
+.workout-date-label {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.workout-date-input {
+  width: 100%;
+  max-width: 11rem;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.workout-summary-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.7rem 0.8rem;
+  border: 2.5px solid var(--ink);
+  background: var(--accent-yellow);
+  box-shadow: 4px 4px 0 var(--relief);
+  margin-bottom: 0.7rem;
+}
+
+.workout-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workout-summary-value {
+  font-size: 1.05rem;
+}
+
+.workout-celebration {
+  padding: 0.65rem 0.75rem;
+  border: 2.5px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--relief-alt);
+  margin-bottom: 0.7rem;
+}
+
+.workout-celebration[hidden] {
+  display: none;
+}
+
+.workout-celebration-text {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.workout-exercises {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.workout-add-exercise-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 0.2rem;
+}
+
+.workout-add-exercise-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.workout-add-exercise-name:focus {
+  outline: none;
+  box-shadow: 3px 2px 0 var(--relief), -3px -2px 0 var(--relief-alt);
+}
+
+.workout-exercise-card {
+  padding: 0.6rem 0.65rem;
+  border: 2.5px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--relief);
+}
+
+.workout-exercise-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.workout-exercise-title {
+  min-width: 0;
+  font-family: var(--font-label);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.workout-pr {
+  display: block;
+  margin: -0.2rem 0 0.45rem;
+  color: var(--ink-muted);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.workout-set-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.workout-set-label {
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.workout-set-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.workout-set-input:focus {
+  outline: none;
+  border-color: var(--aberration-b);
+}
+
+.workout-add-set-btn {
+  margin-top: 0.2rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+.workout-feelings-label {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.workout-feelings-area {
+  width: 100%;
+  min-height: 90px;
+  padding: 0.6rem 0.65rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.workout-feelings-area:focus {
+  outline: none;
+  border-color: var(--aberration-b);
+}
+
+.workout-feelings-area::placeholder {
+  color: var(--ink-faint);
+}
+
+body.dark-mode .workout-date-input,
+body.dark-mode .workout-add-exercise-name,
+body.dark-mode .workout-set-input,
+body.dark-mode .workout-feelings-area,
+body.dark-mode .workout-list-item,
+body.dark-mode .workout-exercise-card {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+
+@media (max-width: 520px) {
+  .workout-layout,
+  .workout-layout.editor-hidden {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 520px) {
   /* iOS Safari auto-zooms the whole page when focusing any control whose
      font-size is under 16px - keep every control at 1rem on phones */
@@ -3082,7 +3397,12 @@ body.animations-off .widget-title {
     grid-template-columns: 1fr;
   }
 
+  .trainer-custom-form .goal-hint {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
+  }
+
   .goal-hint {
-    margin-top: -0.35rem;
+    margin-top: 0.25rem;
   }
 }

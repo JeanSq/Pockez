@@ -2,8 +2,8 @@
  * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
-import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=13";
-import { translations } from "./i18n.js?v=18";
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
+import { translations } from "./i18n.js?v=20";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -239,13 +239,21 @@ if (titleEl) {
 }
 
 const languageSelect = document.getElementById("language-select");
-const notesInput = document.getElementById("notes-input");
-const noteTitleInput = document.getElementById("note-title-input");
-const noteList = document.getElementById("note-list");
-const newNoteButton = document.getElementById("note-new");
+const workoutList = document.getElementById("workout-list");
+const workoutEditor = document.querySelector(".workout-editor");
+const workoutLayout = document.querySelector(".workout-layout");
+const workoutExercisesContainer = document.getElementById("workout-exercises-container");
+const workoutDateInput = document.getElementById("workout-date-input");
+const workoutTonnageValue = document.getElementById("workout-tonnage-value");
+const workoutTotalRepsValue = document.getElementById("workout-total-reps-value");
+const workoutCelebration = document.getElementById("workout-celebration");
+const workoutCelebrationText = document.getElementById("workout-celebration-text");
+const workoutAddExerciseName = document.getElementById("workout-add-exercise-name");
+const workoutAddExerciseSubmit = document.getElementById("workout-add-exercise-submit");
+const workoutFeelingsInput = document.getElementById("workout-feelings-input");
+const workoutSaveButton = document.getElementById("workout-save-btn");
+const newWorkoutButton = document.getElementById("workout-new");
 const saveStatus = document.getElementById("save-status");
-const noteEditor = document.querySelector(".note-editor");
-const notesLayout = document.querySelector(".notes-layout");
 const navButtons = document.querySelectorAll(".nav-btn");
 const widgetPanels = document.querySelectorAll(".widget-panel");
 const settingsDialog = document.getElementById("settings-dialog");
@@ -338,7 +346,7 @@ const dashDateEl = document.getElementById("dash-date");
 const dashProgressEl = document.getElementById("dash-progress");
 const dashProgressFill = document.getElementById("dash-progress-fill");
 const dashProgressMeta = document.getElementById("dash-progress-meta");
-const dashNotesCount = document.getElementById("dash-notes-count");
+// dash-notes-count removed (replaced by workout session count on dashboard)
 let editingMeasurementId = null;
 let bodyStatsCalculated = false;
 const trainerForm = document.getElementById("trainer-form");
@@ -468,7 +476,7 @@ function applyTranslations(lang) {
       : strings.trueShadowsOff;
   }
   renderWeightLog();
-  renderNotes();
+  renderWorkouts();
   renderProfiles();
   loadTrainerPlan();
   renderDashDate();
@@ -1988,14 +1996,13 @@ const dashAddButton = document.getElementById("dash-add");
 if (dashAddButton) {
   dashAddButton.addEventListener("click", () => {
     showWidget("notes");
-    createNote();
+    createWorkout();
   });
 }
 
-// --- Notes save / load ---
+// --- Workout log save / load ---
 function showSaveStatus(state) {
-  const lang = languageSelect.value;
-  const strings = translations[lang] || translations.en;
+  const strings = translations[languageSelect.value] || translations.en;
 
   saveStatus.classList.remove("is-saving", "is-error");
 
@@ -2010,37 +2017,24 @@ function showSaveStatus(state) {
   }
 }
 
-function getNotes() {
-  const savedNotes = loadPreference(STORAGE_KEYS.notesCollection, null);
-  if (savedNotes) {
+function getWorkouts() {
+  const saved = loadPreference(STORAGE_KEYS.workouts, null);
+  if (saved) {
     try {
-      const notes = JSON.parse(savedNotes);
-      if (Array.isArray(notes)) return notes;
+      const workouts = JSON.parse(saved);
+      if (Array.isArray(workouts)) return workouts;
     } catch (error) {
-      console.warn("Could not load notes collection:", error);
+      console.warn("Could not load workouts:", error);
     }
   }
-
-  const oldNote = loadPreference(STORAGE_KEYS.notes, "");
-  if (oldNote) {
-    const migratedNote = [{
-      id: crypto.randomUUID(),
-      title: "",
-      content: oldNote,
-      updatedAt: new Date().toISOString(),
-    }];
-    savePreference(STORAGE_KEYS.notesCollection, JSON.stringify(migratedNote));
-    return migratedNote;
-  }
-
   return [];
 }
 
-function saveNotes(notes) {
+function saveWorkouts(workouts) {
   showSaveStatus("saving");
 
   try {
-    savePreference(STORAGE_KEYS.notesCollection, JSON.stringify(notes));
+    savePreference(STORAGE_KEYS.workouts, JSON.stringify(workouts));
     showSaveStatus("saved");
   } catch (error) {
     console.error("Save failed:", error);
@@ -2048,121 +2042,86 @@ function saveNotes(notes) {
   }
 }
 
-// The note currently open in the editor. In-memory only: a fresh visit
-// starts with the editor hidden until the user opens or creates a note.
-let activeNoteId = null;
+// The workout currently open in the editor. In-memory only: a fresh visit
+// starts with the editor hidden until the user opens or creates a workout.
+let activeWorkoutId = null;
+
+// In-progress edits for the active workout (avoids mutating stored data)
+let unsavedExercises = [];
+let unsavedNotes = "";
+
+const EXERCISE_LIBRARY = Object.entries(trainerExercises).map(([key, def]) => ({
+  id: key,
+  name: def.en,
+  muscle: def.muscle,
+}));
 
 function setEditorVisible(visible) {
-  if (noteEditor) noteEditor.hidden = !visible;
+  if (workoutEditor) workoutEditor.hidden = !visible;
   if (saveStatus) saveStatus.hidden = !visible;
-  if (notesLayout) notesLayout.classList.toggle("editor-hidden", !visible);
+  if (workoutLayout) workoutLayout.classList.toggle("editor-hidden", !visible);
 }
 
-function renderNoteList(notes, activeNoteId) {
-  const strings = translations[languageSelect.value] || translations.en;
-  noteList.innerHTML = "";
-
-  if (notes.length === 0) {
-    const emptyItem = document.createElement("li");
-    emptyItem.className = "note-list-empty";
-    emptyItem.textContent = strings.noNotes;
-    noteList.append(emptyItem);
-    return;
+function computeWorkoutTonnage(exercises) {
+  let totalKg = 0;
+  let totalReps = 0;
+  for (const exercise of exercises) {
+    for (const set of exercise.sets) {
+      const reps = Number(set.reps) || 0;
+      const kgs = Number(set.kgs) || 0;
+      totalKg += reps * kgs;
+      totalReps += reps;
+    }
   }
-
-  [...notes].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).forEach((note) => {
-    const item = document.createElement("li");
-    const selectButton = document.createElement("button");
-    selectButton.type = "button";
-    selectButton.className = "note-list-item";
-    selectButton.classList.toggle("is-active", note.id === activeNoteId);
-    selectButton.textContent = note.title.trim() || strings.untitledNote;
-    selectButton.addEventListener("click", () => selectNote(note.id));
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "note-delete";
-    deleteButton.textContent = "×";
-    deleteButton.title = strings.deleteNote;
-    deleteButton.setAttribute("aria-label", `${strings.deleteNote}: ${selectButton.textContent}`);
-    deleteButton.addEventListener("click", () => deleteNote(note.id));
-
-    item.append(selectButton, deleteButton);
-    noteList.append(item);
-  });
+  return { totalKg, totalReps };
 }
 
-function renderNotes() {
-  const notes = getNotes();
-  const activeNote = notes.find((note) => note.id === activeNoteId);
-
-  // Home "Notes" row counter
-  if (dashNotesCount) dashNotesCount.textContent = String(notes.length);
-
-  renderNoteList(notes, activeNoteId);
-  setEditorVisible(Boolean(activeNote));
-  noteTitleInput.value = activeNote?.title || "";
-  notesInput.value = activeNote?.content || "";
-}
-
-function selectNote(noteId) {
-  activeNoteId = noteId;
-  renderNotes();
-  showSaveStatus("saved");
-}
-
-function createNote() {
-  const notes = getNotes();
-  const newNote = {
-    id: crypto.randomUUID(),
-    title: "",
-    content: "",
-    updatedAt: new Date().toISOString(),
-  };
-  notes.push(newNote);
-  saveNotes(notes);
-  activeNoteId = newNote.id;
-  renderNotes();
-  noteTitleInput.focus();
-}
-
-function deleteNote(noteId) {
-  const notes = getNotes().filter((note) => note.id !== noteId);
-  if (activeNoteId === noteId) {
-    // Closing the editor beats auto-opening a different note
-    activeNoteId = null;
+function getAllTimePRs() {
+  const workouts = getWorkouts();
+  const prs = {};
+  for (const workout of workouts) {
+    for (const exercise of workout.exercises) {
+      const maxKg = Math.max(
+        0,
+        ...exercise.sets.map((s) => Number(s.kgs) || 0)
+      );
+      const existing = prs[exercise.name];
+      if (!existing || maxKg > existing.kg) {
+        prs[exercise.name] = { kg: maxKg, date: workout.date };
+      }
+    }
   }
-  saveNotes(notes);
-  renderNotes();
+  return prs;
 }
 
-function saveActiveNote() {
-  if (!activeNoteId) return; // editor is hidden - nothing to save
-
-  const notes = getNotes();
-  const activeNote = notes.find((note) => note.id === activeNoteId);
-  if (!activeNote) return;
-
-  activeNote.title = noteTitleInput.value;
-  activeNote.content = notesInput.value;
-  activeNote.updatedAt = new Date().toISOString();
-  saveNotes(notes);
-  renderNoteList(notes, activeNoteId);
-}
-
-let saveTimer = null;
-
-function scheduleSave() {
-  showSaveStatus("saving");
-
-  if (saveTimer) {
-    clearTimeout(saveTimer);
+function getExercisePR(name, currentSets) {
+  const prs = getAllTimePRs();
+  const saved = prs[name];
+  if (!saved) return null;
+  const currentMax = Math.max(0, ...currentSets.map((s) => Number(s.kgs) || 0));
+  if (currentMax > saved.kg) {
+    return { kg: currentMax, isNew: true };
   }
-
-  saveTimer = setTimeout(() => {
-    saveActiveNote();
-  }, 400);
+  return { kg: saved.kg, isNew: false, date: saved.date };
 }
+
+const CELEBRATION_TIERS = [
+  { max: 500, key: "celebrationWashingMachine" },
+  { max: 1000, key: "celebrationPanda" },
+  { max: 2000, key: "celebrationGrandPiano" },
+  { max: 6000, key: "celebrationElephant" },
+  { max: 15000, key: "celebrationBlueWhale" },
+  { max: Infinity, key: "celebrationTyrannosaurus" },
+];
+
+function getCelebration(totalKg) {
+  for (const tier of CELEBRATION_TIERS) {
+    if (totalKg <= tier.max) return tier.key;
+  }
+  return CELEBRATION_TIERS[CELEBRATION_TIERS.length - 1].key;
+}
+
+
 
 languageSelect.addEventListener("change", () => {
   setLanguage(languageSelect.value);
@@ -2243,9 +2202,10 @@ profileNameInput.addEventListener("keydown", (event) => {
   if (event.key === "Escape") cancelProfileEdit();
 });
 
-notesInput.addEventListener("input", scheduleSave);
-noteTitleInput.addEventListener("input", scheduleSave);
-newNoteButton.addEventListener("click", createNote);
+if (newWorkoutButton) newWorkoutButton.addEventListener("click", createWorkout);
+if (workoutSaveButton) workoutSaveButton.addEventListener("click", saveActiveWorkout);
+if (workoutDateInput) workoutDateInput.addEventListener("change", scheduleWorkoutSave);
+if (workoutFeelingsInput) workoutFeelingsInput.addEventListener("input", scheduleWorkoutSave);
 
 bodyForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -2530,7 +2490,7 @@ const bootSteps = [
   loadLanguage,
   loadSettings,
   renderProfiles,
-  renderNotes,
+  renderWorkouts,
   loadBodyStats,
   setTodayAsMeasurementDate,
   renderWeightLog,
@@ -2599,3 +2559,258 @@ function startRevealSequence() {
 }
 
 startRevealSequence();
+
+// --- Workout log render / edit ---
+let saveTimer = null;
+function scheduleWorkoutSave() {
+  showSaveStatus("saving");
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveActiveWorkout(), 400);
+}
+
+function renderWorkoutList() {
+  const workouts = getWorkouts();
+  const strings = translations[languageSelect.value] || translations.en;
+  if (!workoutList) return;
+  workoutList.innerHTML = "";
+
+  if (workouts.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "workout-list-empty";
+    empty.textContent = strings.logNoSessions || "No sessions yet";
+    workoutList.append(empty);
+    return;
+  }
+
+  [...workouts].sort((a, b) => b.date.localeCompare(a.date)).forEach((w) => {
+    const item = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "workout-list-item";
+    btn.classList.toggle("is-active", w.id === activeWorkoutId);
+    const tonnage = computeWorkoutTonnage(w.exercises);
+    btn.textContent = w.date + "  —  " + tonnage.totalKg.toLocaleString() + " kg";
+    btn.addEventListener("click", () => selectWorkout(w.id));
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "workout-list-delete";
+    del.textContent = "×";
+    del.title = strings.deleteNote || "Delete";
+    del.addEventListener("click", (e) => { e.stopPropagation(); deleteWorkout(w.id); });
+
+    item.append(btn, del);
+    workoutList.append(item);
+  });
+}
+
+function renderWorkoutExercises() {
+  const strings = translations[languageSelect.value] || translations.en;
+  const prs = getAllTimePRs();
+  workoutExercisesContainer.innerHTML = "";
+
+  unsavedExercises.forEach((ex, exIdx) => {
+    const card = document.createElement("article");
+    card.className = "exercise-card";
+
+    const header = document.createElement("div");
+    header.className = "workout-exercise-header";
+    const nameEl = document.createElement("strong");
+    nameEl.className = "workout-exercise-title";
+    nameEl.textContent = ex.name;
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "exercise-remove";
+    removeBtn.textContent = "×";
+    removeBtn.setAttribute("aria-label", (strings.logRemoveExercise || "Remove exercise") + ": " + ex.name);
+    removeBtn.addEventListener("click", () => removeWorkoutExercise(exIdx));
+    header.append(nameEl, removeBtn);
+    card.append(header);
+
+    const pr = prs[ex.name];
+    if (pr && pr.kg > 0) {
+      const prEl = document.createElement("small");
+      prEl.className = "workout-pr";
+      prEl.textContent = "PR: " + pr.kg + " kg";
+      card.append(prEl);
+    }
+
+    ex.sets.forEach((set, setIdx) => {
+      const row = document.createElement("div");
+      row.className = "workout-set-row";
+      const label = document.createElement("span");
+      label.className = "workout-set-label";
+      label.textContent = (strings.setsLabel || "Set") + " " + (setIdx + 1);
+
+      const repsInput = document.createElement("input");
+      repsInput.type = "number";
+      repsInput.min = "0";
+      repsInput.step = "1";
+      repsInput.className = "workout-set-input";
+      repsInput.value = set.reps;
+      repsInput.placeholder = strings.logRepsLabel || "reps";
+      repsInput.dataset.exerciseIndex = exIdx;
+      repsInput.dataset.setIndex = setIdx;
+      repsInput.dataset.field = "reps";
+      repsInput.addEventListener("input", onWorkoutSetChange);
+
+      const kgsInput = document.createElement("input");
+      kgsInput.type = "number";
+      kgsInput.min = "0";
+      kgsInput.step = "0.5";
+      kgsInput.className = "workout-set-input";
+      kgsInput.value = set.kgs;
+      kgsInput.placeholder = strings.logKgsLabel || "kg";
+      kgsInput.dataset.exerciseIndex = exIdx;
+      kgsInput.dataset.setIndex = setIdx;
+      kgsInput.dataset.field = "kgs";
+      kgsInput.addEventListener("input", onWorkoutSetChange);
+
+      row.append(label, repsInput, kgsInput);
+      card.append(row);
+    });
+
+    const addSetBtn = document.createElement("button");
+    addSetBtn.type = "button";
+    addSetBtn.className = "workout-add-set-btn form-submit";
+    addSetBtn.textContent = "+ " + (strings.logAddSet || "Set");
+    addSetBtn.dataset.exerciseIndex = exIdx;
+    addSetBtn.addEventListener("click", () => addWorkoutSet(exIdx));
+    card.append(addSetBtn);
+
+    workoutExercisesContainer.append(card);
+  });
+
+  const addRow = document.createElement("div");
+  addRow.className = "workout-add-exercise-row";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "workout-add-exercise-name";
+  nameInput.id = "workout-add-exercise-name";
+  nameInput.placeholder = strings.logAddCustomExercise || "Add custom exercise...";
+  nameInput.setAttribute("list", "workout-exercise-suggestions");
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "workout-add-exercise-submit form-submit";
+  addBtn.id = "workout-add-exercise-submit";
+  addBtn.textContent = strings.logAddExercise || "Add exercise";
+  addBtn.addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    if (!name) return;
+    addWorkoutExercise(name);
+    nameInput.value = "";
+  });
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); addBtn.click(); }
+  });
+  addRow.append(nameInput, addBtn);
+  workoutExercisesContainer.append(addRow);
+
+  updateWorkoutSummary();
+}
+
+function onWorkoutSetChange(e) {
+  const exIdx = Number(e.target.dataset.exerciseIndex);
+  const setIdx = Number(e.target.dataset.setIndex);
+  const field = e.target.dataset.field;
+  if (!unsavedExercises[exIdx] || !unsavedExercises[exIdx].sets[setIdx]) return;
+  unsavedExercises[exIdx].sets[setIdx][field] = e.target.value;
+  updateWorkoutSummary();
+  scheduleWorkoutSave();
+}
+
+function updateWorkoutSummary() {
+  const strings = translations[languageSelect.value] || translations.en;
+  const { totalKg, totalReps } = computeWorkoutTonnage(unsavedExercises);
+  if (workoutTonnageValue) workoutTonnageValue.textContent = totalKg.toLocaleString() + " " + (strings.weightUnit || "kg");
+  if (workoutTotalRepsValue) workoutTotalRepsValue.textContent = String(totalReps);
+
+  if (workoutCelebration && workoutCelebrationText) {
+    if (totalKg > 0) {
+      const compKey = getCelebration(totalKg);
+      const comp = strings[compKey] || "";
+      const base = strings.celebrationDefault || "You moved {total} kg today.";
+      const msg = base.replace("{total}", totalKg.toLocaleString()) + " " + comp;
+      workoutCelebrationText.textContent = msg;
+      workoutCelebration.hidden = false;
+    } else {
+      workoutCelebration.hidden = true;
+    }
+  }
+}
+
+function addWorkoutExercise(name) {
+  unsavedExercises.push({ name, sets: [{ reps: "", kgs: "" }] });
+  renderWorkoutExercises();
+  scheduleWorkoutSave();
+}
+
+function removeWorkoutExercise(idx) {
+  unsavedExercises.splice(idx, 1);
+  renderWorkoutExercises();
+  scheduleWorkoutSave();
+}
+
+function addWorkoutSet(exIdx) {
+  if (!unsavedExercises[exIdx]) return;
+  const last = unsavedExercises[exIdx].sets[unsavedExercises[exIdx].sets.length - 1];
+  unsavedExercises[exIdx].sets.push(last ? { reps: last.reps, kgs: last.kgs } : { reps: "", kgs: "" });
+  renderWorkoutExercises();
+  scheduleWorkoutSave();
+}
+
+function saveActiveWorkout() {
+  if (!activeWorkoutId) return;
+  const workouts = getWorkouts();
+  const w = workouts.find((x) => x.id === activeWorkoutId);
+  if (!w) return;
+  w.exercises = JSON.parse(JSON.stringify(unsavedExercises));
+  w.notes = workoutFeelingsInput ? workoutFeelingsInput.value : "";
+  w.date = workoutDateInput && workoutDateInput.value ? workoutDateInput.value : w.date;
+  saveWorkouts(workouts);
+  renderWorkoutList();
+}
+
+function selectWorkout(id) {
+  activeWorkoutId = id;
+  renderWorkoutList();
+  renderWorkout();
+  showSaveStatus("saved");
+}
+
+function renderWorkout() {
+  const workouts = getWorkouts();
+  const w = workouts.find((x) => x.id === activeWorkoutId);
+  if (!w) { setEditorVisible(false); return; }
+  setEditorVisible(true);
+  if (workoutDateInput) workoutDateInput.value = w.date;
+  if (workoutFeelingsInput) workoutFeelingsInput.value = w.notes || "";
+  unsavedExercises = JSON.parse(JSON.stringify(w.exercises));
+  unsavedNotes = w.notes || "";
+  renderWorkoutExercises();
+}
+
+function createWorkout() {
+  const workouts = getWorkouts();
+  const w = { id: crypto.randomUUID(), date: new Date().toISOString().slice(0, 10), notes: "", exercises: [] };
+  workouts.push(w);
+  saveWorkouts(workouts);
+  activeWorkoutId = w.id;
+  renderWorkoutList();
+  renderWorkout();
+  showSaveStatus("saved");
+}
+
+function deleteWorkout(id) {
+  const strings = translations[languageSelect.value] || translations.en;
+  if (!window.confirm(strings.deleteNote || "Delete?")) return;
+  const workouts = getWorkouts().filter((w) => w.id !== id);
+  if (activeWorkoutId === id) activeWorkoutId = null;
+  saveWorkouts(workouts);
+  renderWorkouts();
+}
+
+function renderWorkouts() {
+  renderWorkoutList();
+  renderWorkout();
+}

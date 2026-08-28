@@ -5,6 +5,7 @@ A lightweight, offline-friendly personal dashboard for notes, body-stat estimate
 ## Features
 
 - Multi-note editor with automatic local saving
+- Training log: record sessions (exercise, sets × reps × kg) with automatic session tonnage, all-time PR tracking, and fun celebration messages
 - English and Spanish interface
 - Dark mode, accent themes, and background styles
 - BMI, BMR, maintenance, and suggested calorie estimates
