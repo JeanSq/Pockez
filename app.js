@@ -916,6 +916,19 @@ function loadBodyStatsProfile() {
   }
 }
 
+// Strip the hover/ping state from every chart point except `exceptPoint`. Used
+// so only one diamond pings at a time: whichever point the user just hovered,
+// tapped, or keyboard-focused wins, and the others drop their radar ring at
+// once instead of lingering on their 2s auto-hide timer.
+function clearWeightPointHover(exceptPoint) {
+  for (const child of weightChartPoints.children) {
+    if (child === exceptPoint) continue;
+    if (child.classList.contains("is-hovered")) {
+      child.classList.remove("is-hovered");
+    }
+  }
+}
+
 function showWeightTooltip(point, entry, chartWidth, chartHeight) {
   logWeightTooltip("show:start", {
     date: entry.date,
@@ -924,6 +937,11 @@ function showWeightTooltip(point, entry, chartWidth, chartHeight) {
     pointTitle: point.querySelector("title")?.textContent || null,
     pointAriaLabel: point.getAttribute("aria-label"),
   });
+  // Exclusive radar ping: only the freshly hovered/tapped/focused diamond may
+  // ping. If the previous point's 2s hide timer is still pending its
+  // `is-hovered` class would overlap with this one - strip it from every other
+  // point the instant a new point becomes active, before it pings.
+  clearWeightPointHover(point);
   const tooltipText = `${formatMeasurementDate(entry.date)} · ${(translations[languageSelect.value] || translations.en).weightTooltip}: ${formatWeight(entry.weight)} kg`;
   if (weightTooltipHideDelayTimer) {
     clearTimeout(weightTooltipHideDelayTimer);
