@@ -1417,6 +1417,43 @@ const trainerExercises = {
   plank: { name: { en: "Plank", es: "Plancha" }, cue: { en: "Keep ribs tucked and squeeze glutes while breathing steadily.", es: "Mantén las costillas recogidas, aprieta los glúteos y respira." }, muscle: "abs" },
 };
 
+// Body region per muscle group, used to filter which exercises a day
+// recommends when adding moves to a custom plan (upper days should never
+// suggest squats, Romanian deadlifts, etc., and vice versa).
+const TRAINER_BODY_REGION = {
+  quads: "lower",
+  hamstrings: "lower",
+  chest: "upper",
+  shoulders: "upper",
+  back: "upper",
+  biceps: "upper",
+  triceps: "upper",
+  abs: "core",
+};
+
+function getExerciseBodyRegion(muscle) {
+  return TRAINER_BODY_REGION[muscle] || "upper";
+}
+
+// Split-day focus: "Upper body" / "Push" / "Pull" are upper days, "Lower
+// body" / "Legs" are lower days, and "Full body" spans everything.
+function getDayBodyRegion(dayName) {
+  if (dayName === "Full body") return "full";
+  if (dayName === "Upper body" || dayName === "Push" || dayName === "Pull") return "upper";
+  if (dayName === "Lower body" || dayName === "Legs") return "lower";
+  return "full";
+}
+
+function getDayRecommendedExerciseIds(dayName) {
+  const region = getDayBodyRegion(dayName);
+  return Object.entries(trainerExercises)
+    .filter(([, libraryItem]) => {
+      const itemRegion = getExerciseBodyRegion(libraryItem.muscle);
+      return region === "full" || itemRegion === region || itemRegion === "core";
+    })
+    .map(([id]) => id);
+}
+
 const trainerSplits = {
   fullBody: [
     { name: "Full body", exercises: ["squat", "push", "row", "plank"] },
@@ -1726,12 +1763,14 @@ function renderTrainerPlan(plan) {
     });
 
     // Custom plans: an inline row to add a library exercise or a brand-new
-    // custom-named one
+    // custom-named one. The exercise list is filtered to the day's body
+    // region so an upper day never recommends lower-body moves (and vice
+    // versa); core moves stay available on both.
     if (isCustomMode) {
       const exerciseAddRow = document.createElement("div");
       exerciseAddRow.className = "exercise-add";
-      const libraryOptions = Object.entries(trainerExercises)
-        .map(([id, libraryItem]) => `<option value="${id}">${libraryItem.name[locale]}</option>`)
+      const libraryOptions = getDayRecommendedExerciseIds(day.name)
+        .map((id) => `<option value="${id}">${trainerExercises[id].name[locale]}</option>`)
         .join("");
       exerciseAddRow.innerHTML = `
         <select class="exercise-add-select" data-add-day="${dayIndex}" aria-label="${strings.addExercise}">
