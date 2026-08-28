@@ -2352,7 +2352,10 @@ body.animations-off .widget-title {
 }
 
 /* Radar ping radiating from the newest measurement diamond - stays dark
-   until the point is hovered or keyboard-focused */
+   until the point is hovered or keyboard-focused. Uses the ADJACENT sibling
+   selector (+) so each diamond reveals only its own ring: because every ping
+   is built immediately after its point, + pairs them one-to-one (a general
+   sibling ~ would light up every ping to the right of the hovered point). */
 .chart-ping {
   transform-box: fill-box;
   transform-origin: center;
@@ -2360,8 +2363,8 @@ body.animations-off .widget-title {
   opacity: 0;
 }
 
-.weight-chart .chart-point.is-hovered ~ .chart-ping,
-.weight-chart .chart-point:focus-visible ~ .chart-ping {
+.weight-chart .chart-point.is-hovered + .chart-ping,
+.weight-chart .chart-point:focus-visible + .chart-ping {
   opacity: 1;
   animation: chart-ping 1.2s ease-out infinite;
 }
