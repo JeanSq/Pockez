@@ -929,7 +929,14 @@ function showWeightTooltip(point, entry, chartWidth, chartHeight) {
     clearTimeout(weightTooltipHideDelayTimer);
     weightTooltipHideDelayTimer = null;
   }
-  const tooltipWidth = Math.max(112, tooltipText.length * 6.2);
+  // Unhide before measuring: opacity stays 0 until .is-visible, so nothing
+  // flashes. Sizing from the real rendered text (getComputedTextLength)
+  // beats per-character estimates, which undershot the mono font and let
+  // text escape the chip.
+  weightChartTooltip.hidden = false;
+  weightChartTooltipText.textContent = tooltipText;
+  const textWidth = weightChartTooltipText.getComputedTextLength();
+  const tooltipWidth = Math.max(112, Math.ceil(textWidth) + 16);
   const tooltipHeight = 24;
   const pointX = Number(point.getAttribute("cx"));
   const pointY = Number(point.getAttribute("cy"));
@@ -942,8 +949,6 @@ function showWeightTooltip(point, entry, chartWidth, chartHeight) {
   weightChartTooltipBox.setAttribute("height", tooltipHeight);
   weightChartTooltipText.setAttribute("x", tooltipX + tooltipWidth / 2);
   weightChartTooltipText.setAttribute("y", tooltipY + 16);
-  weightChartTooltipText.textContent = tooltipText;
-  weightChartTooltip.hidden = false;
   weightChartTooltip.classList.add("is-visible");
   point.classList.add("is-hovered");
 
@@ -1123,6 +1128,19 @@ function renderWeightChart(entries) {
       logWeightTooltip("event:blur", { date: entry.date });
       scheduleHideWeightTooltip(point);
     });
+    if (index === sortedEntries.length - 1) {
+      // Radar ping marking the newest measurement
+      const ping = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      ping.setAttribute("x", x - 10);
+      ping.setAttribute("y", y - 10);
+      ping.setAttribute("width", "20");
+      ping.setAttribute("height", "20");
+      ping.setAttribute("fill", "none");
+      ping.setAttribute("stroke", "var(--aberration-b)");
+      ping.setAttribute("stroke-width", "2");
+      ping.setAttribute("class", "chart-ping");
+      weightChartPoints.append(ping);
+    }
     weightChartPoints.append(point);
 
     const dateLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -1136,15 +1154,27 @@ function renderWeightChart(entries) {
     weightChartXLabels.append(dateLabel);
   });
 
-  // One-shot draw-in: the yellow line and its ink underlay reveal together
-  // like a pen stroke (class re-added per render to restart the animation)
+  replayWeightChartAnimation();
+}
+
+// Replay the chart's entrance (line draw + staggered point pops): fires on
+// every re-render and whenever the Weight tab opens - otherwise the
+// entrance plays invisibly at startup and the graph reads as static.
+function replayWeightChartAnimation() {
+  if (weightChart.hidden) return;
   for (const line of [weightChartLine, weightChartLineUnderlay]) {
     line.classList.remove("chart-draw");
+  }
+  for (const point of weightChartPoints.children) {
+    point.classList.remove("chart-pop");
   }
   void weightChart.getBoundingClientRect();
   for (const line of [weightChartLineUnderlay, weightChartLine]) {
     line.setAttribute("pathLength", "1");
     line.classList.add("chart-draw");
+  }
+  for (const point of weightChartPoints.children) {
+    point.classList.add("chart-pop");
   }
 }
 
@@ -1312,6 +1342,22 @@ function renderDashboardSummary() {
     : strings.deficitSummary;
 }
 
+// Muscle-group accent colors for the trainer plan cards (their `muscle`
+// field drives both the tile color and the card's accent edge).
+const TRAINER_MUSCLE_COLORS = {
+  quads: "var(--accent-blue)",
+  hamstrings: "var(--accent-purple)",
+  chest: "var(--accent-red)",
+  shoulders: "var(--accent-orange)",
+  back: "var(--accent-green)",
+  biceps: "var(--accent-yellow)",
+  triceps: "var(--accent-red)",
+  abs: "var(--accent-purple)",
+};
+
+const TRAINER_ICON_DUMBBELL = '<svg viewBox="0 0 32 32" class="icon-svg"><path d="M6 12v8M10 9v14M22 9v14M26 12v8M10 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TRAINER_ICON_TIMER = '<svg viewBox="0 0 32 32" class="icon-svg"><circle cx="16" cy="18" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 18v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12.5 4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
 const trainerExercises = {
   squat: { name: { en: "Squat", es: "Sentadilla" }, cue: { en: "Brace your trunk and keep your knees tracking over your toes.", es: "Activa el tronco y mantén las rodillas alineadas con los pies." }, muscle: "quads" },
   hinge: { name: { en: "Romanian deadlift", es: "Peso muerto rumano" }, cue: { en: "Push your hips back and keep the weight close to your legs.", es: "Lleva la cadera atrás y mantén el peso cerca de las piernas." }, muscle: "hamstrings" },
@@ -1461,31 +1507,64 @@ function renderTrainerPlan(plan) {
     const daySection = document.createElement("section");
     daySection.className = "trainer-day trainer-day-animated";
     daySection.style.setProperty("--trainer-delay", `${dayIndex * 90}ms`);
+
+    const dayChipColors = ["var(--accent-red)", "var(--accent-blue)", "var(--accent-yellow)", "var(--accent-purple)", "var(--accent-green)", "var(--accent-orange)"];
+    const dayHeader = document.createElement("div");
+    dayHeader.className = "trainer-day-header";
+    const daySr = document.createElement("span");
+    daySr.className = "sr-only";
+    daySr.textContent = `${strings.dayLabel} ${dayIndex + 1}`;
+    const dayChip = document.createElement("span");
+    dayChip.className = "trainer-day-chip";
+    dayChip.setAttribute("aria-hidden", "true");
+    dayChip.style.background = dayChipColors[dayIndex % dayChipColors.length];
+    dayChip.textContent = String(dayIndex + 1);
     const dayTitle = document.createElement("h4");
-    dayTitle.textContent = `${strings.dayLabel} ${dayIndex + 1} · ${getTrainerDayName(day.name, strings)}`;
-    daySection.append(dayTitle);
+    dayTitle.textContent = getTrainerDayName(day.name, strings);
+    dayHeader.append(daySr, dayChip, dayTitle);
 
     const exerciseList = document.createElement("div");
     exerciseList.className = "exercise-list";
     day.exercises.forEach((exercise, exerciseIndex) => {
       const data = trainerExercises[exercise.id];
+      const muscleColor = TRAINER_MUSCLE_COLORS[data.muscle] || "var(--accent-blue)";
       const card = document.createElement("article");
       card.className = "exercise-card exercise-card-animated";
       card.style.setProperty("--trainer-delay", `${dayIndex * 90 + exerciseIndex * 45 + 120}ms`);
+      card.style.borderLeftColor = muscleColor;
       card.innerHTML = `
-        <div class="exercise-visual" aria-hidden="true">${data.name[locale].slice(0, 2).toUpperCase()}</div>
+        <div class="exercise-visual" aria-hidden="true" style="background: ${muscleColor}">${exercise.id === "plank" ? TRAINER_ICON_TIMER : TRAINER_ICON_DUMBBELL}</div>
         <div class="exercise-main">
           <h5>${data.name[locale]}</h5>
-          <p><strong>${strings.formCueLabel}:</strong> ${data.cue[locale]}</p>
           <div class="exercise-variables">
             <label><span>${strings.setsLabel}</span><input type="number" min="1" max="10" value="${exercise.sets}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="sets"></label>
             <label><span>${exercise.id === "plank" ? strings.timeLabel : strings.repsLabel}</span><input type="text" value="${exercise.id === "plank" ? "30-45" : exercise.reps}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="${exercise.id === "plank" ? "duration" : "reps"}"><small>${exercise.id === "plank" ? strings.secondsLabel : ""}</small></label>
             <label><span>${strings.restLabel}</span><input type="text" value="${formatTrainerRest(exercise.rest)}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="rest"></label>
           </div>
         </div>`;
+
+      // Form cues collapse behind a chip so the cards read as a quick
+      // workout sheet instead of a wall of text
+      const cueToggle = document.createElement("button");
+      cueToggle.type = "button";
+      cueToggle.className = "exercise-cue-toggle";
+      cueToggle.setAttribute("aria-expanded", "false");
+      cueToggle.textContent = strings.formCueLabel;
+      const cueText = document.createElement("p");
+      cueText.className = "exercise-cue";
+      cueText.hidden = true;
+      cueText.textContent = data.cue[locale];
+      cueToggle.addEventListener("click", () => {
+        const open = cueText.hidden;
+        cueText.hidden = !open;
+        cueToggle.setAttribute("aria-expanded", String(open));
+        cueToggle.classList.toggle("is-open", open);
+      });
+      card.querySelector("h5").after(cueToggle, cueText);
+
       exerciseList.append(card);
     });
-    daySection.append(exerciseList);
+    daySection.append(dayHeader, exerciseList);
     trainerDays.append(daySection);
   });
 }
@@ -1586,6 +1665,12 @@ function showWidget(widgetId) {
         )
       );
     }
+  }
+
+  if (widgetId === "weight") {
+    // Replay the chart entrance on every visit - at startup it would
+    // otherwise play invisibly behind the hidden tab.
+    replayWeightChartAnimation();
   }
 
   logUiState(`Widget changed to ${widgetId}`);
