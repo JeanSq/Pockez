@@ -1992,13 +1992,6 @@ body.animations-off .widget-title {
   margin-top: 1rem;
 }
 
-.trainer-day {
-  padding: 0.75rem;
-  border: 2px solid var(--ink);
-  border-radius: 0;
-  background: var(--paper);
-}
-
 /* Shared staggered entrance used across tabs (trainer plan, dashboard
    cards, weight summary, ...). `backwards` fill keeps pre-delay frames
    hidden but releases the final frame afterwards so hover transforms
@@ -2365,8 +2358,8 @@ body.animations-off .widget-title {
   opacity: 0;
 }
 
-.weight-chart .chart-point-latest.is-hovered ~ .chart-ping,
-.weight-chart .chart-point-latest:focus-visible ~ .chart-ping {
+.weight-chart .chart-point.is-hovered ~ .chart-ping,
+.weight-chart .chart-point:focus-visible ~ .chart-ping {
   opacity: 1;
   animation: chart-ping 1.2s ease-out infinite;
 }

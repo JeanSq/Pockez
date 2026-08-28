@@ -1104,7 +1104,7 @@ function renderWeightChart(entries) {
     point.setAttribute("fill", "var(--aberration-b)");
     point.setAttribute("stroke", "var(--ink)");
     point.setAttribute("stroke-width", "2.5");
-    point.setAttribute("class", index === sortedEntries.length - 1 ? "chart-point chart-pop chart-point-latest" : "chart-point chart-pop");
+    point.setAttribute("class", "chart-point chart-pop");
     point.style.setProperty("--pop-delay", `${index * 70}ms`);
     point.setAttribute("tabindex", "0");
     point.setAttribute("aria-label", `${formatMeasurementDate(entry.date)}: ${formatWeight(entry.weight)} kg`);
@@ -1129,20 +1129,18 @@ function renderWeightChart(entries) {
       scheduleHideWeightTooltip(point);
     });
     weightChartPoints.append(point);
-    if (index === sortedEntries.length - 1) {
-      // Radar ping marking the newest measurement - appended AFTER the
-      // point so the hover/focus sibling selector can reveal it
-      const ping = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      ping.setAttribute("x", x - 10);
-      ping.setAttribute("y", y - 10);
-      ping.setAttribute("width", "20");
-      ping.setAttribute("height", "20");
-      ping.setAttribute("fill", "none");
-      ping.setAttribute("stroke", "var(--aberration-b)");
-      ping.setAttribute("stroke-width", "2");
-      ping.setAttribute("class", "chart-ping");
-      weightChartPoints.append(ping);
-    }
+    // Radar ping ring for this point - revealed by the CSS sibling
+    // selector while the diamond is hovered or keyboard-focused
+    const ping = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    ping.setAttribute("x", x - 10);
+    ping.setAttribute("y", y - 10);
+    ping.setAttribute("width", "20");
+    ping.setAttribute("height", "20");
+    ping.setAttribute("fill", "none");
+    ping.setAttribute("stroke", "var(--aberration-b)");
+    ping.setAttribute("stroke-width", "2");
+    ping.setAttribute("class", "chart-ping");
+    weightChartPoints.append(ping);
 
     const dateLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
     dateLabel.setAttribute("x", x);
