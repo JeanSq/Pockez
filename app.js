@@ -2,8 +2,8 @@
  * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
-import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=12";
-import { translations } from "./i18n.js?v=17";
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=13";
+import { translations } from "./i18n.js?v=18";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -350,6 +350,14 @@ const trainerPlanHeading = document.getElementById("trainer-plan-heading");
 const trainerPlanTitle = document.getElementById("trainer-plan-title");
 const trainerPlanMeta = document.getElementById("trainer-plan-meta");
 const trainerDays = document.getElementById("trainer-days");
+const trainerRecommendedSection = document.getElementById("trainer-recommended");
+const trainerCustomSection = document.getElementById("trainer-custom");
+const trainerCustomForm = document.getElementById("trainer-custom-form");
+const trainerCustomSplitInput = document.getElementById("trainer-custom-split-input");
+const trainerModeInputs = document.querySelectorAll('input[name="trainer-mode"]');
+// Day-index set of currently expanded plan days, so add/remove re-renders
+// don't collapse the day being edited (null = never rendered yet).
+let trainerOpenDays = null;
 
 const i18nElements = document.querySelectorAll("[data-i18n]");
 const i18nPlaceholderElements = document.querySelectorAll(
@@ -1197,6 +1205,38 @@ function replayWeightChartAnimation() {
   }
 }
 
+// Weight-goal progress shared by the Weight tab and Dashboard heroes.
+// "Current" is always the actual latest weight. "Start" is the recorded
+// weight farthest from the goal (the real beginning of the effort, e.g. the
+// 88 kg peak when cutting to 80), so matching the goal in the past can never
+// make a current drift read as 100%.
+function computeWeightProgress(rawEntries, goalWeight) {
+  const entries = [...rawEntries].sort((a, b) => a.date.localeCompare(b.date));
+  const latest = entries[entries.length - 1];
+  if (goalWeight === null || goalWeight === undefined || !latest) return null;
+  const goal = Number(goalWeight);
+  const current = Number(latest.weight);
+  if (!Number.isFinite(goal) || !Number.isFinite(current)) return null;
+
+  let startWeight = Number(entries[0].weight);
+  let farthest = Math.abs(startWeight - goal);
+  entries.forEach((entry) => {
+    const distance = Math.abs(Number(entry.weight) - goal);
+    if (distance > farthest) {
+      farthest = distance;
+      startWeight = Number(entry.weight);
+    }
+  });
+
+  const totalDistance = Math.abs(startWeight - goal);
+  if (totalDistance < 0.05) {
+    // Every recorded weight sits on the goal line.
+    return Math.abs(current - goal) < 0.05 ? 100 : 0;
+  }
+  const traveled = Math.abs(startWeight - current);
+  return Math.min(100, Math.max(0, (traveled / totalDistance) * 100));
+}
+
 function renderWeightLog() {
   const entries = getWeightEntries().sort((a, b) => a.date.localeCompare(b.date));
   const firstEntry = entries[0];
@@ -1216,20 +1256,14 @@ function renderWeightLog() {
   if (goalWeight === null || !firstEntry || !latestEntry) {
     goalHint.textContent = strings.goalWeightHint;
   } else {
-    const startingWeight = Number(firstEntry.weight);
-    const latestWeight = Number(latestEntry.weight);
-    const totalDistance = goalWeight < startingWeight
-      ? startingWeight - goalWeight
-      : goalWeight - startingWeight;
-    const traveledDistance = goalWeight < startingWeight
-      ? startingWeight - latestWeight
-      : latestWeight - startingWeight;
-    progress = totalDistance === 0
-      ? 100
-      : Math.min(100, Math.max(0, (traveledDistance / totalDistance) * 100));
-    goalHint.textContent = progress >= 100
-      ? strings.progressGoalReached
-      : strings.progressToGoal.replace("{percent}", Math.round(progress));
+    progress = computeWeightProgress(entries, goalWeight);
+    if (progress === null) {
+      goalHint.textContent = strings.goalWeightHint;
+    } else {
+      goalHint.textContent = progress >= 100
+        ? strings.progressGoalReached
+        : strings.progressToGoal.replace("{percent}", Math.round(progress));
+    }
   }
 
   // Goal-progress hero strip: same computation as above, home-tab styling.
@@ -1317,19 +1351,13 @@ function renderDashboardSummary() {
     ? `${Number(latestEntry.weight) - Number(firstEntry.weight) > 0 ? "+" : ""}${formatWeight(Number(latestEntry.weight) - Number(firstEntry.weight))} kg`
     : strings.noData;
 
-  // Hero "overall progress": how far the latest weight has moved from the
-  // first entry toward the profile's goal weight. Direction-aware, so both
-  // cutting and bulking read correctly; clamped to 0-100%.
+  // Hero "overall progress": how far the actual latest weight has moved from
+  // the recorded point farthest from the goal toward the profile's goal weight.
+  // Direction-aware, so both cutting and bulking read correctly; clamped 0-100%.
   const goalWeight = getGoalWeight();
   if (latestEntry && goalWeight !== null) {
-    const startWeight = firstEntry ? Number(firstEntry.weight) : Number(latestEntry.weight);
-    const currentWeight = Number(latestEntry.weight);
-    const totalDistance = startWeight - goalWeight;
-    const doneDistance = startWeight - currentWeight;
-    const rawPct = totalDistance === 0
-      ? (Math.abs(doneDistance) < 0.05 ? 100 : 0)
-      : (doneDistance / totalDistance) * 100;
-    const pct = Math.max(0, Math.min(100, Math.round(rawPct)));
+    const computed = computeWeightProgress(entries, goalWeight);
+    const pct = computed === null ? 0 : Math.max(0, Math.min(100, Math.round(computed)));
     if (dashProgressEl) dashProgressEl.textContent = String(pct);
     if (dashProgressFill) dashProgressFill.style.width = `${pct}%`;
     if (dashProgressMeta) dashProgressMeta.textContent = `${strings.dashGoalLabel}: ${formatWeight(goalWeight)} kg`;
@@ -1495,29 +1523,108 @@ function buildTrainerPlan(dayCount, goal, emphasis, volume) {
   };
 }
 
-function saveTrainerPlan(plan) {
-  updateActiveProfile({ trainerPlan: JSON.stringify(plan) });
+// --- Custom trainer plans ---
+// The split picker maps onto the same day templates as the recommended
+// generator, but the user chooses the structure explicitly and is then free
+// to add / remove / reorder exercises by hand.
+const trainerCustomSplits = [
+  { id: "fullBody2", key: "fullBody", days: 2 },
+  { id: "fullBody3", key: "fullBody", days: 3 },
+  { id: "upperLower4", key: "upperLower", days: 4 },
+  { id: "upperLowerPlus5", key: "upperLowerPlus", days: 5 },
+  { id: "pushPullLegs6", key: "pushPullLegs", days: 6 },
+];
+
+function getCustomTrainerSplit(splitId) {
+  const match = trainerCustomSplits.find((split) => split.id === splitId) || trainerCustomSplits[1];
+  const split = getTrainerSplit(match.days, "balanced");
+  return { id: match.id, key: split.key, days: split.days.slice(0, match.days) };
 }
 
-function getSavedTrainerPlan() {
+function customSplitIdForPlan(plan) {
+  const match = trainerCustomSplits.find(
+    (split) => split.key === plan.splitKey && split.days === plan.dayCount
+  );
+  return match ? match.id : "fullBody3";
+}
+
+function buildCustomTrainerPlan(splitId, goal, volume) {
+  const split = getCustomTrainerSplit(splitId);
+  const variables = getTrainerVariables(goal);
+  const daysWithVolume = assignTrainerVolume(split.days.map((day) => ({
+    name: day.name,
+    exercises: day.exercises.map((exerciseId) => ({ id: exerciseId, ...variables })),
+  })), volume);
+  return {
+    dayCount: split.days.length,
+    goal,
+    emphasis: "custom",
+    volume,
+    splitKey: split.key,
+    custom: true,
+    days: daysWithVolume,
+  };
+}
+
+function addLibraryExercise(plan, dayIndex, exerciseId) {
+  const day = plan.days[dayIndex];
+  if (!day) return;
+  day.exercises.push({ id: exerciseId, ...getTrainerVariables(plan.goal || "muscle") });
+}
+
+function addCustomExercise(plan, dayIndex, name) {
+  const day = plan.days[dayIndex];
+  if (!day) return;
+  day.exercises.push({
+    id: `custom-${Date.now()}`,
+    custom: true,
+    customName: name,
+    ...getTrainerVariables(plan.goal || "muscle"),
+  });
+}
+
+function getTrainerPlanStore() {
   const saved = getActiveProfile()?.trainerPlan || "";
   if (!saved) return null;
   try {
-    return JSON.parse(saved);
+    const parsed = JSON.parse(saved);
+    // Legacy flat plan shape (pre container) → treat it as the recommended plan.
+    if (parsed && Array.isArray(parsed.days) && !parsed.activeMode) {
+      return { activeMode: "recommended", recommended: parsed, custom: null };
+    }
+    return parsed && parsed.activeMode ? parsed : null;
   } catch (error) {
     return null;
   }
 }
 
+function saveTrainerPlanStore(store) {
+  updateActiveProfile({ trainerPlan: JSON.stringify(store) });
+}
+
+function saveTrainerPlan(plan) {
+  const store = getTrainerPlanStore() || { activeMode: "recommended", recommended: null, custom: null };
+  store[store.activeMode] = plan;
+  saveTrainerPlanStore(store);
+}
+
+function getSavedTrainerPlan() {
+  const store = getTrainerPlanStore();
+  return store ? store[store.activeMode] : null;
+}
+
 function renderTrainerPlan(plan) {
   const strings = translations[languageSelect.value] || translations.en;
   const locale = languageSelect.value;
+  const isCustomMode = plan.custom === true;
   const splitKey = plan.splitKey === "upperLowerPlus" ? "splitUpperLowerPlus" : plan.splitKey === "pushPullLegs" ? "splitPushPullLegs" : plan.splitKey === "upperLower" ? "splitUpperLower" : "splitFullBody";
   trainerPlanHeading.hidden = false;
+  trainerPlanHeading.querySelector(".dashboard-eyebrow").textContent = isCustomMode ? strings.yourCustomPlan : strings.yourPlan;
   trainerPlanTitle.textContent = strings[splitKey];
   const volumeKey = plan.volume === "moderateHigh" ? "volumeModerateHigh" : plan.volume === "low" ? "volumeLow" : "volumeModerate";
   trainerPlanMeta.textContent = `${plan.dayCount} ${strings.trainingDaysLabel.toLowerCase()} · ${strings[volumeKey]} ${strings.volumeLabel}`;
   trainerDays.innerHTML = "";
+  const openIndices = trainerOpenDays === null ? new Set([0]) : new Set(trainerOpenDays);
 
   plan.days.forEach((day, dayIndex) => {
     const daySection = document.createElement("section");
@@ -1526,8 +1633,8 @@ function renderTrainerPlan(plan) {
 
     const dayChipColors = ["var(--accent-red)", "var(--accent-blue)", "var(--accent-yellow)", "var(--accent-purple)", "var(--accent-green)", "var(--accent-orange)"];
     // Days are collapsible: the header is a full-width button that reveals
-    // that day's exercise cards (first day starts open)
-    const isOpen = dayIndex === 0;
+    // that day's exercise cards (the first render opens day 1)
+    const isOpen = openIndices.has(dayIndex);
     const dayHeader = document.createElement("button");
     dayHeader.type = "button";
     dayHeader.className = "trainer-day-header";
@@ -1557,21 +1664,44 @@ function renderTrainerPlan(plan) {
     exerciseList.className = "exercise-list";
     if (!isOpen) exerciseList.hidden = true;
     day.exercises.forEach((exercise, exerciseIndex) => {
-      const data = trainerExercises[exercise.id];
-      const muscleColor = TRAINER_MUSCLE_COLORS[data.muscle] || "var(--accent-blue)";
+      const libraryEntry = trainerExercises[exercise.id];
+      const customExercise = !libraryEntry;
+      const name = customExercise ? (exercise.customName || exercise.id) : libraryEntry.name[locale];
+      const muscle = customExercise ? null : libraryEntry.muscle;
+      const muscleColor = muscle ? (TRAINER_MUSCLE_COLORS[muscle] || "var(--accent-blue)") : "var(--accent-purple)";
+      const cueValue = customExercise ? (exercise.customCue || strings.customCue) : libraryEntry.cue[locale];
+      const isTimed = !customExercise && exercise.id === "plank";
+
       const card = document.createElement("article");
       card.className = "exercise-card exercise-card-animated";
       card.style.setProperty("--trainer-delay", `${dayIndex * 90 + exerciseIndex * 45 + 120}ms`);
       card.style.borderLeftColor = muscleColor;
       card.innerHTML = `
         <div class="exercise-main">
-          <h5>${data.name[locale]}</h5>
+          <div class="exercise-name-row"></div>
           <div class="exercise-variables">
             <label><span>${strings.setsLabel}</span><input type="number" min="1" max="10" value="${exercise.sets}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="sets"></label>
-            <label><span>${exercise.id === "plank" ? strings.timeLabel : strings.repsLabel}</span><input type="text" value="${exercise.id === "plank" ? "30-45" : exercise.reps}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="${exercise.id === "plank" ? "duration" : "reps"}"><small>${exercise.id === "plank" ? strings.secondsLabel : ""}</small></label>
+            <label><span>${isTimed ? strings.timeLabel : strings.repsLabel}</span><input type="text" value="${isTimed ? "30-45" : (exercise.reps || "8-12")}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="${isTimed ? "duration" : "reps"}"><small>${isTimed ? strings.secondsLabel : ""}</small></label>
             <label><span>${strings.restLabel}</span><input type="text" value="${formatTrainerRest(exercise.rest)}" data-plan-day="${dayIndex}" data-plan-exercise="${exerciseIndex}" data-variable="rest"></label>
           </div>
         </div>`;
+
+      const nameRow = card.querySelector(".exercise-name-row");
+      const nameTitle = document.createElement("h5");
+      nameTitle.textContent = name;
+      nameRow.append(nameTitle);
+
+      // Custom plans let you add and remove exercises directly
+      if (isCustomMode) {
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "exercise-remove";
+        removeButton.dataset.removeDay = String(dayIndex);
+        removeButton.dataset.removeExercise = String(exerciseIndex);
+        removeButton.setAttribute("aria-label", `${strings.removeExercise}: ${name}`);
+        removeButton.textContent = "×";
+        nameRow.append(removeButton);
+      }
 
       // Form cues collapse behind a chip so the cards read as a quick
       // workout sheet instead of a wall of text
@@ -1583,22 +1713,49 @@ function renderTrainerPlan(plan) {
       const cueText = document.createElement("p");
       cueText.className = "exercise-cue";
       cueText.hidden = true;
-      cueText.textContent = data.cue[locale];
+      cueText.textContent = cueValue;
       cueToggle.addEventListener("click", () => {
         const open = cueText.hidden;
         cueText.hidden = !open;
         cueToggle.setAttribute("aria-expanded", String(open));
         cueToggle.classList.toggle("is-open", open);
       });
-      card.querySelector("h5").after(cueToggle, cueText);
+      nameTitle.after(cueToggle, cueText);
 
       exerciseList.append(card);
     });
+
+    // Custom plans: an inline row to add a library exercise or a brand-new
+    // custom-named one
+    if (isCustomMode) {
+      const exerciseAddRow = document.createElement("div");
+      exerciseAddRow.className = "exercise-add";
+      const libraryOptions = Object.entries(trainerExercises)
+        .map(([id, libraryItem]) => `<option value="${id}">${libraryItem.name[locale]}</option>`)
+        .join("");
+      exerciseAddRow.innerHTML = `
+        <select class="exercise-add-select" data-add-day="${dayIndex}" aria-label="${strings.addExercise}">
+          <option value="">${strings.addExercise}…</option>
+          ${libraryOptions}
+          <option value="__custom__">${strings.customExerciseOption}…</option>
+        </select>
+        <input type="text" class="exercise-add-name" data-add-day="${dayIndex}" placeholder="${strings.customExercisePlaceholder}" hidden />
+        <button type="button" class="exercise-add-submit" data-add-day="${dayIndex}" hidden>${strings.addExercise}</button>
+      `;
+      exerciseList.append(exerciseAddRow);
+    }
+
     dayHeader.addEventListener("click", () => {
       const open = exerciseList.hidden;
       exerciseList.hidden = !open;
       dayHeader.setAttribute("aria-expanded", String(open));
       dayHeader.classList.toggle("is-open", open);
+      if (open) {
+        openIndices.add(dayIndex);
+      } else {
+        openIndices.delete(dayIndex);
+      }
+      trainerOpenDays = Array.from(openIndices);
     });
 
     daySection.append(dayHeader, exerciseList);
@@ -1625,20 +1782,71 @@ function getTrainerDayName(name, strings) {
   return names[name] || name;
 }
 
-function loadTrainerPlan() {
+function setTrainerModeRadio(mode) {
+  trainerModeInputs.forEach((radio) => {
+    radio.checked = radio.value === mode;
+  });
+}
+
+function migrateLegacyTrainerPlan(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.days) && !parsed.activeMode) {
+      updateActiveProfile({
+        trainerPlan: JSON.stringify({ activeMode: "recommended", recommended: parsed, custom: null }),
+      });
+    }
+  } catch (error) {
+    // stored value is not something we can migrate - leave it alone
+  }
+}
+
+function updateTrainerSections(mode) {
+  trainerRecommendedSection.hidden = mode !== "recommended";
+  trainerCustomSection.hidden = mode !== "custom";
   const plan = getSavedTrainerPlan();
-  if (!plan) {
+  if (plan) {
+    renderTrainerPlan(plan);
+  } else {
     trainerPlanHeading.hidden = true;
     trainerDays.innerHTML = "";
-    trainingEmphasisInput.value = getSuggestedTrainerEmphasis();
-    trainingVolumeInput.value = "moderate";
-    return;
   }
-  trainingDaysInput.value = plan.dayCount;
-  trainingGoalInput.value = plan.goal;
-  trainingEmphasisInput.value = plan.emphasis || "balanced";
-  trainingVolumeInput.value = plan.volume || "moderate";
-  renderTrainerPlan(plan);
+}
+
+function loadTrainerPlan() {
+  const raw = getActiveProfile()?.trainerPlan || "";
+  if (raw) migrateLegacyTrainerPlan(raw);
+  const store = getTrainerPlanStore();
+  const mode = store?.activeMode || "recommended";
+  const plan = store ? store[mode] : null;
+
+  setTrainerModeRadio(mode);
+  trainerRecommendedSection.hidden = mode !== "recommended";
+  trainerCustomSection.hidden = mode !== "custom";
+
+  // Each mode's form reflects that mode's stored plan (the recommended form
+  // keeps its own params even while a custom plan is active).
+  const recommendedPlan = store?.recommended || null;
+  if (recommendedPlan) {
+    trainingDaysInput.value = recommendedPlan.dayCount;
+    trainingGoalInput.value = recommendedPlan.goal;
+    trainingEmphasisInput.value = recommendedPlan.emphasis || "balanced";
+    trainingVolumeInput.value = recommendedPlan.volume || "moderate";
+  }
+  if (store?.custom) {
+    trainerCustomSplitInput.value = customSplitIdForPlan(store.custom);
+  }
+
+  if (plan) {
+    renderTrainerPlan(plan);
+  } else {
+    trainerPlanHeading.hidden = true;
+    trainerDays.innerHTML = "";
+    if (!recommendedPlan) {
+      trainingEmphasisInput.value = getSuggestedTrainerEmphasis();
+      trainingVolumeInput.value = "moderate";
+    }
+  }
 }
 
 function setTodayAsMeasurementDate() {
@@ -2125,11 +2333,66 @@ resetOfflineCacheButton.addEventListener("click", resetOfflineCache);
 trainerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const plan = buildTrainerPlan(Number(trainingDaysInput.value), trainingGoalInput.value, trainingEmphasisInput.value, trainingVolumeInput.value);
-  saveTrainerPlan(plan);
+  const store = getTrainerPlanStore() || { activeMode: "recommended", recommended: null, custom: null };
+  store.recommended = plan;
+  store.activeMode = "recommended";
+  saveTrainerPlanStore(store);
+  setTrainerModeRadio("recommended");
+  trainerRecommendedSection.hidden = false;
+  trainerCustomSection.hidden = true;
   renderTrainerPlan(plan);
 });
 
+trainerCustomForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const plan = buildCustomTrainerPlan(trainerCustomSplitInput.value, trainingGoalInput.value, trainingVolumeInput.value);
+  const store = getTrainerPlanStore() || { activeMode: "custom", recommended: null, custom: null };
+  store.custom = plan;
+  store.activeMode = "custom";
+  saveTrainerPlanStore(store);
+  setTrainerModeRadio("custom");
+  trainerRecommendedSection.hidden = true;
+  trainerCustomSection.hidden = false;
+  renderTrainerPlan(plan);
+});
+
+trainerModeInputs.forEach((radio) => {
+  radio.addEventListener("change", () => {
+    if (!radio.checked) return;
+    const store = getTrainerPlanStore() || { activeMode: "recommended", recommended: null, custom: null };
+    store.activeMode = radio.value;
+    saveTrainerPlanStore(store);
+    updateTrainerSections(radio.value);
+  });
+});
+
 trainerDays.addEventListener("change", (event) => {
+  // Adding an exercise to a custom plan day (library pick or custom flow)
+  const addSelect = event.target.closest(".exercise-add-select");
+  if (addSelect) {
+    const dayIndex = Number(addSelect.dataset.addDay);
+    const row = addSelect.closest(".exercise-add");
+    if (addSelect.value === "__custom__") {
+      addSelect.value = "";
+      const nameInput = row.querySelector(".exercise-add-name");
+      const submitButton = row.querySelector(".exercise-add-submit");
+      nameInput.hidden = false;
+      submitButton.hidden = false;
+      nameInput.focus();
+      return;
+    }
+    if (addSelect.value) {
+      const plan = getSavedTrainerPlan();
+      if (plan) {
+        addLibraryExercise(plan, dayIndex, addSelect.value);
+        addSelect.value = "";
+        saveTrainerPlan(plan);
+        renderTrainerPlan(plan);
+      }
+    }
+    return;
+  }
+
   const input = event.target.closest("input[data-plan-day]");
   if (!input) return;
   const plan = getSavedTrainerPlan();
@@ -2158,6 +2421,47 @@ trainerDays.addEventListener("change", (event) => {
     exerciseCard.classList.add("exercise-card-highlight");
   }
   saveTrainerPlan(plan);
+});
+
+// Custom plans: remove an exercise or commit a hand-written custom exercise
+trainerDays.addEventListener("click", (event) => {
+  const removeButton = event.target.closest(".exercise-remove");
+  if (removeButton) {
+    const dayIndex = Number(removeButton.dataset.removeDay);
+    const exerciseIndex = Number(removeButton.dataset.removeExercise);
+    const plan = getSavedTrainerPlan();
+    if (!plan) return;
+    const day = plan.days[dayIndex];
+    if (day) day.exercises.splice(exerciseIndex, 1);
+    saveTrainerPlan(plan);
+    renderTrainerPlan(plan);
+    return;
+  }
+  const submitButton = event.target.closest(".exercise-add-submit");
+  if (submitButton) {
+    const dayIndex = Number(submitButton.dataset.addDay);
+    const row = submitButton.closest(".exercise-add");
+    const nameInput = row.querySelector(".exercise-add-name");
+    const name = nameInput.value.trim();
+    if (!name) return;
+    const plan = getSavedTrainerPlan();
+    if (!plan) return;
+    addCustomExercise(plan, dayIndex, name);
+    saveTrainerPlan(plan);
+    nameInput.value = "";
+    nameInput.hidden = true;
+    submitButton.hidden = true;
+    renderTrainerPlan(plan);
+  }
+});
+
+// Enter in the custom-exercise name box commits it (same as the Add button)
+trainerDays.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  const nameInput = event.target.closest(".exercise-add-name");
+  if (!nameInput || nameInput.hidden) return;
+  event.preventDefault();
+  nameInput.closest(".exercise-add").querySelector(".exercise-add-submit").click();
 });
 
 function recommendRepsForSets(sets) {

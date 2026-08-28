@@ -1964,6 +1964,23 @@ body.animations-off .widget-title {
   white-space: nowrap;
 }
 
+/* Recommended / Custom plan switch */
+.trainer-mode-group {
+  margin-top: 1rem;
+}
+
+.trainer-mode-group .mode-switch {
+  max-width: 24rem;
+}
+
+.trainer-custom-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.trainer-custom-form .form-submit {
+  white-space: nowrap;
+}
+
 .trainer-plan-heading {
   display: flex;
   align-items: end;
@@ -2177,6 +2194,72 @@ body.animations-off .widget-title {
   margin: 0;
   color: var(--ink);
   font-size: 1rem;
+}
+
+/* Custom plans: name + remove sit on one row so the "×" never wraps */
+.exercise-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.exercise-name-row h5 {
+  min-width: 0;
+}
+
+.exercise-remove {
+  flex: 0 0 auto;
+  padding: 0.05rem 0.45rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.exercise-remove:hover,
+.exercise-remove:focus-visible {
+  color: var(--ink);
+  background: rgba(22, 22, 22, 0.06);
+}
+
+/* "Add exercise" row shown at the bottom of each day in custom plans */
+.exercise-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1.5px dashed var(--ink-faint);
+  background: rgba(22, 22, 22, 0.03);
+}
+
+.exercise-add select,
+.exercise-add input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.exercise-add .exercise-add-submit {
+  padding: 0.35rem 0.7rem;
+  border: 2px solid var(--ink);
+  background: var(--accent-blue);
+  color: var(--text-on-dark);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .exercise-main p {

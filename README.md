@@ -10,6 +10,7 @@ A lightweight, offline-friendly personal dashboard for notes, body-stat estimate
 - BMI, BMR, maintenance, and suggested calorie estimates
 - Up to five customizable people profiles, each with separate health data
 - Personal Trainer widget with day-based splits, goals, training emphasis, exercise cues, and adjustable variables
+- Recommended generator plus a Custom mode: pick a split, then add or remove exercises per day
 - Set/reps recommendations that adapt to each other, plus 2 - 3 minute rest guidance
 - Reference-based low, moderate, and moderate-high weekly training volume bands
 - Weight history with goals, trends, accessible chart points, and date filters

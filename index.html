@@ -23,7 +23,7 @@
     <link rel="preload" href="fonts/bangers-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link rel="stylesheet" href="style.css?v=27" />
+    <link rel="stylesheet" href="style.css?v=28" />
 
     <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
          during a site rebuild), force the app visible instead of sticking on
@@ -767,17 +767,32 @@
           <h2 id="trainer-heading" class="widget-title" data-i18n="trainerTitle">Personal trainer</h2>
           <p class="widget-hint" data-i18n="trainerHint">Build a practical split around the days you can train.</p>
 
-          <form class="trainer-form" id="trainer-form">
-            <label class="form-field">
-              <span data-i18n="trainingDaysLabel">Days available</span>
-              <select id="training-days-input">
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-              </select>
-            </label>
+          <fieldset class="trainer-mode-group">
+            <legend class="form-field-label" data-i18n="trainerModeLabel">Plan type</legend>
+            <div class="mode-switch">
+              <label class="mode-option">
+                <input type="radio" name="trainer-mode" value="recommended" checked />
+                <span data-i18n="trainerRecommended">Recommended</span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="trainer-mode" value="custom" />
+                <span data-i18n="trainerCustom">Custom</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="trainer-recommended">
+            <form class="trainer-form" id="trainer-form">
+              <label class="form-field">
+                <span data-i18n="trainingDaysLabel">Days available</span>
+                <select id="training-days-input">
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </label>
             <label class="form-field">
               <span data-i18n="trainingGoalLabel">Main goal</span>
               <select id="training-goal-input">
@@ -803,7 +818,25 @@
               </select>
             </label>
             <button class="form-submit" type="submit" data-i18n="generatePlan">Generate plan</button>
-          </form>
+            </form>
+          </div>
+
+          <div id="trainer-custom" hidden>
+            <form class="trainer-form trainer-custom-form" id="trainer-custom-form">
+              <label class="form-field">
+                <span data-i18n="customSplitLabel">Training split</span>
+                <select id="trainer-custom-split-input">
+                  <option value="fullBody2" data-i18n="splitFullBody2d">Full body · 2 days</option>
+                  <option value="fullBody3" selected data-i18n="splitFullBody3d">Full body · 3 days</option>
+                  <option value="upperLower4" data-i18n="splitUpperLower4d">Upper / lower · 4 days</option>
+                  <option value="upperLowerPlus5" data-i18n="splitUpperLowerPlus5d">Upper / lower + full body · 5 days</option>
+                  <option value="pushPullLegs6" data-i18n="splitPushPullLegs6d">Push / pull / legs · 6 days</option>
+                </select>
+              </label>
+              <button class="form-submit" type="submit" data-i18n="generateCustomPlan">Build plan</button>
+            </form>
+            <p class="goal-hint" data-i18n="customHint">Pick a split, then open a day to add or remove exercises and tune sets, reps, and rest.</p>
+          </div>
 
           <div class="trainer-plan-heading" id="trainer-plan-heading" hidden>
             <div>
@@ -819,7 +852,7 @@
       </main>
 
       <footer class="footer">
-        <p><span data-i18n="footerNote">Personal dashboard &mdash; learning project</span> &middot; v30</p>
+        <p><span data-i18n="footerNote">Personal dashboard &mdash; learning project</span> &middot; v31</p>
         <p class="footer-install" hidden>
           <button type="button" class="install-app-button" id="install-app-footer" data-i18n="installApp" hidden>
             Install app
@@ -831,6 +864,6 @@
       </footer>
     </div>
 
-            <script type="module" src="app.js?v=24"></script>
+            <script type="module" src="app.js?v=25"></script>
   </body>
 </html>
