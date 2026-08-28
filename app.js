@@ -1104,7 +1104,7 @@ function renderWeightChart(entries) {
     point.setAttribute("fill", "var(--aberration-b)");
     point.setAttribute("stroke", "var(--ink)");
     point.setAttribute("stroke-width", "2.5");
-    point.setAttribute("class", "chart-point chart-pop");
+    point.setAttribute("class", index === sortedEntries.length - 1 ? "chart-point chart-pop chart-point-latest" : "chart-point chart-pop");
     point.style.setProperty("--pop-delay", `${index * 70}ms`);
     point.setAttribute("tabindex", "0");
     point.setAttribute("aria-label", `${formatMeasurementDate(entry.date)}: ${formatWeight(entry.weight)} kg`);
@@ -1128,8 +1128,10 @@ function renderWeightChart(entries) {
       logWeightTooltip("event:blur", { date: entry.date });
       scheduleHideWeightTooltip(point);
     });
+    weightChartPoints.append(point);
     if (index === sortedEntries.length - 1) {
-      // Radar ping marking the newest measurement
+      // Radar ping marking the newest measurement - appended AFTER the
+      // point so the hover/focus sibling selector can reveal it
       const ping = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       ping.setAttribute("x", x - 10);
       ping.setAttribute("y", y - 10);
@@ -1141,7 +1143,6 @@ function renderWeightChart(entries) {
       ping.setAttribute("class", "chart-ping");
       weightChartPoints.append(ping);
     }
-    weightChartPoints.append(point);
 
     const dateLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
     dateLabel.setAttribute("x", x);
@@ -1166,6 +1167,7 @@ function replayWeightChartAnimation() {
     line.classList.remove("chart-draw");
   }
   for (const point of weightChartPoints.children) {
+    if (!point.classList.contains("chart-point")) continue;
     point.classList.remove("chart-pop");
   }
   void weightChart.getBoundingClientRect();
@@ -1174,6 +1176,7 @@ function replayWeightChartAnimation() {
     line.classList.add("chart-draw");
   }
   for (const point of weightChartPoints.children) {
+    if (!point.classList.contains("chart-point")) continue;
     point.classList.add("chart-pop");
   }
 }
@@ -1355,9 +1358,6 @@ const TRAINER_MUSCLE_COLORS = {
   abs: "var(--accent-purple)",
 };
 
-const TRAINER_ICON_DUMBBELL = '<svg viewBox="0 0 32 32" class="icon-svg"><path d="M6 12v8M10 9v14M22 9v14M26 12v8M10 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const TRAINER_ICON_TIMER = '<svg viewBox="0 0 32 32" class="icon-svg"><circle cx="16" cy="18" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 18v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12.5 4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-
 const trainerExercises = {
   squat: { name: { en: "Squat", es: "Sentadilla" }, cue: { en: "Brace your trunk and keep your knees tracking over your toes.", es: "Activa el tronco y mantén las rodillas alineadas con los pies." }, muscle: "quads" },
   hinge: { name: { en: "Romanian deadlift", es: "Peso muerto rumano" }, cue: { en: "Push your hips back and keep the weight close to your legs.", es: "Lleva la cadera atrás y mantén el peso cerca de las piernas." }, muscle: "hamstrings" },
@@ -1509,8 +1509,14 @@ function renderTrainerPlan(plan) {
     daySection.style.setProperty("--trainer-delay", `${dayIndex * 90}ms`);
 
     const dayChipColors = ["var(--accent-red)", "var(--accent-blue)", "var(--accent-yellow)", "var(--accent-purple)", "var(--accent-green)", "var(--accent-orange)"];
-    const dayHeader = document.createElement("div");
+    // Days are collapsible: the header is a full-width button that reveals
+    // that day's exercise cards (first day starts open)
+    const isOpen = dayIndex === 0;
+    const dayHeader = document.createElement("button");
+    dayHeader.type = "button";
     dayHeader.className = "trainer-day-header";
+    dayHeader.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) dayHeader.classList.add("is-open");
     const daySr = document.createElement("span");
     daySr.className = "sr-only";
     daySr.textContent = `${strings.dayLabel} ${dayIndex + 1}`;
@@ -1521,10 +1527,19 @@ function renderTrainerPlan(plan) {
     dayChip.textContent = String(dayIndex + 1);
     const dayTitle = document.createElement("h4");
     dayTitle.textContent = getTrainerDayName(day.name, strings);
-    dayHeader.append(daySr, dayChip, dayTitle);
+    const dayCount = document.createElement("span");
+    dayCount.className = "trainer-day-count";
+    dayCount.setAttribute("aria-hidden", "true");
+    dayCount.textContent = String(day.exercises.length);
+    const dayArrow = document.createElement("span");
+    dayArrow.className = "trainer-day-arrow";
+    dayArrow.setAttribute("aria-hidden", "true");
+    dayArrow.textContent = "+";
+    dayHeader.append(daySr, dayChip, dayTitle, dayCount, dayArrow);
 
     const exerciseList = document.createElement("div");
     exerciseList.className = "exercise-list";
+    if (!isOpen) exerciseList.hidden = true;
     day.exercises.forEach((exercise, exerciseIndex) => {
       const data = trainerExercises[exercise.id];
       const muscleColor = TRAINER_MUSCLE_COLORS[data.muscle] || "var(--accent-blue)";
@@ -1533,7 +1548,6 @@ function renderTrainerPlan(plan) {
       card.style.setProperty("--trainer-delay", `${dayIndex * 90 + exerciseIndex * 45 + 120}ms`);
       card.style.borderLeftColor = muscleColor;
       card.innerHTML = `
-        <div class="exercise-visual" aria-hidden="true" style="background: ${muscleColor}">${exercise.id === "plank" ? TRAINER_ICON_TIMER : TRAINER_ICON_DUMBBELL}</div>
         <div class="exercise-main">
           <h5>${data.name[locale]}</h5>
           <div class="exercise-variables">
@@ -1564,6 +1578,13 @@ function renderTrainerPlan(plan) {
 
       exerciseList.append(card);
     });
+    dayHeader.addEventListener("click", () => {
+      const open = exerciseList.hidden;
+      exerciseList.hidden = !open;
+      dayHeader.setAttribute("aria-expanded", String(open));
+      dayHeader.classList.toggle("is-open", open);
+    });
+
     daySection.append(dayHeader, exerciseList);
     trainerDays.append(daySection);
   });

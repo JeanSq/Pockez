@@ -187,7 +187,6 @@ body.true-shadows .form-submit,
 body.true-shadows .summary-card,
 body.true-shadows .result-card,
 body.true-shadows .target-card,
-body.true-shadows .exercise-visual,
 body.true-shadows .note-list-item.is-active,
 body.true-shadows .install-app-button,
 body.true-shadows .dash-add,
@@ -946,7 +945,6 @@ body.animations-off *::after {
 
 /* Flat mode: with animations disabled, also drop the decorative tilts -
    axis-aligned boxes are immune to scroll-time rasterization shimmer */
-body.animations-off .exercise-visual,
 body.animations-off .title,
 body.animations-off .widget-title {
   transform: none !important;
@@ -2034,7 +2032,32 @@ body.animations-off .widget-title {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
   margin-bottom: 0.7rem;
+  padding: 0.5rem 0.6rem;
+  border: 2.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--relief);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.trainer-day-header:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--relief);
+}
+
+.trainer-day-header:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--relief);
+}
+
+.trainer-day-header:focus-visible {
+  outline: 2px dashed var(--aberration-b);
+  outline-offset: 3px;
 }
 
 .trainer-day-chip {
@@ -2052,10 +2075,34 @@ body.animations-off .widget-title {
 }
 
 .trainer-day-header h4 {
+  flex: 1 1 auto;
   margin: 0;
   color: var(--ink);
   font-family: var(--font-title);
   font-size: 1.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trainer-day-count {
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.3rem;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.trainer-day-arrow {
+  font-family: var(--font-label);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .exercise-list {
@@ -2063,11 +2110,13 @@ body.animations-off .widget-title {
   gap: 0.5rem;
 }
 
+/* display:grid above would beat the hidden attribute's UA display:none */
+.exercise-list[hidden] {
+  display: none;
+}
+
 .exercise-card {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 0.7rem;
-  padding: 0.6rem;
+  padding: 0.6rem 0.7rem;
   border: 2px solid var(--ink);
   border-left: 8px solid var(--accent-blue);
   border-radius: 0;
@@ -2118,23 +2167,6 @@ body.animations-off .widget-title {
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-.exercise-visual {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  border: 2px solid var(--ink);
-  background: var(--accent-yellow);
-  color: var(--text-on-dark);
-  font-family: var(--font-app-title);
-  font-size: 0.9rem;
-  transform: rotate(-3deg);
-}
-
-.exercise-visual .icon-svg {
-  width: 26px;
-  height: 26px;
 }
 
 .exercise-main h5 {
@@ -2324,12 +2356,19 @@ body.animations-off .widget-title {
   }
 }
 
-/* Radar ping radiating from the newest measurement diamond */
+/* Radar ping radiating from the newest measurement diamond - stays dark
+   until the point is hovered or keyboard-focused */
 .chart-ping {
   transform-box: fill-box;
   transform-origin: center;
   transform: rotate(45deg);
-  animation: chart-ping 2.4s ease-out 1.1s infinite;
+  opacity: 0;
+}
+
+.weight-chart .chart-point-latest.is-hovered ~ .chart-ping,
+.weight-chart .chart-point-latest:focus-visible ~ .chart-ping {
+  opacity: 1;
+  animation: chart-ping 1.2s ease-out infinite;
 }
 
 @keyframes chart-ping {
