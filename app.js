@@ -3,7 +3,7 @@
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
-import { translations } from "./i18n.js?v=20";
+import { translations } from "./i18n.js?v=21";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {

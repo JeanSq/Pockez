@@ -540,6 +540,10 @@ body.reveal-header:not(.animations-ready) .widget-panel * {
 .settings-toggles .toggle-state {
   min-width: 0;
   text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 body.dark-mode .form-field input,
