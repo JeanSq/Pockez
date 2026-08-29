@@ -2207,6 +2207,24 @@ if (workoutSaveButton) workoutSaveButton.addEventListener("click", saveActiveWor
 if (workoutDateInput) workoutDateInput.addEventListener("change", scheduleWorkoutSave);
 if (workoutFeelingsInput) workoutFeelingsInput.addEventListener("input", scheduleWorkoutSave);
 
+// Add exercise: clicking the button (or pressing Enter in the name field)
+// adds an exercise card, which renders the reps/kg number inputs.
+if (workoutAddExerciseSubmit && workoutAddExerciseName) {
+  workoutAddExerciseSubmit.addEventListener("click", () => {
+    const name = workoutAddExerciseName.value.trim();
+    if (!name) return;
+    addWorkoutExercise(name);
+    workoutAddExerciseName.value = "";
+    workoutAddExerciseName.focus();
+  });
+  workoutAddExerciseName.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      workoutAddExerciseSubmit.click();
+    }
+  });
+}
+
 bodyForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (bodyForm.reportValidity()) {
@@ -2684,9 +2702,6 @@ function renderWorkoutExercises() {
 
   updateWorkoutSummary();
 }
-
-const workoutAddExerciseNameEl = document.getElementById("workout-add-exercise-name");
-const workoutAddExerciseSubmitEl = document.getElementById("workout-add-exercise-submit");
 
 function onWorkoutSetChange(e) {
   const exIdx = Number(e.target.dataset.exerciseIndex);
