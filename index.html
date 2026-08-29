@@ -311,6 +311,105 @@
       <main class="dashboard">
         <section
           class="widget-panel rugged-paper spider-hover"
+          data-widget="dashboard"
+          aria-labelledby="dashboard-heading"
+          hidden
+        >
+          <div class="dash-top">
+            <div class="dash-top-text">
+              <h2 id="dashboard-heading" class="dash-title" data-i18n="dashboardTitle">Today</h2>
+              <p class="dash-date" id="dash-date">&mdash;</p>
+            </div>
+            <button
+              type="button"
+              class="dash-add"
+              id="dash-add"
+              data-i18n-aria="newNoteButton"
+              aria-label="New note"
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
+
+          <section class="dash-hero" aria-live="polite">
+            <div class="dash-hero-text">
+              <span class="dash-hero-label" data-i18n="dashHeroLabel">Overall progress</span>
+              <strong class="dash-hero-value"><span id="dash-progress">&mdash;</span><span class="dash-hero-unit" aria-hidden="true">%</span></strong>
+              <em class="dash-hero-meta" id="dash-progress-meta">&mdash;</em>
+              <div class="dash-hero-bar" aria-hidden="true">
+                <span class="dash-hero-fill" id="dash-progress-fill"></span>
+              </div>
+            </div>
+            <div class="dash-hero-dots" aria-hidden="true"></div>
+          </section>
+
+          <h3 class="dash-section-label" data-i18n="dashboardEyebrow">Personal snapshot</h3>
+
+          <section class="dash-rows" aria-live="polite">
+            <button type="button" class="summary-card dash-row" data-widget-target="weight">
+              <span class="dash-tile dash-tile-red" aria-hidden="true">
+                <svg viewBox="0 0 32 32" class="icon-svg">
+                  <rect x="5" y="5" width="22" height="22" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M10.5 15a5.5 5.5 0 0 1 11 0" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M16 15l3-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="dash-row-text">
+                <strong data-i18n="summaryLatestWeight">Latest weight</strong>
+                <em id="summary-weight-change">&mdash;</em>
+              </span>
+              <span class="dash-value"><span id="summary-weight">&mdash;</span><small data-i18n="weightUnit">kg</small></span>
+            </button>
+
+            <button type="button" class="summary-card dash-row" data-widget-target="body">
+              <span class="dash-tile dash-tile-blue" aria-hidden="true">
+                <svg viewBox="0 0 32 32" class="icon-svg">
+                  <path d="M4 18h5l3-9 5 14 3-8h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="dash-row-text">
+                <strong data-i18n="summaryBmi">BMI</strong>
+                <em data-i18n="summaryFromBody">From Body Stats</em>
+              </span>
+              <span class="dash-value"><span id="summary-bmi">&mdash;</span></span>
+            </button>
+
+            <button type="button" class="summary-card dash-row" data-widget-target="body">
+              <span class="dash-tile dash-tile-yellow" aria-hidden="true">
+                <svg viewBox="0 0 32 32" class="icon-svg">
+                  <path d="M16 4c4 5 7 8 7 13a7 7 0 0 1-14 0c0-3.2 1.6-5.8 3.6-8.4.5 2 1.4 3.2 3.2 4.2-.7-2.8-.4-5.8.2-8.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="dash-row-text">
+                <strong data-i18n="summaryCalories">Calorie target</strong>
+                <em id="summary-calorie-mode">&mdash;</em>
+              </span>
+              <span class="dash-value"><span id="summary-calories">&mdash;</span><small data-i18n="caloriesUnit">kcal/day</small></span>
+            </button>
+
+            <button type="button" class="summary-card dash-row" data-widget-target="notes">
+              <span class="dash-tile dash-tile-purple" aria-hidden="true">
+                <svg viewBox="0 0 32 32" class="icon-svg">
+                  <path d="M9 23l1.4-4.6L21.6 7.2a2.2 2.2 0 0 1 3.1 3.1L13.5 21.5 9 23z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M19.5 9.5l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="dash-row-text">
+                <strong data-i18n="navNotes">Log</strong>
+                <em data-i18n="dashLogSaved">sessions logged</em>
+              </span>
+              <span class="dash-value"><span id="dash-notes-count">0</span></span>
+            </button>
+          </section>
+
+          <button type="button" class="quick-link dash-cta" data-widget-target="weight">
+            <span data-i18n="dashLogWeight">Log today's weight</span>
+            <span class="dash-cta-arrow" aria-hidden="true">&rarr;</span>
+          </button>
+        </section>
+
+        <section
+          class="widget-panel rugged-paper spider-hover"
           data-widget="notes"
           aria-labelledby="log-heading"
           hidden
@@ -320,7 +419,7 @@
             Training log, PRs, and session totals. Saves automatically.
           </p>
 
-          <div class="workout-layout">
+                    <div class="workout-layout">
             <aside class="workout-sidebar" aria-label="Saved sessions">
               <button type="button" class="form-submit workout-new-button" id="workout-new" data-i18n="logNewSession">
                 New session
@@ -348,11 +447,11 @@
                 <p class="workout-celebration-text" id="workout-celebration-text"></p>
               </div>
 
-              <div class="workout-exercises" id="workout-exercises-container">
-                <div class="workout-add-exercise-row">
-                  <input list="workout-exercise-suggestions" id="workout-add-exercise-name" class="workout-add-exercise-name" type="text" data-i18n-placeholder="logAddCustomExercise" placeholder="Add custom…" hidden />
-                  <button type="button" class="workout-add-exercise-submit form-submit" id="workout-add-exercise-submit" data-i18n="logAddExercise">Add exercise</button>
-                </div>
+              <div class="workout-exercises" id="workout-exercises-container"></div>
+
+              <div class="workout-add-exercise-row">
+                <input list="workout-exercise-suggestions" id="workout-add-exercise-name" class="workout-add-exercise-name" type="text" data-i18n-placeholder="logAddCustomExercise" placeholder="Exercise name" />
+                <button type="button" class="workout-add-exercise-submit form-submit" id="workout-add-exercise-submit" data-i18n="logAddExercise">Add</button>
               </div>
 
               <datalist id="workout-exercise-suggestions"></datalist>

@@ -3036,7 +3036,7 @@ body.animations-off .widget-title {
   gap: 0.4rem;
   padding: 0.7rem 0.8rem;
   border: 2.5px solid var(--ink);
-  background: var(--accent-yellow);
+  background: var(--paper);
   box-shadow: 4px 4px 0 var(--relief);
   margin-bottom: 0.7rem;
 }

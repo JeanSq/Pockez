@@ -2681,33 +2681,12 @@ function renderWorkoutExercises() {
     workoutExercisesContainer.append(card);
   });
 
-  const addRow = document.createElement("div");
-  addRow.className = "workout-add-exercise-row";
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.className = "workout-add-exercise-name";
-  nameInput.id = "workout-add-exercise-name";
-  nameInput.placeholder = strings.logAddCustomExercise || "Add custom exercise...";
-  nameInput.setAttribute("list", "workout-exercise-suggestions");
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "workout-add-exercise-submit form-submit";
-  addBtn.id = "workout-add-exercise-submit";
-  addBtn.textContent = strings.logAddExercise || "Add exercise";
-  addBtn.addEventListener("click", () => {
-    const name = nameInput.value.trim();
-    if (!name) return;
-    addWorkoutExercise(name);
-    nameInput.value = "";
-  });
-  nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); addBtn.click(); }
-  });
-  addRow.append(nameInput, addBtn);
-  workoutExercisesContainer.append(addRow);
 
   updateWorkoutSummary();
 }
+
+const workoutAddExerciseNameEl = document.getElementById("workout-add-exercise-name");
+const workoutAddExerciseSubmitEl = document.getElementById("workout-add-exercise-submit");
 
 function onWorkoutSetChange(e) {
   const exIdx = Number(e.target.dataset.exerciseIndex);
