@@ -19,6 +19,7 @@ import { loadSettings, setAccent, setAnimationsEnabled, setBackground, setDarkMo
 import { getActiveProfile, getActiveProfileId, getProfiles, makeProfile, saveProfiles, updateActiveProfile } from "./profiles.js?v=1";
 
 import { computeWeightProgress, getGoalWeight, loadBodyStatsProfile, renderWeightChart, replayWeightChartAnimation } from "./weightChart.js?v=1";
+import { showSaveStatus } from "./ui.js?v=1";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -1016,21 +1017,6 @@ if (dashAddButton) {
 }
 
 // --- Workout log save / load ---
-function showSaveStatus(state) {
-  const strings = translations[languageSelect.value] || translations.en;
-
-  saveStatus.classList.remove("is-saving", "is-error");
-
-  if (state === "saving") {
-    saveStatus.textContent = strings.saving;
-    saveStatus.classList.add("is-saving");
-  } else if (state === "error") {
-    saveStatus.textContent = strings.saveError;
-    saveStatus.classList.add("is-error");
-  } else {
-    saveStatus.textContent = strings.saved;
-  }
-}
 
 
 function saveWorkouts(workouts) {
@@ -1210,49 +1196,6 @@ measurementCancelButton.addEventListener("click", cancelMeasurementEdit);
 
 chartRangeSelect.addEventListener("change", renderWeightLog);
 
-function getExportData() {
-  return {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    data: Object.fromEntries(Object.values(STORAGE_KEYS).map((key) => [key, loadPreference(key, "")])) ,
-  };
-}
-
-function exportData() {
-  const file = new Blob([JSON.stringify(getExportData(), null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `pockez-backup-${getTodayDateValue()}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function importData(file) {
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    try {
-      const imported = JSON.parse(reader.result);
-      if (!imported?.data || typeof imported.data !== "object") throw new Error("Invalid backup");
-      for (const key of Object.values(STORAGE_KEYS)) {
-        if (typeof imported.data[key] === "string") savePreference(key, imported.data[key]);
-      }
-      window.location.reload();
-    } catch (error) {
-      showSaveStatus("error");
-      console.warn("Could not import dashboard data:", error);
-    }
-  });
-  reader.readAsText(file);
-}
-
-function clearAllData() {
-  const strings = translations[languageSelect.value] || translations.en;
-  if (!window.confirm(strings.clearDataConfirm)) return;
-  for (const key of Object.values(STORAGE_KEYS)) removePreference(key);
-  window.location.reload();
-}
-
 /* Reset the offline app shell so a stale cached copy can never strand the
    user. Deletes every service-worker cache, then re-registers the worker so
    it re-downloads the current shell. Notes (localStorage) are untouched. */
@@ -1278,13 +1221,6 @@ async function resetOfflineCache() {
   }
 }
 
-exportDataButton.addEventListener("click", exportData);
-importDataButton.addEventListener("click", () => importDataInput.click());
-importDataInput.addEventListener("change", () => {
-  if (importDataInput.files[0]) importData(importDataInput.files[0]);
-  importDataInput.value = "";
-});
-clearDataButton.addEventListener("click", clearAllData);
 resetOfflineCacheButton.addEventListener("click", resetOfflineCache);
 
 trainerForm.addEventListener("submit", (event) => {
