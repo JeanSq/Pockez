@@ -24,6 +24,7 @@ function getTrainerPlanStore() {
   if (!saved) return null;
   try {
     const parsed = JSON.parse(saved);
+    // Legacy flat plan shape (pre container) → treat it as the recommended plan.
     if (parsed && Array.isArray(parsed.days) && !parsed.activeMode) {
       return { activeMode: "recommended", recommended: parsed, custom: null };
     }
@@ -41,6 +42,11 @@ function saveTrainerPlan(plan) {
   const store = getTrainerPlanStore() || { activeMode: "recommended", recommended: null, custom: null };
   store[store.activeMode] = plan;
   saveTrainerPlanStore(store);
+}
+
+function getSavedTrainerPlan() {
+  const store = getTrainerPlanStore();
+  return store ? store[store.activeMode] : null;
 }
 
 function renderTrainerPlan(plan) {
@@ -62,6 +68,8 @@ function renderTrainerPlan(plan) {
     daySection.style.setProperty("--trainer-delay", `${dayIndex * 90}ms`);
 
     const dayChipColors = ["var(--accent-red)", "var(--accent-blue)", "var(--accent-yellow)", "var(--accent-purple)", "var(--accent-green)", "var(--accent-orange)"];
+    // Days are collapsible: the header is a full-width button that reveals
+    // that day's exercise cards (the first render opens day 1)
     const isOpen = openIndices.has(dayIndex);
     const dayHeader = document.createElement("button");
     dayHeader.type = "button";
@@ -93,6 +101,13 @@ function renderTrainerPlan(plan) {
     if (!isOpen) exerciseList.hidden = true;
     day.exercises.forEach((exercise, exerciseIndex) => {
       const libraryEntry = trainerExercises[exercise.id];
+      const customExercise = !libraryEntry;
+      const name = customExercise ? (exercise.customName || exercise.id) : libraryEntry.name[locale];
+      const muscle = customExercise ? null : libraryEntry.muscle;
+      const muscleColor = muscle ? (TRAINER_MUSCLE_COLORS[muscle] || "var(--accent-blue)") : "var(--accent-purple)";
+      const cueValue = customExercise ? (exercise.customCue || strings.customCue) : libraryEntry.cue[locale];
+      const isTimed = !customExercise && exercise.id === "plank";
+
       const card = document.createElement("article");
       card.className = "exercise-card exercise-card-animated";
       card.style.setProperty("--trainer-delay", `${dayIndex * 90 + exerciseIndex * 45 + 120}ms`);
@@ -112,6 +127,7 @@ function renderTrainerPlan(plan) {
       nameTitle.textContent = name;
       nameRow.append(nameTitle);
 
+      // Custom plans let you add and remove exercises directly
       if (isCustomMode) {
         const removeButton = document.createElement("button");
         removeButton.type = "button";
@@ -123,6 +139,8 @@ function renderTrainerPlan(plan) {
         nameRow.append(removeButton);
       }
 
+      // Form cues collapse behind a chip so the cards read as a quick
+      // workout sheet instead of a wall of text
       const cueToggle = document.createElement("button");
       cueToggle.type = "button";
       cueToggle.className = "exercise-cue-toggle";
@@ -138,6 +156,15 @@ function renderTrainerPlan(plan) {
         cueToggle.setAttribute("aria-expanded", String(open));
         cueToggle.classList.toggle("is-open", open);
       });
+      nameTitle.after(cueToggle, cueText);
+
+      exerciseList.append(card);
+    });
+
+    // Custom plans: an inline row to add a library exercise or a brand-new
+    // custom-named one. The exercise list is filtered to the day's body
+    // region so an upper day never recommends lower-body moves (and vice
+    // versa); core moves stay available on both.
     if (isCustomMode) {
       const exerciseAddRow = document.createElement("div");
       exerciseAddRow.className = "exercise-add";
@@ -172,6 +199,8 @@ function renderTrainerPlan(plan) {
     daySection.append(dayHeader, exerciseList);
     trainerDays.append(daySection);
   });
+}
+
 function formatTrainerRest(rest) {
   return typeof rest === "number" ? "2 - 3 min" : rest || "2 - 3 min";
 }
@@ -233,6 +262,8 @@ function loadTrainerPlan() {
   trainerRecommendedSection.hidden = mode !== "recommended";
   trainerCustomSection.hidden = mode !== "custom";
 
+  // Each mode's form reflects that mode's stored plan (the recommended form
+  // keeps its own params even while a custom plan is active).
   const recommendedPlan = store?.recommended || null;
   if (recommendedPlan) {
     trainingDaysInput.value = recommendedPlan.dayCount;
@@ -270,22 +301,3 @@ export {
   setTrainerModeRadio,
   updateTrainerSections,
 };
-
-}
-
-      nameTitle.after(cueToggle, cueText);
-
-      exerciseList.append(card);
-    });
-
-      const customExercise = !libraryEntry;
-      const name = customExercise ? (exercise.customName || exercise.id) : libraryEntry.name[locale];
-      const muscle = customExercise ? null : libraryEntry.muscle;
-      const muscleColor = muscle ? (TRAINER_MUSCLE_COLORS[muscle] || "var(--accent-blue)") : "var(--accent-purple)";
-      const cueValue = customExercise ? (exercise.customCue || strings.customCue) : libraryEntry.cue[locale];
-      const isTimed = !customExercise && exercise.id === "plank";
-
-function getSavedTrainerPlan() {
-  const store = getTrainerPlanStore();
-  return store ? store[store.activeMode] : null;
-}

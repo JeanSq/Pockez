@@ -15,7 +15,7 @@ import { addCustomExercise, addLibraryExercise, buildCustomTrainerPlan, buildTra
 import { computeWorkoutTonnage, getAllTimePRs, getCelebration, getWorkouts } from "./workoutEngine.js?v=1";
 
 
-import { formatTrainerRest, getSavedTrainerPlan, getSuggestedTrainerEmphasis, getTrainerDayName, getTrainerPlanStore, loadTrainerPlan, migrateLegacyTrainerPlan, renderTrainerPlan, saveTrainerPlan, saveTrainerPlanStore, setTrainerModeRadio, updateTrainerSections } from "./trainer.js?v=1";
+import { formatTrainerRest, getSavedTrainerPlan, getSuggestedTrainerEmphasis, getTrainerDayName, getTrainerPlanStore, loadTrainerPlan, migrateLegacyTrainerPlan, renderTrainerPlan, saveTrainerPlan, saveTrainerPlanStore, setTrainerModeRadio, updateTrainerSections } from "./trainer.js?v=2";
 import { loadSettings, setAccent, setAnimationsEnabled, setBackground, setDarkModeEnabled, setTrueShadowsEnabled, updateActivityDescription } from "./settings.js?v=1";
 
 import { getActiveProfile, getActiveProfileId, getProfiles, makeProfile, saveProfiles, updateActiveProfile } from "./profiles.js?v=1";
