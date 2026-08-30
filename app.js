@@ -5,6 +5,11 @@
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
 import { translations } from "./i18n.js?v=21";
 
+import { DEBUG_ENABLED, debugLog } from "./debug.js?v=1";
+import { formatMeasurementDate, formatWeight, getTodayDateValue } from "./format.js?v=1";
+import { accentOptions, activityDescription, activityInput, aggressiveCaloriesResult, animationsState, animationsToggle, backgroundOptions, bodyForm, bodyInputs, bodyResults, calorieModeOptions, chartEmpty, chartRangeSelect, chartSummary, clearDataButton, conservativeCaloriesResult, darkModeState, darkModeToggle, dashDateEl, dashProgressEl, dashProgressFill, dashProgressMeta, exportDataButton, goalHint, goalWeightInput, goalWeightResult, i18nAriaElements, i18nElements, i18nPlaceholderElements, i18nTitleElements, importDataButton, importDataInput, installButtons, iosHintEls, isFileProtocol, isIos, isStandalone, languageSelect, latestWeightResult, measurementCancelButton, measurementDateInput, measurementList, measurementSubmitButton, measurementWeightInput, navButtons, newWorkoutButton, profileAddButton, profileCancelButton, profileCount, profileDeleteButton, profileEditor, profileNameInput, profileRenameButton, profileSaveButton, profileSelect, quickLinks, resetOfflineCacheButton, saveStatus, settingsClose, settingsDialog, settingsOpen, startingWeightResult, summaryBmi, summaryCalorieMode, summaryCalories, summaryWeight, summaryWeightChange, titleEl, trainerCustomForm, trainerCustomSection, trainerCustomSplitInput, trainerDays, trainerForm, trainerModeInputs, trainerPlanHeading, trainerPlanMeta, trainerPlanTitle, trainerRecommendedSection, trainingDaysInput, trainingEmphasisInput, trainingGoalInput, trainingVolumeInput, trueShadowsState, trueShadowsToggle, weightChangeResult, weightChart, weightChartArea, weightChartBaseline, weightChartGrid, weightChartLine, weightChartLineUnderlay, weightChartPoints, weightChartTooltip, weightChartTooltipBox, weightChartTooltipText, weightChartXLabels, weightChartYLabels, weightForm, weightGoalLine, weightHeroFill, weightHeroMeta, weightHeroProgress, weightTrendLine, widgetPanels, workoutAddExerciseName, workoutAddExerciseSubmit, workoutCelebration, workoutCelebrationText, workoutDateInput, workoutEditor, workoutExercisesContainer, workoutFeelingsInput, workoutLayout, workoutList, workoutSaveButton, workoutTonnageValue, workoutTotalRepsValue } from "./elements.js?v=1";
+import { TRAINER_BODY_REGION, TRAINER_MUSCLE_COLORS, trainerExercises } from "./exerciseLibrary.js?v=1";
+
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
   document.body.classList.add("splash");
@@ -13,103 +18,6 @@ try {
   // ignore if body not ready
 }
 
-// --- Debug / instrumentation ---
-// Active ONLY when the page is opened with ?debug in the URL
-// (e.g. index.html?debug). Production runs stay free of console spam
-// and the log buffer can no longer grow without bound.
-const DEBUG_ENABLED = /[?&]debug\b/i.test(location.search);
-const MAX_DEBUG_LOGS = 500;
-const __debugLogs = [];
-function debugLog(msg, meta = {}) {
-  if (!DEBUG_ENABLED) return;
-  const entry = { t: new Date().toISOString(), msg, bodyClass: document.body.className, meta };
-  __debugLogs.push(entry);
-  if (__debugLogs.length > MAX_DEBUG_LOGS) __debugLogs.shift();
-  try { console.log("[dbg]", entry); } catch (e) {}
-}
-
-function exportDebugLogs() {
-  try {
-    const blob = new Blob([JSON.stringify(__debugLogs, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pockez-debug-log.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-// Floating export button + Shift+D shortcut, ?debug builds only
-if (DEBUG_ENABLED) {
-  const debugButton = document.createElement('button');
-  debugButton.textContent = 'Export logs';
-  debugButton.id = 'debug-export';
-  debugButton.style.cssText = 'position:fixed;right:12px;bottom:96px;z-index:9999;padding:6px 8px;border-radius:6px;background:#222;color:#fff;border:0;opacity:0.8;font-size:12px;';
-  debugButton.addEventListener('click', exportDebugLogs);
-  document.addEventListener('DOMContentLoaded', () => document.body.appendChild(debugButton));
-
-  // keyboard export: Shift+D
-  window.addEventListener('keydown', (e) => {
-    if (e.shiftKey && e.key.toLowerCase() === 'd') {
-      exportDebugLogs();
-    }
-  });
-}
-
-// Freeze perpetual decorative loops while scrolling (see .is-scrolling CSS).
-let __scrollEndTimer = null;
-function __markScrolling() {
-  document.body.classList.add("is-scrolling");
-  if (__scrollEndTimer) clearTimeout(__scrollEndTimer);
-  __scrollEndTimer = setTimeout(() => {
-    document.body.classList.remove("is-scrolling");
-  }, 200);
-}
-window.addEventListener("scroll", __markScrolling, { passive: true });
-
-// (?debug) Scroll-geometry probe: logs the exact numbers that expose any
-// horizontal shift - scrollbar width, column edges, centering error, and
-// the fixed nav / active panel rects.
-let __lastScrollProbe = 0;
-window.addEventListener(
-  "scroll",
-  () => {
-    if (!DEBUG_ENABLED) return;
-    const now = performance.now();
-    if (now - __lastScrollProbe < 250) return;
-    __lastScrollProbe = now;
-
-    const root = document.documentElement;
-    const bodyRect = document.body.getBoundingClientRect();
-    const navRect = document.querySelector(".app-nav")?.getBoundingClientRect();
-    const panelRect = document
-      .querySelector(".widget-panel.is-active")
-      ?.getBoundingClientRect();
-    const round1 = (n) => Math.round(n * 10) / 10;
-    debugLog("scroll geometry", {
-      scrollXExact: Math.round(window.scrollX * 100) / 100,
-      scrollYExact: Math.round(window.scrollY * 100) / 100,
-      innerWidth: window.innerWidth,
-      rootClientWidth: root.clientWidth,
-      scrollbarWidth: window.innerWidth - root.clientWidth,
-      rootHOverflow: root.scrollWidth - root.clientWidth,
-      bodyHOverflow: document.body.scrollWidth - document.body.clientWidth,
-      bodyLeftGap: round1(bodyRect.left),
-      bodyRightGap: round1(window.innerWidth - bodyRect.right),
-      centerDeviation: round1((bodyRect.left + bodyRect.right) / 2 - window.innerWidth / 2),
-      navLeft: navRect ? round1(navRect.left) : null,
-      navRightGap: navRect ? round1(window.innerWidth - navRect.right) : null,
-      panelLeft: panelRect ? round1(panelRect.left) : null,
-      panelRightGap: panelRect ? round1(window.innerWidth - panelRect.right) : null,
-    });
-  },
-  { passive: true }
-);
 
 // --- PWA: service worker (offline + installable when served over http[s]) ---
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
@@ -156,14 +64,6 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 // offer a custom "Install app" button (footer + Settings) instead of relying
 // only on the browser's built-in UI. iOS Safari has no such event at all, so
 // it gets a small manual "Add to Home Screen" hint instead.
-const installButtons = document.querySelectorAll(".install-app-button");
-const iosHintEls = document.querySelectorAll(".install-ios-hint");
-const isStandalone =
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true;
-const isFileProtocol = location.protocol === "file:";
-const isIos =
-  /ipad|iphone|ipod/i.test(navigator.userAgent || "") && !window.MSStream;
 
 let deferredInstallPrompt = null;
 
@@ -232,149 +132,21 @@ window.addEventListener("appinstalled", () => {
 debugLog('startup: added splash/no-js handling');
 
 // Hook title animation events to log and ensure we don't reveal content early
-const titleEl = document.querySelector('.title');
 if (titleEl) {
   titleEl.addEventListener('animationstart', () => debugLog('title animationstart'));
   titleEl.addEventListener('animationend', () => debugLog('title animationend'));
 }
 
-const languageSelect = document.getElementById("language-select");
-const workoutList = document.getElementById("workout-list");
-const workoutEditor = document.querySelector(".workout-editor");
-const workoutLayout = document.querySelector(".workout-layout");
-const workoutExercisesContainer = document.getElementById("workout-exercises-container");
-const workoutDateInput = document.getElementById("workout-date-input");
-const workoutTonnageValue = document.getElementById("workout-tonnage-value");
-const workoutTotalRepsValue = document.getElementById("workout-total-reps-value");
-const workoutCelebration = document.getElementById("workout-celebration");
-const workoutCelebrationText = document.getElementById("workout-celebration-text");
-const workoutAddExerciseName = document.getElementById("workout-add-exercise-name");
-const workoutAddExerciseSubmit = document.getElementById("workout-add-exercise-submit");
-const workoutFeelingsInput = document.getElementById("workout-feelings-input");
-const workoutSaveButton = document.getElementById("workout-save-btn");
-const newWorkoutButton = document.getElementById("workout-new");
-const saveStatus = document.getElementById("save-status");
-const navButtons = document.querySelectorAll(".nav-btn");
-const widgetPanels = document.querySelectorAll(".widget-panel");
-const settingsDialog = document.getElementById("settings-dialog");
-const settingsOpen = document.getElementById("settings-open");
-const settingsClose = document.getElementById("settings-close");
-const accentOptions = document.querySelectorAll('input[name="accent"]');
-const backgroundOptions = document.querySelectorAll('input[name="background"]');
-const animationsToggle = document.getElementById("animations-toggle");
-const animationsState = document.querySelector(".toggle-state");
-const darkModeToggle = document.getElementById("dark-mode-toggle");
-const darkModeState = darkModeToggle?.closest(".animation-setting")?.querySelector(".toggle-state");
-const trueShadowsToggle = document.getElementById("true-shadows-toggle");
-const trueShadowsState = trueShadowsToggle?.closest(".animation-setting")?.querySelector(".toggle-state");
-const exportDataButton = document.getElementById("export-data");
-const importDataButton = document.getElementById("import-data-button");
-const importDataInput = document.getElementById("import-data-input");
-const clearDataButton = document.getElementById("clear-data");
-const resetOfflineCacheButton = document.getElementById("reset-offline-cache");
-const profileSelect = document.getElementById("profile-select");
-const profileCount = document.getElementById("profile-count");
-const profileAddButton = document.getElementById("profile-add");
-const profileRenameButton = document.getElementById("profile-rename");
-const profileDeleteButton = document.getElementById("profile-delete");
-const profileEditor = document.getElementById("profile-editor");
-const profileNameInput = document.getElementById("profile-name-input");
-const profileSaveButton = document.getElementById("profile-save");
-const profileCancelButton = document.getElementById("profile-cancel");
 let profileEditMode = null;
-const bodyForm = document.getElementById("body-form");
-const bodyInputs = {
-  age: document.getElementById("age-input"),
-  sex: document.getElementById("sex-input"),
-  height: document.getElementById("height-input"),
-  weight: document.getElementById("body-weight-input"),
-  activity: document.getElementById("activity-input"),
-};
-const bodyResults = {
-  bmi: document.getElementById("bmi-result"),
-  bmiCategory: document.getElementById("bmi-category"),
-  bmiMarker: document.getElementById("bmi-scale-marker"),
-  bmiReferenceDescription: document.getElementById("bmi-reference-description"),
-  bmr: document.getElementById("bmr-result"),
-  calories: document.getElementById("maintenance-calories-result"),
-};
-const calorieModeOptions = document.querySelectorAll('input[name="calorie-mode"]');
-const conservativeCaloriesResult = document.getElementById("conservative-calories-result");
-const aggressiveCaloriesResult = document.getElementById("aggressive-calories-result");
-const weightForm = document.getElementById("weight-form");
-const measurementSubmitButton = weightForm?.querySelector('button[type="submit"]');
-const measurementCancelButton = document.getElementById("measurement-cancel");
-const measurementDateInput = document.getElementById("measurement-date-input");
-const measurementWeightInput = document.getElementById("measurement-weight-input");
-const startingWeightResult = document.getElementById("starting-weight-result");
-const latestWeightResult = document.getElementById("latest-weight-result");
-const weightChangeResult = document.getElementById("weight-change-result");
-const weightChart = document.getElementById("weight-chart");
-const weightChartGrid = document.getElementById("weight-chart-grid");
-const weightChartYLabels = document.getElementById("weight-chart-y-labels");
-const weightChartArea = document.getElementById("weight-chart-area");
-const weightChartLineUnderlay = document.getElementById("weight-chart-line-underlay");
-const weightChartBaseline = document.getElementById("weight-chart-baseline");
-const weightChartLine = document.getElementById("weight-chart-line");
-const weightChartPoints = document.getElementById("weight-chart-points");
-const weightChartXLabels = document.getElementById("weight-chart-x-labels");
-const weightChartTooltip = document.getElementById("weight-chart-tooltip");
-const weightChartTooltipBox = document.getElementById("weight-chart-tooltip-box");
-const weightChartTooltipText = document.getElementById("weight-chart-tooltip-text");
 let weightTooltipTimer = null;
 let weightTooltipFadeTimer = null;
 let weightTooltipHideDelayTimer = null;
-const chartEmpty = document.getElementById("chart-empty");
-const measurementList = document.getElementById("measurement-list");
-const goalWeightInput = document.getElementById("goal-weight-input");
-const goalWeightResult = document.getElementById("goal-weight-result");
-const weightGoalLine = document.getElementById("weight-goal-line");
-const weightTrendLine = document.getElementById("weight-trend-line");
-const goalHint = document.getElementById("goal-hint");
-const weightHeroProgress = document.getElementById("weight-hero-progress");
-const weightHeroMeta = document.getElementById("weight-hero-meta");
-const weightHeroFill = document.getElementById("weight-hero-fill");
-const chartRangeSelect = document.getElementById("chart-range-select");
-const chartSummary = document.getElementById("chart-summary");
-const summaryWeight = document.getElementById("summary-weight");
-const summaryWeightChange = document.getElementById("summary-weight-change");
-const summaryBmi = document.getElementById("summary-bmi");
-const summaryCalories = document.getElementById("summary-calories");
-const summaryCalorieMode = document.getElementById("summary-calorie-mode");
-const quickLinks = document.querySelectorAll("[data-widget-target]");
-const dashDateEl = document.getElementById("dash-date");
-const dashProgressEl = document.getElementById("dash-progress");
-const dashProgressFill = document.getElementById("dash-progress-fill");
-const dashProgressMeta = document.getElementById("dash-progress-meta");
-// dash-notes-count removed (replaced by workout session count on dashboard)
 let editingMeasurementId = null;
 let bodyStatsCalculated = false;
-const trainerForm = document.getElementById("trainer-form");
-const trainingDaysInput = document.getElementById("training-days-input");
-const trainingGoalInput = document.getElementById("training-goal-input");
-const trainingEmphasisInput = document.getElementById("training-emphasis-input");
-const trainingVolumeInput = document.getElementById("training-volume-input");
-const trainerPlanHeading = document.getElementById("trainer-plan-heading");
-const trainerPlanTitle = document.getElementById("trainer-plan-title");
-const trainerPlanMeta = document.getElementById("trainer-plan-meta");
-const trainerDays = document.getElementById("trainer-days");
-const trainerRecommendedSection = document.getElementById("trainer-recommended");
-const trainerCustomSection = document.getElementById("trainer-custom");
-const trainerCustomForm = document.getElementById("trainer-custom-form");
-const trainerCustomSplitInput = document.getElementById("trainer-custom-split-input");
-const trainerModeInputs = document.querySelectorAll('input[name="trainer-mode"]');
 // Day-index set of currently expanded plan days, so add/remove re-renders
 // don't collapse the day being edited (null = never rendered yet).
 let trainerOpenDays = null;
 
-const i18nElements = document.querySelectorAll("[data-i18n]");
-const i18nPlaceholderElements = document.querySelectorAll(
-  "[data-i18n-placeholder]"
-);
-const i18nAriaElements = document.querySelectorAll("[data-i18n-aria]");
-const i18nTitleElements = document.querySelectorAll("[data-i18n-title]");
-const activityInput = document.getElementById("activity-input");
-const activityDescription = document.getElementById("activity-description");
 
 const DEBUG_UI = DEBUG_ENABLED;
 const DEBUG_WEIGHT_TOOLTIP = DEBUG_ENABLED;
@@ -877,22 +649,6 @@ function saveGoalWeight() {
   updateActiveProfile({ goalWeight: String(value) });
 }
 
-function formatWeight(value) {
-  return Number(value).toFixed(1);
-}
-
-function formatMeasurementDate(dateValue) {
-  return new Date(`${dateValue}T00:00:00`).toLocaleDateString(
-    languageSelect.value,
-    { year: "numeric", month: "short", day: "numeric" }
-  );
-}
-
-function getTodayDateValue() {
-  const today = new Date();
-  const offset = today.getTimezoneOffset() * 60000;
-  return new Date(today.getTime() - offset).toISOString().split("T")[0];
-}
 
 // Home header date line ("AUGUST 26, 2026"), locale-aware
 function renderDashDate() {
@@ -1397,47 +1153,6 @@ function renderDashboardSummary() {
     : strings.deficitSummary;
 }
 
-// Muscle-group accent colors for the trainer plan cards (their `muscle`
-// field drives both the tile color and the card's accent edge).
-const TRAINER_MUSCLE_COLORS = {
-  quads: "var(--accent-blue)",
-  hamstrings: "var(--accent-purple)",
-  chest: "var(--accent-red)",
-  shoulders: "var(--accent-orange)",
-  back: "var(--accent-green)",
-  biceps: "var(--accent-yellow)",
-  triceps: "var(--accent-red)",
-  abs: "var(--accent-purple)",
-};
-
-const trainerExercises = {
-  squat: { name: { en: "Squat", es: "Sentadilla" }, cue: { en: "Brace your trunk and keep your knees tracking over your toes.", es: "Activa el tronco y mantén las rodillas alineadas con los pies." }, muscle: "quads" },
-  hinge: { name: { en: "Romanian deadlift", es: "Peso muerto rumano" }, cue: { en: "Push your hips back and keep the weight close to your legs.", es: "Lleva la cadera atrás y mantén el peso cerca de las piernas." }, muscle: "hamstrings" },
-  push: { name: { en: "Bench press", es: "Press de banca" }, cue: { en: "Keep your shoulder blades set and lower with control.", es: "Fija los omóplatos y baja con control." }, muscle: "chest" },
-  overhead: { name: { en: "Overhead press", es: "Press por encima de la cabeza" }, cue: { en: "Squeeze your glutes and press in a smooth vertical path.", es: "Aprieta los glúteos y empuja en una trayectoria vertical suave." }, muscle: "shoulders" },
-  row: { name: { en: "Seated row", es: "Remo sentado" }, cue: { en: "Pull toward your ribs without shrugging your shoulders.", es: "Lleva el agarre hacia las costillas sin encoger los hombros." }, muscle: "back" },
-  pulldown: { name: { en: "Lat pulldown", es: "Jalón al pecho" }, cue: { en: "Pull your elbows down and avoid swinging your torso.", es: "Lleva los codos abajo y evita balancear el torso." }, muscle: "back" },
-  splitSquat: { name: { en: "Split squat", es: "Sentadilla dividida" }, cue: { en: "Use a stable stance and lower your back knee straight down.", es: "Usa una postura estable y baja la rodilla trasera hacia abajo." }, muscle: "quads" },
-  calf: { name: { en: "Calf raise", es: "Elevación de gemelos" }, cue: { en: "Pause briefly at the top and lower through the full range.", es: "Pausa arriba y baja usando todo el recorrido." }, muscle: "hamstrings" },
-  pushup: { name: { en: "Push-up", es: "Flexión" }, cue: { en: "Keep your body in one line and move as one unit.", es: "Mantén el cuerpo en línea y muévete como una unidad." }, muscle: "chest" },
-  curl: { name: { en: "Dumbbell curl", es: "Curl con mancuernas" }, cue: { en: "Keep your elbows still and avoid using momentum.", es: "Mantén los codos quietos y evita usar impulso." }, muscle: "biceps" },
-  triceps: { name: { en: "Triceps pressdown", es: "Extensión de tríceps" }, cue: { en: "Keep your upper arms still as you extend your elbows.", es: "Mantén los brazos quietos mientras extiendes los codos." }, muscle: "triceps" },
-  plank: { name: { en: "Plank", es: "Plancha" }, cue: { en: "Keep ribs tucked and squeeze glutes while breathing steadily.", es: "Mantén las costillas recogidas, aprieta los glúteos y respira." }, muscle: "abs" },
-};
-
-// Body region per muscle group, used to filter which exercises a day
-// recommends when adding moves to a custom plan (upper days should never
-// suggest squats, Romanian deadlifts, etc., and vice versa).
-const TRAINER_BODY_REGION = {
-  quads: "lower",
-  hamstrings: "lower",
-  chest: "upper",
-  shoulders: "upper",
-  back: "upper",
-  biceps: "upper",
-  triceps: "upper",
-  abs: "core",
-};
 
 function getExerciseBodyRegion(muscle) {
   return TRAINER_BODY_REGION[muscle] || "upper";
