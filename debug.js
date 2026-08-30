@@ -2,6 +2,10 @@
 // Active ONLY when the page is opened with ?debug in the URL
 // (e.g. index.html?debug). Production runs stay free of console spam
 // and the log buffer can no longer grow without bound.
+import { settingsDialog, weightChartTooltip, weightChartTooltipText } from "./elements.js?v=1";
+import { STORAGE_KEYS, loadPreference } from "./storage.js?v=14";
+import { state } from "./state.js?v=1";
+
 export const DEBUG_ENABLED = /[?&]debug\b/i.test(location.search);
 export const MAX_DEBUG_LOGS = 500;
 export const __debugLogs = [];
@@ -95,3 +99,52 @@ window.addEventListener(
   },
   { passive: true }
 );
+
+export const DEBUG_UI = DEBUG_ENABLED;
+export const DEBUG_WEIGHT_TOOLTIP = DEBUG_ENABLED;
+
+export function logWeightTooltip(eventName, details = {}) {
+  if (!DEBUG_WEIGHT_TOOLTIP) return;
+  console.log(`[Weight Tooltip] ${eventName}`, {
+    ...details,
+    tooltipHidden: weightChartTooltip?.hidden,
+    tooltipText: weightChartTooltipText?.textContent,
+    timerActive: state.weightTooltipTimer !== null,
+  });
+}
+
+export function logUiState(label) {
+  if (!DEBUG_UI) return;
+
+  const widget = document.querySelector(".widget-panel.is-active");
+  const dialog = settingsDialog;
+  const widgetStyles = widget ? getComputedStyle(widget) : null;
+  const dialogStyles = dialog ? getComputedStyle(dialog) : null;
+
+  console.group(`[Pockez] ${label}`);
+  console.log("Theme", {
+    accent: loadPreference(STORAGE_KEYS.accent, "red-blue"),
+    background: loadPreference(STORAGE_KEYS.background, "desk"),
+    activeWidget: widget?.dataset.widget || "none",
+  });
+  console.log("Widget panel", widget ? {
+    className: widget.className,
+    hidden: widget.hidden,
+    rect: widget.getBoundingClientRect().toJSON(),
+    border: widgetStyles.border,
+    boxShadow: widgetStyles.boxShadow,
+    transform: widgetStyles.transform,
+    filter: widgetStyles.filter,
+    clipPath: widgetStyles.clipPath,
+  } : "not found");
+  console.log("Settings dialog", dialog ? {
+    open: dialog.open,
+    rect: dialog.getBoundingClientRect().toJSON(),
+    border: dialogStyles.border,
+    boxShadow: dialogStyles.boxShadow,
+    transform: dialogStyles.transform,
+    filter: dialogStyles.filter,
+    clipPath: dialogStyles.clipPath,
+  } : "not found");
+  console.groupEnd();
+}

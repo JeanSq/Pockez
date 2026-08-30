@@ -5,7 +5,7 @@
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
 import { translations } from "./i18n.js?v=21";
 
-import { DEBUG_ENABLED, debugLog } from "./debug.js?v=1";
+import { DEBUG_ENABLED, debugLog, logUiState, logWeightTooltip } from "./debug.js?v=2";
 import { formatMeasurementDate, formatWeight, getTodayDateValue } from "./format.js?v=1";
 import { accentOptions, activityDescription, activityInput, aggressiveCaloriesResult, animationsState, animationsToggle, backgroundOptions, bodyForm, bodyInputs, bodyResults, calorieModeOptions, chartEmpty, chartRangeSelect, chartSummary, clearDataButton, conservativeCaloriesResult, darkModeState, darkModeToggle, dashDateEl, dashProgressEl, dashProgressFill, dashProgressMeta, exportDataButton, goalHint, goalWeightInput, goalWeightResult, i18nAriaElements, i18nElements, i18nPlaceholderElements, i18nTitleElements, importDataButton, importDataInput, installButtons, iosHintEls, isFileProtocol, isIos, isStandalone, languageSelect, latestWeightResult, measurementCancelButton, measurementDateInput, measurementList, measurementSubmitButton, measurementWeightInput, navButtons, newWorkoutButton, profileAddButton, profileCancelButton, profileCount, profileDeleteButton, profileEditor, profileNameInput, profileRenameButton, profileSaveButton, profileSelect, quickLinks, resetOfflineCacheButton, saveStatus, settingsClose, settingsDialog, settingsOpen, startingWeightResult, summaryBmi, summaryCalorieMode, summaryCalories, summaryWeight, summaryWeightChange, titleEl, trainerCustomForm, trainerCustomSection, trainerCustomSplitInput, trainerDays, trainerForm, trainerModeInputs, trainerPlanHeading, trainerPlanMeta, trainerPlanTitle, trainerRecommendedSection, trainingDaysInput, trainingEmphasisInput, trainingGoalInput, trainingVolumeInput, trueShadowsState, trueShadowsToggle, weightChangeResult, weightChart, weightChartArea, weightChartBaseline, weightChartGrid, weightChartLine, weightChartLineUnderlay, weightChartPoints, weightChartTooltip, weightChartTooltipBox, weightChartTooltipText, weightChartXLabels, weightChartYLabels, weightForm, weightGoalLine, weightHeroFill, weightHeroMeta, weightHeroProgress, weightTrendLine, widgetPanels, workoutAddExerciseName, workoutAddExerciseSubmit, workoutCelebration, workoutCelebrationText, workoutDateInput, workoutEditor, workoutExercisesContainer, workoutFeelingsInput, workoutLayout, workoutList, workoutSaveButton, workoutTonnageValue, workoutTotalRepsValue } from "./elements.js?v=1";
 import { TRAINER_BODY_REGION, TRAINER_MUSCLE_COLORS, trainerExercises } from "./exerciseLibrary.js?v=1";
@@ -13,6 +13,8 @@ import { state } from "./state.js?v=1";
 
 import { addCustomExercise, addLibraryExercise, buildCustomTrainerPlan, buildTrainerPlan, customSplitIdForPlan, getDayRecommendedExerciseIds, recommendRepsForSets, recommendSetsForReps } from "./trainerEngine.js?v=1";
 import { computeWorkoutTonnage, getAllTimePRs, getCelebration, getWorkouts } from "./workoutEngine.js?v=1";
+
+import { loadSettings, setAccent, setAnimationsEnabled, setBackground, setDarkModeEnabled, setTrueShadowsEnabled, updateActivityDescription } from "./settings.js?v=1";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -144,54 +146,6 @@ if (titleEl) {
 // don't collapse the day being edited (null = never rendered yet).
 
 
-const DEBUG_UI = DEBUG_ENABLED;
-const DEBUG_WEIGHT_TOOLTIP = DEBUG_ENABLED;
-
-function logWeightTooltip(eventName, details = {}) {
-  if (!DEBUG_WEIGHT_TOOLTIP) return;
-  console.log(`[Weight Tooltip] ${eventName}`, {
-    ...details,
-    tooltipHidden: weightChartTooltip?.hidden,
-    tooltipText: weightChartTooltipText?.textContent,
-    timerActive: state.weightTooltipTimer !== null,
-  });
-}
-
-function logUiState(label) {
-  if (!DEBUG_UI) return;
-
-  const widget = document.querySelector(".widget-panel.is-active");
-  const dialog = settingsDialog;
-  const widgetStyles = widget ? getComputedStyle(widget) : null;
-  const dialogStyles = dialog ? getComputedStyle(dialog) : null;
-
-  console.group(`[Pockez] ${label}`);
-  console.log("Theme", {
-    accent: loadPreference(STORAGE_KEYS.accent, "red-blue"),
-    background: loadPreference(STORAGE_KEYS.background, "desk"),
-    activeWidget: widget?.dataset.widget || "none",
-  });
-  console.log("Widget panel", widget ? {
-    className: widget.className,
-    hidden: widget.hidden,
-    rect: widget.getBoundingClientRect().toJSON(),
-    border: widgetStyles.border,
-    boxShadow: widgetStyles.boxShadow,
-    transform: widgetStyles.transform,
-    filter: widgetStyles.filter,
-    clipPath: widgetStyles.clipPath,
-  } : "not found");
-  console.log("Settings dialog", dialog ? {
-    open: dialog.open,
-    rect: dialog.getBoundingClientRect().toJSON(),
-    border: dialogStyles.border,
-    boxShadow: dialogStyles.boxShadow,
-    transform: dialogStyles.transform,
-    filter: dialogStyles.filter,
-    clipPath: dialogStyles.clipPath,
-  } : "not found");
-  console.groupEnd();
-}
 
 function applyTranslations(lang) {
   const strings = translations[lang] || translations.en;
@@ -252,15 +206,6 @@ function applyTranslations(lang) {
   document.documentElement.lang = lang;
 }
 
-function updateActivityDescription(lang = languageSelect.value) {
-  const strings = translations[lang] || translations.en;
-  const selectedOption = activityInput.options[activityInput.selectedIndex];
-  const descriptionKey = selectedOption?.dataset.descriptionKey;
-  activityDescription.textContent = descriptionKey
-    ? strings[descriptionKey] || translations.en[descriptionKey]
-    : "";
-}
-
 function setLanguage(lang) {
   const safeLang = translations[lang] ? lang : "en";
   applyTranslations(safeLang);
@@ -285,80 +230,6 @@ function loadLanguage() {
   setLanguage(savedLang);
 }
 
-const accentThemes = {
-  "red-blue": ["#ef4444", "#3b5bdb"],
-  "orange-teal": ["#f59b2c", "#0e9f9a"],
-  "yellow-pink": ["#f6d80b", "#e84393"],
-};
-
-function setAccent(accentId) {
-  const colors = accentThemes[accentId] || accentThemes["red-blue"];
-  document.documentElement.style.setProperty("--aberration-a", colors[0]);
-  document.documentElement.style.setProperty("--aberration-b", colors[1]);
-  const selectedOption = document.querySelector(`input[name="accent"][value="${accentId}"]`);
-  if (selectedOption) selectedOption.checked = true;
-  savePreference(STORAGE_KEYS.accent, accentId);
-  logUiState(`Accent changed to ${accentId}`);
-}
-
-function setBackground(backgroundId) {
-  const normalizedBackground = backgroundId === "desk" ? "paper" : backgroundId;
-  // "dark-paper" was removed as an option: saved preferences for it fall
-  // through to the "graffiti" default below.
-  const safeBackground = ["paper", "graffiti", "blueprint"].includes(normalizedBackground)
-    ? normalizedBackground
-    : "graffiti";
-  document.body.classList.remove(
-    "background-paper",
-    "background-graffiti",
-    "background-blueprint"
-  );
-  document.body.classList.add(`background-${safeBackground}`);
-  const selectedOption = document.querySelector(
-    `input[name="background"][value="${safeBackground}"]`
-  );
-  if (selectedOption) selectedOption.checked = true;
-  savePreference(STORAGE_KEYS.background, safeBackground);
-  logUiState(`Background changed to ${safeBackground}`);
-}
-
-function setAnimationsEnabled(enabled) {
-  const safeEnabled = enabled !== false;
-  document.body.classList.toggle("animations-off", !safeEnabled);
-  animationsToggle.checked = safeEnabled;
-  animationsState.textContent = safeEnabled
-    ? (translations[languageSelect.value] || translations.en).animationsOn
-    : (translations[languageSelect.value] || translations.en).animationsOff;
-  savePreference(STORAGE_KEYS.animations, String(safeEnabled));
-}
-
-function setDarkModeEnabled(enabled) {
-  const safeEnabled = enabled === true;
-  document.body.classList.toggle("dark-mode", safeEnabled);
-  darkModeToggle.checked = safeEnabled;
-  darkModeState.textContent = safeEnabled
-    ? (translations[languageSelect.value] || translations.en).darkModeOn
-    : (translations[languageSelect.value] || translations.en).darkModeOff;
-  savePreference(STORAGE_KEYS.darkMode, String(safeEnabled));
-}
-
-function setTrueShadowsEnabled(enabled) {
-  const safeEnabled = enabled === true;
-  document.body.classList.toggle("true-shadows", safeEnabled);
-  trueShadowsToggle.checked = safeEnabled;
-  trueShadowsState.textContent = safeEnabled
-    ? (translations[languageSelect.value] || translations.en).trueShadowsOn
-    : (translations[languageSelect.value] || translations.en).trueShadowsOff;
-  savePreference(STORAGE_KEYS.trueShadows, String(safeEnabled));
-}
-
-function loadSettings() {
-  setAccent(loadPreference(STORAGE_KEYS.accent, "red-blue"));
-  setBackground(loadPreference(STORAGE_KEYS.background, "graffiti"));
-  setAnimationsEnabled(loadPreference(STORAGE_KEYS.animations, "true") !== "false");
-  setDarkModeEnabled(loadPreference(STORAGE_KEYS.darkMode, "false") === "true");
-  setTrueShadowsEnabled(loadPreference(STORAGE_KEYS.trueShadows, "false") === "true");
-}
 
 function makeProfile(name, data = {}) {
   return {
