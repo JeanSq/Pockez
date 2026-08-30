@@ -9,6 +9,7 @@ import { DEBUG_ENABLED, debugLog } from "./debug.js?v=1";
 import { formatMeasurementDate, formatWeight, getTodayDateValue } from "./format.js?v=1";
 import { accentOptions, activityDescription, activityInput, aggressiveCaloriesResult, animationsState, animationsToggle, backgroundOptions, bodyForm, bodyInputs, bodyResults, calorieModeOptions, chartEmpty, chartRangeSelect, chartSummary, clearDataButton, conservativeCaloriesResult, darkModeState, darkModeToggle, dashDateEl, dashProgressEl, dashProgressFill, dashProgressMeta, exportDataButton, goalHint, goalWeightInput, goalWeightResult, i18nAriaElements, i18nElements, i18nPlaceholderElements, i18nTitleElements, importDataButton, importDataInput, installButtons, iosHintEls, isFileProtocol, isIos, isStandalone, languageSelect, latestWeightResult, measurementCancelButton, measurementDateInput, measurementList, measurementSubmitButton, measurementWeightInput, navButtons, newWorkoutButton, profileAddButton, profileCancelButton, profileCount, profileDeleteButton, profileEditor, profileNameInput, profileRenameButton, profileSaveButton, profileSelect, quickLinks, resetOfflineCacheButton, saveStatus, settingsClose, settingsDialog, settingsOpen, startingWeightResult, summaryBmi, summaryCalorieMode, summaryCalories, summaryWeight, summaryWeightChange, titleEl, trainerCustomForm, trainerCustomSection, trainerCustomSplitInput, trainerDays, trainerForm, trainerModeInputs, trainerPlanHeading, trainerPlanMeta, trainerPlanTitle, trainerRecommendedSection, trainingDaysInput, trainingEmphasisInput, trainingGoalInput, trainingVolumeInput, trueShadowsState, trueShadowsToggle, weightChangeResult, weightChart, weightChartArea, weightChartBaseline, weightChartGrid, weightChartLine, weightChartLineUnderlay, weightChartPoints, weightChartTooltip, weightChartTooltipBox, weightChartTooltipText, weightChartXLabels, weightChartYLabels, weightForm, weightGoalLine, weightHeroFill, weightHeroMeta, weightHeroProgress, weightTrendLine, widgetPanels, workoutAddExerciseName, workoutAddExerciseSubmit, workoutCelebration, workoutCelebrationText, workoutDateInput, workoutEditor, workoutExercisesContainer, workoutFeelingsInput, workoutLayout, workoutList, workoutSaveButton, workoutTonnageValue, workoutTotalRepsValue } from "./elements.js?v=1";
 import { TRAINER_BODY_REGION, TRAINER_MUSCLE_COLORS, trainerExercises } from "./exerciseLibrary.js?v=1";
+import { state } from "./state.js?v=1";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -65,7 +66,6 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 // only on the browser's built-in UI. iOS Safari has no such event at all, so
 // it gets a small manual "Add to Home Screen" hint instead.
 
-let deferredInstallPrompt = null;
 
 function showInstallButtons() {
   installButtons.forEach((btn) => btn.removeAttribute("hidden"));
@@ -109,22 +109,22 @@ window.addEventListener("beforeinstallprompt", (event) => {
   // Prevent the browser's default mini-infobar so the prompt moment and
   // styling stay ours (a deliberate in-app button converts better).
   event.preventDefault();
-  deferredInstallPrompt = event;
+  state.deferredInstallPrompt = event;
   if (!isStandalone && !isFileProtocol) showInstallButtons();
 });
 
 installButtons.forEach((btn) => {
   btn.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) return;
+    if (!state.deferredInstallPrompt) return;
     // prompt() must be triggered from the same user gesture.
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-    if (outcome === "accepted") deferredInstallPrompt = null;
+    state.deferredInstallPrompt.prompt();
+    const { outcome } = await state.deferredInstallPrompt.userChoice;
+    if (outcome === "accepted") state.deferredInstallPrompt = null;
   });
 });
 
 window.addEventListener("appinstalled", () => {
-  deferredInstallPrompt = null;
+  state.deferredInstallPrompt = null;
   hideInstallButtons();
   showInstalledToast();
 });
@@ -137,15 +137,8 @@ if (titleEl) {
   titleEl.addEventListener('animationend', () => debugLog('title animationend'));
 }
 
-let profileEditMode = null;
-let weightTooltipTimer = null;
-let weightTooltipFadeTimer = null;
-let weightTooltipHideDelayTimer = null;
-let editingMeasurementId = null;
-let bodyStatsCalculated = false;
 // Day-index set of currently expanded plan days, so add/remove re-renders
 // don't collapse the day being edited (null = never rendered yet).
-let trainerOpenDays = null;
 
 
 const DEBUG_UI = DEBUG_ENABLED;
@@ -157,7 +150,7 @@ function logWeightTooltip(eventName, details = {}) {
     ...details,
     tooltipHidden: weightChartTooltip?.hidden,
     tooltipText: weightChartTooltipText?.textContent,
-    timerActive: weightTooltipTimer !== null,
+    timerActive: state.weightTooltipTimer !== null,
   });
 }
 
@@ -438,7 +431,7 @@ function renderProfiles() {
 function switchProfile(profileId) {
   if (!getProfiles().some((profile) => profile.id === profileId)) return;
   savePreference(STORAGE_KEYS.activeProfile, profileId);
-  editingMeasurementId = null;
+  state.editingMeasurementId = null;
   renderProfiles();
   loadBodyStats();
   cancelMeasurementEdit();
@@ -453,7 +446,7 @@ function addProfile() {
     window.alert(strings.maxProfilesWarning);
     return;
   }
-  profileEditMode = "add";
+  state.profileEditMode = "add";
   profileNameInput.value = `${strings.newProfileName} ${profiles.length + 1}`;
   profileEditor.hidden = false;
   profileNameInput.focus();
@@ -461,7 +454,7 @@ function addProfile() {
 
 function renameProfile() {
   const profile = getActiveProfile();
-  profileEditMode = "rename";
+  state.profileEditMode = "rename";
   profileNameInput.value = profile.name;
   profileEditor.hidden = false;
   profileNameInput.focus();
@@ -471,7 +464,7 @@ function saveProfileName() {
   const name = profileNameInput.value.trim();
   if (!name) return;
   const profiles = getProfiles();
-  if (profileEditMode === "add") {
+  if (state.profileEditMode === "add") {
     const profile = makeProfile(name);
     profiles.push(profile);
     saveProfiles(profiles);
@@ -480,17 +473,17 @@ function saveProfileName() {
     loadBodyStats();
     cancelMeasurementEdit();
     renderWeightLog();
-  } else if (profileEditMode === "rename") {
+  } else if (state.profileEditMode === "rename") {
     const activeId = getActiveProfileId();
     saveProfiles(profiles.map((profile) => profile.id === activeId ? { ...profile, name } : profile));
     renderProfiles();
   }
-  profileEditMode = null;
+  state.profileEditMode = null;
   profileEditor.hidden = true;
 }
 
 function cancelProfileEdit() {
-  profileEditMode = null;
+  state.profileEditMode = null;
   profileEditor.hidden = true;
 }
 
@@ -538,7 +531,7 @@ function calculateBodyStats() {
   bodyResults.calories.textContent = Math.round(dailyCalories).toLocaleString();
   conservativeCaloriesResult.textContent = Math.round(conservativeCalories).toLocaleString();
   aggressiveCaloriesResult.textContent = Math.round(aggressiveCalories).toLocaleString();
-  bodyStatsCalculated = true;
+  state.bodyStatsCalculated = true;
 
   updateActiveProfile({
     bodyStats: JSON.stringify({
@@ -590,7 +583,7 @@ function loadBodyStats() {
   const savedStats = getActiveProfile()?.bodyStats || null;
   if (!savedStats) {
     bodyForm.reset();
-    bodyStatsCalculated = false;
+    state.bodyStatsCalculated = false;
     bodyResults.bmi.textContent = "—";
     bodyResults.bmiCategory.textContent = "";
     bodyResults.bmiMarker.hidden = true;
@@ -715,9 +708,9 @@ function showWeightTooltip(point, entry, chartWidth, chartHeight) {
   // point the instant a new point becomes active, before it pings.
   clearWeightPointHover(point);
   const tooltipText = `${formatMeasurementDate(entry.date)} · ${(translations[languageSelect.value] || translations.en).weightTooltip}: ${formatWeight(entry.weight)} kg`;
-  if (weightTooltipHideDelayTimer) {
-    clearTimeout(weightTooltipHideDelayTimer);
-    weightTooltipHideDelayTimer = null;
+  if (state.weightTooltipHideDelayTimer) {
+    clearTimeout(state.weightTooltipHideDelayTimer);
+    state.weightTooltipHideDelayTimer = null;
   }
   // Unhide before measuring: opacity stays 0 until .is-visible, so nothing
   // flashes. Sizing from the real rendered text (getComputedTextLength)
@@ -742,8 +735,8 @@ function showWeightTooltip(point, entry, chartWidth, chartHeight) {
   weightChartTooltip.classList.add("is-visible");
   point.classList.add("is-hovered");
 
-  if (weightTooltipTimer) clearTimeout(weightTooltipTimer);
-  weightTooltipTimer = setTimeout(() => {
+  if (state.weightTooltipTimer) clearTimeout(state.weightTooltipTimer);
+  state.weightTooltipTimer = setTimeout(() => {
     logWeightTooltip("timer:expired", { date: entry.date });
     hideWeightTooltip(point);
   }, 2000);
@@ -754,26 +747,26 @@ function hideWeightTooltip(point) {
   logWeightTooltip("hide:start", {
     pointClass: point.className.baseVal,
   });
-  if (weightTooltipTimer) {
-    clearTimeout(weightTooltipTimer);
-    weightTooltipTimer = null;
+  if (state.weightTooltipTimer) {
+    clearTimeout(state.weightTooltipTimer);
+    state.weightTooltipTimer = null;
     logWeightTooltip("hide:timer-cleared");
   }
-  if (weightTooltipFadeTimer) clearTimeout(weightTooltipFadeTimer);
+  if (state.weightTooltipFadeTimer) clearTimeout(state.weightTooltipFadeTimer);
   weightChartTooltip.classList.remove("is-visible");
-  weightTooltipFadeTimer = setTimeout(() => {
+  state.weightTooltipFadeTimer = setTimeout(() => {
     weightChartTooltip.hidden = true;
-    weightTooltipFadeTimer = null;
+    state.weightTooltipFadeTimer = null;
   }, 180);
   point.classList.remove("is-hovered");
   logWeightTooltip("hide:complete");
 }
 
 function scheduleHideWeightTooltip(point) {
-  if (weightTooltipHideDelayTimer) clearTimeout(weightTooltipHideDelayTimer);
+  if (state.weightTooltipHideDelayTimer) clearTimeout(state.weightTooltipHideDelayTimer);
   logWeightTooltip("hide:scheduled", { delayMs: 2000 });
-  weightTooltipHideDelayTimer = setTimeout(() => {
-    weightTooltipHideDelayTimer = null;
+  state.weightTooltipHideDelayTimer = setTimeout(() => {
+    state.weightTooltipHideDelayTimer = null;
     logWeightTooltip("hide:delay-expired");
     hideWeightTooltip(point);
   }, 2000);
@@ -1087,7 +1080,7 @@ function renderWeightLog() {
 }
 
 function startMeasurementEdit(entry) {
-  editingMeasurementId = entry.id;
+  state.editingMeasurementId = entry.id;
   measurementDateInput.value = entry.date;
   measurementWeightInput.value = entry.weight;
   measurementSubmitButton.textContent = (translations[languageSelect.value] || translations.en).saveMeasurement;
@@ -1096,7 +1089,7 @@ function startMeasurementEdit(entry) {
 }
 
 function cancelMeasurementEdit() {
-  editingMeasurementId = null;
+  state.editingMeasurementId = null;
   measurementWeightInput.value = "";
   setTodayAsMeasurementDate();
   measurementSubmitButton.textContent = (translations[languageSelect.value] || translations.en).addMeasurementButton;
@@ -1384,7 +1377,7 @@ function renderTrainerPlan(plan) {
   const volumeKey = plan.volume === "moderateHigh" ? "volumeModerateHigh" : plan.volume === "low" ? "volumeLow" : "volumeModerate";
   trainerPlanMeta.textContent = `${plan.dayCount} ${strings.trainingDaysLabel.toLowerCase()} · ${strings[volumeKey]} ${strings.volumeLabel}`;
   trainerDays.innerHTML = "";
-  const openIndices = trainerOpenDays === null ? new Set([0]) : new Set(trainerOpenDays);
+  const openIndices = state.trainerOpenDays === null ? new Set([0]) : new Set(state.trainerOpenDays);
 
   plan.days.forEach((day, dayIndex) => {
     const daySection = document.createElement("section");
@@ -1517,7 +1510,7 @@ function renderTrainerPlan(plan) {
       } else {
         openIndices.delete(dayIndex);
       }
-      trainerOpenDays = Array.from(openIndices);
+      state.trainerOpenDays = Array.from(openIndices);
     });
 
     daySection.append(dayHeader, exerciseList);
@@ -1759,11 +1752,8 @@ function saveWorkouts(workouts) {
 
 // The workout currently open in the editor. In-memory only: a fresh visit
 // starts with the editor hidden until the user opens or creates a workout.
-let activeWorkoutId = null;
 
 // In-progress edits for the active workout (avoids mutating stored data)
-let unsavedExercises = [];
-let unsavedNotes = "";
 
 const EXERCISE_LIBRARY = Object.entries(trainerExercises).map(([key, def]) => ({
   id: key,
@@ -1844,11 +1834,10 @@ languageSelect.addEventListener("change", () => {
 
 // Widget that was visible right before the settings gear was clicked.
 // Restored when the settings dialog closes, no matter how it is closed.
-let widgetBeforeSettings = null;
 
 settingsOpen.addEventListener("click", () => {
   const activePanel = document.querySelector(".widget-panel.is-active");
-  widgetBeforeSettings = activePanel ? activePanel.dataset.widget : null;
+  state.widgetBeforeSettings = activePanel ? activePanel.dataset.widget : null;
 
   // Mark the settings gear as the selected tab while the dialog is open
   // (same is-active/aria-current scheme as showWidget). The dialog's
@@ -1867,9 +1856,9 @@ settingsOpen.addEventListener("click", () => {
 // and the Escape key alike.
 settingsDialog.addEventListener("close", () => {
   const validIds = [...widgetPanels].map((panel) => panel.dataset.widget);
-  showWidget(validIds.includes(widgetBeforeSettings) ? widgetBeforeSettings : "dashboard");
+  showWidget(validIds.includes(state.widgetBeforeSettings) ? state.widgetBeforeSettings : "dashboard");
 
-  widgetBeforeSettings = null;
+  state.widgetBeforeSettings = null;
   debugLog("settings closed, restored widget");
   logUiState("Settings closed");
 });
@@ -1953,7 +1942,7 @@ activityInput.addEventListener("change", () => {
 
 for (const option of calorieModeOptions) {
   option.addEventListener("change", () => {
-    if (bodyStatsCalculated && bodyForm.checkValidity()) {
+    if (state.bodyStatsCalculated && bodyForm.checkValidity()) {
       calculateBodyStats();
     }
   });
@@ -1963,8 +1952,8 @@ weightForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!weightForm.reportValidity()) return;
 
-  const entries = getWeightEntries().filter((entry) => entry.date !== measurementDateInput.value || entry.id === editingMeasurementId);
-  const editedEntry = editingMeasurementId && entries.find((entry) => entry.id === editingMeasurementId);
+  const entries = getWeightEntries().filter((entry) => entry.date !== measurementDateInput.value || entry.id === state.editingMeasurementId);
+  const editedEntry = state.editingMeasurementId && entries.find((entry) => entry.id === state.editingMeasurementId);
   if (editedEntry) {
     editedEntry.date = measurementDateInput.value;
     editedEntry.weight = Number(measurementWeightInput.value);
@@ -2294,11 +2283,10 @@ function startRevealSequence() {
 startRevealSequence();
 
 // --- Workout log render / edit ---
-let saveTimer = null;
 function scheduleWorkoutSave() {
   showSaveStatus("saving");
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveActiveWorkout(), 400);
+  if (state.saveTimer) clearTimeout(state.saveTimer);
+  state.saveTimer = setTimeout(() => saveActiveWorkout(), 400);
 }
 
 function renderWorkoutList() {
@@ -2320,7 +2308,7 @@ function renderWorkoutList() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "workout-list-item";
-    btn.classList.toggle("is-active", w.id === activeWorkoutId);
+    btn.classList.toggle("is-active", w.id === state.activeWorkoutId);
     const tonnage = computeWorkoutTonnage(w.exercises);
     btn.textContent = w.date + "  —  " + tonnage.totalKg.toLocaleString() + " kg";
     btn.addEventListener("click", () => selectWorkout(w.id));
@@ -2342,7 +2330,7 @@ function renderWorkoutExercises() {
   const prs = getAllTimePRs();
   workoutExercisesContainer.innerHTML = "";
 
-  unsavedExercises.forEach((ex, exIdx) => {
+  state.unsavedExercises.forEach((ex, exIdx) => {
     const card = document.createElement("article");
     card.className = "exercise-card";
 
@@ -2422,15 +2410,15 @@ function onWorkoutSetChange(e) {
   const exIdx = Number(e.target.dataset.exerciseIndex);
   const setIdx = Number(e.target.dataset.setIndex);
   const field = e.target.dataset.field;
-  if (!unsavedExercises[exIdx] || !unsavedExercises[exIdx].sets[setIdx]) return;
-  unsavedExercises[exIdx].sets[setIdx][field] = e.target.value;
+  if (!state.unsavedExercises[exIdx] || !state.unsavedExercises[exIdx].sets[setIdx]) return;
+  state.unsavedExercises[exIdx].sets[setIdx][field] = e.target.value;
   updateWorkoutSummary();
   scheduleWorkoutSave();
 }
 
 function updateWorkoutSummary() {
   const strings = translations[languageSelect.value] || translations.en;
-  const { totalKg, totalReps } = computeWorkoutTonnage(unsavedExercises);
+  const { totalKg, totalReps } = computeWorkoutTonnage(state.unsavedExercises);
   if (workoutTonnageValue) workoutTonnageValue.textContent = totalKg.toLocaleString() + " " + (strings.weightUnit || "kg");
   if (workoutTotalRepsValue) workoutTotalRepsValue.textContent = String(totalReps);
 
@@ -2449,31 +2437,31 @@ function updateWorkoutSummary() {
 }
 
 function addWorkoutExercise(name) {
-  unsavedExercises.push({ name, sets: [{ reps: "", kgs: "" }] });
+  state.unsavedExercises.push({ name, sets: [{ reps: "", kgs: "" }] });
   renderWorkoutExercises();
   scheduleWorkoutSave();
 }
 
 function removeWorkoutExercise(idx) {
-  unsavedExercises.splice(idx, 1);
+  state.unsavedExercises.splice(idx, 1);
   renderWorkoutExercises();
   scheduleWorkoutSave();
 }
 
 function addWorkoutSet(exIdx) {
-  if (!unsavedExercises[exIdx]) return;
-  const last = unsavedExercises[exIdx].sets[unsavedExercises[exIdx].sets.length - 1];
-  unsavedExercises[exIdx].sets.push(last ? { reps: last.reps, kgs: last.kgs } : { reps: "", kgs: "" });
+  if (!state.unsavedExercises[exIdx]) return;
+  const last = state.unsavedExercises[exIdx].sets[state.unsavedExercises[exIdx].sets.length - 1];
+  state.unsavedExercises[exIdx].sets.push(last ? { reps: last.reps, kgs: last.kgs } : { reps: "", kgs: "" });
   renderWorkoutExercises();
   scheduleWorkoutSave();
 }
 
 function saveActiveWorkout() {
-  if (!activeWorkoutId) return;
+  if (!state.activeWorkoutId) return;
   const workouts = getWorkouts();
-  const w = workouts.find((x) => x.id === activeWorkoutId);
+  const w = workouts.find((x) => x.id === state.activeWorkoutId);
   if (!w) return;
-  w.exercises = JSON.parse(JSON.stringify(unsavedExercises));
+  w.exercises = JSON.parse(JSON.stringify(state.unsavedExercises));
   w.notes = workoutFeelingsInput ? workoutFeelingsInput.value : "";
   w.date = workoutDateInput && workoutDateInput.value ? workoutDateInput.value : w.date;
   saveWorkouts(workouts);
@@ -2481,7 +2469,7 @@ function saveActiveWorkout() {
 }
 
 function selectWorkout(id) {
-  activeWorkoutId = id;
+  state.activeWorkoutId = id;
   renderWorkoutList();
   renderWorkout();
   showSaveStatus("saved");
@@ -2489,13 +2477,13 @@ function selectWorkout(id) {
 
 function renderWorkout() {
   const workouts = getWorkouts();
-  const w = workouts.find((x) => x.id === activeWorkoutId);
+  const w = workouts.find((x) => x.id === state.activeWorkoutId);
   if (!w) { setEditorVisible(false); return; }
   setEditorVisible(true);
   if (workoutDateInput) workoutDateInput.value = w.date;
   if (workoutFeelingsInput) workoutFeelingsInput.value = w.notes || "";
-  unsavedExercises = JSON.parse(JSON.stringify(w.exercises));
-  unsavedNotes = w.notes || "";
+  state.unsavedExercises = JSON.parse(JSON.stringify(w.exercises));
+  state.unsavedNotes = w.notes || "";
   renderWorkoutExercises();
 }
 
@@ -2504,7 +2492,7 @@ function createWorkout() {
   const w = { id: crypto.randomUUID(), date: new Date().toISOString().slice(0, 10), notes: "", exercises: [] };
   workouts.push(w);
   saveWorkouts(workouts);
-  activeWorkoutId = w.id;
+  state.activeWorkoutId = w.id;
   renderWorkoutList();
   renderWorkout();
   showSaveStatus("saved");
@@ -2514,7 +2502,7 @@ function deleteWorkout(id) {
   const strings = translations[languageSelect.value] || translations.en;
   if (!window.confirm(strings.deleteNote || "Delete?")) return;
   const workouts = getWorkouts().filter((w) => w.id !== id);
-  if (activeWorkoutId === id) activeWorkoutId = null;
+  if (state.activeWorkoutId === id) state.activeWorkoutId = null;
   saveWorkouts(workouts);
   renderWorkouts();
 }
