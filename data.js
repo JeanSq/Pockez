@@ -1,4 +1,4 @@
-﻿import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
+import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
 import { translations } from "./i18n.js?v=22";
 import { clearDataButton, exportDataButton, importDataButton, importDataInput, languageSelect } from "./elements.js?v=2";
 import { getTodayDateValue } from "./format.js?v=1";

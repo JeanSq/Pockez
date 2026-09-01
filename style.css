@@ -3034,10 +3034,12 @@ body.animations-off .widget-title {
 
 .notes-empty-flourish {
   display: block;
-  margin-top: 0.4rem;
-  font-family: var(--font-title);
-  font-size: 1.25rem;
-  color: var(--ink-muted);
+  margin-top: 0.45rem;
+  font-family: var(--font-label);
+  font-style: italic;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
 }
 
 body.dark-mode .note-compose-area,

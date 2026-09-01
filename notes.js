@@ -1,4 +1,4 @@
-﻿import { STORAGE_KEYS, savePreference } from "./storage.js?v=14";
+import { STORAGE_KEYS, savePreference } from "./storage.js?v=14";
 import { showSaveStatus } from "./ui.js?v=1";
 import {
   languageSelect,
@@ -52,7 +52,7 @@ export function renderNotes() {
     const empty = document.createElement("li");
     empty.className = "notes-empty";
     const emptyText = document.createElement("span");
-    emptyText.textContent = strings.notesEmpty || "Nothing here yet â€” write your first note above.";
+    emptyText.textContent = strings.notesEmpty || "Nothing here yet — write your first note above.";
     empty.append(emptyText);
     const flourish = document.createElement("span");
     flourish.className = "notes-empty-flourish";
@@ -78,7 +78,7 @@ export function renderNotes() {
       const del = document.createElement("button");
       del.type = "button";
       del.className = "note-delete";
-      del.textContent = "Ã—";
+      del.textContent = "×";
       del.setAttribute("aria-label", (strings.deleteNote || "Delete") + ": " + note.date);
       del.addEventListener("click", (e) => { e.stopPropagation(); deleteNote(note.id); });
       card.append(del);

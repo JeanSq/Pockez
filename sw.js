@@ -6,7 +6,7 @@
       like storage.js / i18n.js changed)
    A changed URL can never be served from a stale cache - not the phone's
    HTTP cache, not a service worker, not the GitHub Pages CDN. */
-const CACHE_VERSION = "pockez-v1.16";
+const CACHE_VERSION = "pockez-v1.17";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -62,17 +62,18 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-/* Cache-first with background refresh (stale-while-revalidate):
-   instant loads, and the cache self-heals whenever the network is up.
-   `ignoreSearch` lets a versioned request (style.css?v=N) fall back to ANY
-   cached version, so a mid-deploy 404 can never break a working client. */
+/* Exact-match cache first, then network (with runtime caching). No
+   ignoreSearch: matching ANY cached version of a URL used to serve a
+   one-deploy-stale app shell (old app.js against new HTML = dead UI).
+   Offline navigations fall back to the cached shell. */
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then((cached) => {
-      const network = fetch(request)
+    caches.match(request).then((exact) => {
+      if (exact) return exact;
+      return fetch(request)
         .then((response) => {
           const cacheable =
             response &&
@@ -90,11 +91,10 @@ self.addEventListener("fetch", (event) => {
           // Offline / failed fetch: navigations fall back to the cached
           // shell so the app still opens; assets serve the last good copy.
           if (request.mode === "navigate") {
-            return caches.match("./index.html", { ignoreSearch: true });
+            return caches.match("./index.html");
           }
-          return cached;
+          return caches.match(request, { ignoreSearch: true });
         });
-      return cached || network;
     })
   );
 });

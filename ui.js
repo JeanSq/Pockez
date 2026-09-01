@@ -1,9 +1,9 @@
-﻿import { translations } from "./i18n.js?v=22";
+import { translations } from "./i18n.js?v=22";
 import { languageSelect, saveStatus } from "./elements.js?v=2";
 
 // Toggle the save-status chip through its three states: "saving" (working),
 // "saved" (default/neutral), "error" (save failed). Used across data ops,
-// workout saves, and cache reset â€” every persistence path funnels through here
+// workout saves, and cache reset — every persistence path funnels through here
 // so the chip never shows stale state.
 export function showSaveStatus(state) {
   const strings = translations[languageSelect.value] || translations.en;

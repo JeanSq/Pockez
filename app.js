@@ -1,5 +1,5 @@
-﻿/**
- * Pockez â€” personal notes, health, and training
+/**
+ * Pockez — personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
@@ -321,13 +321,13 @@ function loadBodyStats() {
   if (!savedStats) {
     bodyForm.reset();
     state.bodyStatsCalculated = false;
-    bodyResults.bmi.textContent = "â€”";
+    bodyResults.bmi.textContent = "—";
     bodyResults.bmiCategory.textContent = "";
     bodyResults.bmiMarker.hidden = true;
-    bodyResults.bmr.textContent = "â€”";
-    bodyResults.calories.textContent = "â€”";
-    conservativeCaloriesResult.textContent = "â€”";
-    aggressiveCaloriesResult.textContent = "â€”";
+    bodyResults.bmr.textContent = "—";
+    bodyResults.calories.textContent = "—";
+    conservativeCaloriesResult.textContent = "—";
+    aggressiveCaloriesResult.textContent = "—";
     updateActivityDescription();
     renderDashboardSummary();
     return;
@@ -393,12 +393,12 @@ function renderWeightLog() {
   const latestEntry = entries[entries.length - 1];
   const change = firstEntry && latestEntry ? Number(latestEntry.weight) - Number(firstEntry.weight) : null;
 
-  startingWeightResult.textContent = firstEntry ? formatWeight(firstEntry.weight) : "â€”";
-  latestWeightResult.textContent = latestEntry ? formatWeight(latestEntry.weight) : "â€”";
-  weightChangeResult.textContent = change === null ? "â€”" : `${change > 0 ? "+" : ""}${formatWeight(change)}`;
+  startingWeightResult.textContent = firstEntry ? formatWeight(firstEntry.weight) : "—";
+  latestWeightResult.textContent = latestEntry ? formatWeight(latestEntry.weight) : "—";
+  weightChangeResult.textContent = change === null ? "—" : `${change > 0 ? "+" : ""}${formatWeight(change)}`;
   const goalWeight = getGoalWeight();
   goalWeightInput.value = goalWeight === null ? "" : formatWeight(goalWeight);
-  goalWeightResult.textContent = goalWeight === null ? "â€”" : formatWeight(goalWeight);
+  goalWeightResult.textContent = goalWeight === null ? "—" : formatWeight(goalWeight);
   const strings = translations[languageSelect.value] || translations.en;
   // Null-ish (not ===null) on purpose: entries[...] is undefined when the
   // log is empty, and the old check let goal-without-measurements through.
@@ -418,7 +418,7 @@ function renderWeightLog() {
 
   // Goal-progress hero strip: same computation as above, home-tab styling.
   if (progress === null) {
-    weightHeroProgress.textContent = "â€”";
+    weightHeroProgress.textContent = "—";
     weightHeroMeta.textContent = strings.weightHeroNoGoal;
     weightHeroFill.style.width = "0%";
   } else {
@@ -442,7 +442,7 @@ function renderWeightLog() {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "measurement-delete";
-    deleteButton.textContent = "Ã—";
+    deleteButton.textContent = "×";
     deleteButton.title = (translations[languageSelect.value] || translations.en).deleteMeasurement;
     deleteButton.setAttribute("aria-label", `${deleteButton.title}: ${formatMeasurementDate(entry.date)}`);
     deleteButton.addEventListener("click", () => {
@@ -452,7 +452,7 @@ function renderWeightLog() {
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "measurement-edit";
-    editButton.textContent = "âœŽ";
+    editButton.textContent = "✎";
     editButton.title = strings.editMeasurement;
     editButton.setAttribute("aria-label", `${strings.editMeasurement}: ${formatMeasurementDate(entry.date)}`);
     editButton.addEventListener("click", () => startMeasurementEdit(entry));
@@ -496,7 +496,7 @@ function renderDashboardSummary() {
   const latestEntry = entries[entries.length - 1];
   const firstEntry = entries[0];
 
-  summaryWeight.textContent = latestEntry ? formatWeight(latestEntry.weight) : "â€”";
+  summaryWeight.textContent = latestEntry ? formatWeight(latestEntry.weight) : "—";
   summaryWeightChange.textContent = latestEntry && firstEntry
     ? `${Number(latestEntry.weight) - Number(firstEntry.weight) > 0 ? "+" : ""}${formatWeight(Number(latestEntry.weight) - Number(firstEntry.weight))} kg`
     : strings.noData;
@@ -512,14 +512,14 @@ function renderDashboardSummary() {
     if (dashProgressFill) dashProgressFill.style.width = `${pct}%`;
     if (dashProgressMeta) dashProgressMeta.textContent = `${strings.dashGoalLabel}: ${formatWeight(goalWeight)} kg`;
   } else {
-    if (dashProgressEl) dashProgressEl.textContent = "â€”";
+    if (dashProgressEl) dashProgressEl.textContent = "—";
     if (dashProgressFill) dashProgressFill.style.width = "0%";
     if (dashProgressMeta) dashProgressMeta.textContent = latestEntry ? strings.dashNoGoal : strings.noData;
   }
 
   if (!profile) {
-    summaryBmi.textContent = "â€”";
-    summaryCalories.textContent = "â€”";
+    summaryBmi.textContent = "—";
+    summaryCalories.textContent = "—";
     summaryCalorieMode.textContent = strings.noData;
     return;
   }
@@ -1001,7 +1001,7 @@ function startRevealSequence() {
       revealNow();
     }, 1800);
   } else {
-    // No title element â€” quickly reveal
+    // No title element — quickly reveal
     setTimeout(revealNow, 200);
   }
 }
