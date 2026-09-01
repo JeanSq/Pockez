@@ -33,6 +33,20 @@ try {
   // ignore if body not ready
 }
 
+// Replay the subtitle's 4.5s entrance only the first load of a tab session;
+// on later loads in the same session skip it so the intro doesn't re-theaterize
+// a daily-working dashboard. The title's own 1.2s entrance, and reduced-motion /
+// animations-off, are unaffected (see style.css: body.no-intro-replay .subtitle).
+try {
+  if (sessionStorage.getItem("pockez-seen-intro")) {
+    document.body.classList.add("no-intro-replay");
+  } else {
+    sessionStorage.setItem("pockez-seen-intro", "1");
+  }
+} catch (e) {
+  // storage blocked: keep the intro
+}
+
 
 // --- PWA: service worker + install UX (extracted to pwa.js) ---
 initPwa();

@@ -2,7 +2,8 @@ import { translations } from "./i18n.js?v=21";
 import { state } from "./state.js?v=1";
 import { showSaveStatus } from "./ui.js?v=1";
 import { STORAGE_KEYS, savePreference } from "./storage.js?v=14";
-import { getWorkouts, computeWorkoutTonnage, getAllTimePRs, getCelebration } from "./workoutEngine.js?v=1";
+import { getWorkouts, computeWorkoutTonnage, getAllTimePRs, getCelebration, getExercisePR, EXERCISE_LIBRARY } from "./workoutEngine.js?v=1";
+import { TRAINER_MUSCLE_COLORS } from "./exerciseLibrary.js?v=1";
 import {
   languageSelect,
   saveStatus,
@@ -47,6 +48,23 @@ function scheduleWorkoutSave() {
   state.saveTimer = setTimeout(() => saveActiveWorkout(), 400);
 }
 
+function workoutTierClass(totalKg) {
+  if (totalKg >= 1000) return "var(--accent-yellow)";
+  if (totalKg >= 300) return "var(--accent-purple)";
+  if (totalKg >= 100) return "var(--accent-red)";
+  return "var(--accent-blue)";
+}
+
+function sessionMeta(w, strings) {
+  const parts = [];
+  if (w.exercises && w.exercises.length) {
+    parts.push(w.exercises.length + " " + (strings.logExercisesTiny || "ex"));
+   }
+  const note = (w.notes || "").replace(/\s+/g,  ' ').trim();
+ if (note) parts.push(note.slice(0, 24));
+  return parts.join("  -  ");
+}
+
 function renderWorkoutList() {
   const workouts = getWorkouts();
   const strings = translations[languageSelect.value] || translations.en;
@@ -56,7 +74,13 @@ function renderWorkoutList() {
   if (workouts.length === 0) {
     const empty = document.createElement("li");
     empty.className = "workout-list-empty";
-    empty.textContent = strings.logNoSessions || "No sessions yet";
+    const emptyText = document.createElement("span");
+    emptyText.textContent = strings.logNoSessions || "No sessions yet";
+    empty.append(emptyText);
+    const flourish = document.createElement("span");
+    flourish.className = "workout-list-empty-flourish";
+    flourish.textContent = strings.logEmptyFlourish || "";
+    empty.append(flourish);
     workoutList.append(empty);
     return;
   }
@@ -65,10 +89,26 @@ function renderWorkoutList() {
     const item = document.createElement("li");
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "workout-list-item";
-    btn.classList.toggle("is-active", w.id === state.activeWorkoutId);
     const tonnage = computeWorkoutTonnage(w.exercises);
-    btn.textContent = w.date + "  —  " + tonnage.totalKg.toLocaleString() + " kg";
+    btn.className = "workout-list-item summary-card dash-row";
+    btn.style.borderLeftWidth = "6px";
+    btn.style.borderLeftColor = workoutTierClass(tonnage.totalKg);
+    btn.classList.toggle("is-active", w.id === state.activeWorkoutId);
+    const rowText = document.createElement("span");
+    rowText.className = "dash-row-text";
+    const dateEl = document.createElement("strong");
+    dateEl.textContent = w.date;
+    const metaEl = document.createElement("em");
+    metaEl.textContent = sessionMeta(w, strings);
+    rowText.append(dateEl, metaEl);
+    const valueEl = document.createElement("span");
+    valueEl.className = "dash-value";
+    const val = document.createElement("span");
+    val.textContent = tonnage.totalKg.toLocaleString();
+    const unit = document.createElement("small");
+    unit.textContent = strings.weightUnit || "kg";
+    valueEl.append(val, unit);
+    btn.append(rowText, valueEl);
     btn.addEventListener("click", () => selectWorkout(w.id));
 
     const del = document.createElement("button");
@@ -85,12 +125,16 @@ function renderWorkoutList() {
 
 function renderWorkoutExercises() {
   const strings = translations[languageSelect.value] || translations.en;
-  const prs = getAllTimePRs();
+  const prs = getAllTimePRs(); // kept for reference; per-exercise PR + new-PR detection is below
   workoutExercisesContainer.innerHTML = "";
 
   state.unsavedExercises.forEach((ex, exIdx) => {
     const card = document.createElement("article");
     card.className = "exercise-card";
+    const libraryItem = EXERCISE_LIBRARY.find((e) => e.name === ex.name);
+    const muscleColor = libraryItem ? (TRAINER_MUSCLE_COLORS[libraryItem.muscle] || "var(--accent-purple)") : "var(--accent-purple)";
+    card.style.borderLeftColor = muscleColor;
+    card.style.borderLeftWidth = "6px";
 
     const header = document.createElement("div");
     header.className = "workout-exercise-header";
@@ -106,12 +150,22 @@ function renderWorkoutExercises() {
     header.append(nameEl, removeBtn);
     card.append(header);
 
-    const pr = prs[ex.name];
-    if (pr && pr.kg > 0) {
+    const currentMax = Math.max(0,...ex.sets.map((s) => Number(s.kgs) || 0));
+    const prInfo = getExercisePR(ex.name, ex.sets);
+    if (prInfo && prInfo.kg > 0) {
+      const chipsRow = document.createElement("div");
+      chipsRow.className = "workout-pr-row";
       const prEl = document.createElement("small");
       prEl.className = "workout-pr";
-      prEl.textContent = "PR: " + pr.kg + " kg";
-      card.append(prEl);
+      prEl.textContent = "PR: " + prInfo.kg + " kg";
+      chipsRow.append(prEl);
+      if (prInfo.isNew && currentMax > 0) {
+        const chip = document.createElement("span");
+        chip.className = "workout-pr-chip";
+        chip.textContent = strings.logNewPr || "NEW PR";
+        chipsRow.append(chip);
+      }
+      card.append(chipsRow);
     }
 
     ex.sets.forEach((set, setIdx) => {

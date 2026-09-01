@@ -67,7 +67,25 @@ export function setDarkModeEnabled(enabled) {
   darkModeState.textContent = safeEnabled
     ? (translations[languageSelect.value] || translations.en).darkModeOn
     : (translations[languageSelect.value] || translations.en).darkModeOff;
+  updateThemeColor();
   savePreference(STORAGE_KEYS.darkMode, String(safeEnabled));
+}
+
+// Keep the browser chrome / status bar in tune with the theme (the static meta
+// previously left a near-black frame around the light app). Light mode matches
+// the warm page base; dark mode matches the near-black canvas dueskin.
+
+function updateThemeColor() {
+  const dark = document.body.classList.contains("dark-mode");
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.name = "theme-color";
+    document.head.appendChild(meta);
+  }
+  meta.content = dark ? "#151517" : "#e9e7e2";
+  const status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (status) status.content = dark ? "black-translucent" : "default";
 }
 
 export function setTrueShadowsEnabled(enabled) {
