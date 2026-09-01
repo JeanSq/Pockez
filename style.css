@@ -553,7 +553,7 @@ body.reveal-header:not(.animations-ready) .widget-panel * {
 
 body.dark-mode .form-field input,
 body.dark-mode .form-field select,
-body.dark-mode .setting-group select,
+body.dark-mode .setting-group select {
   background: rgba(255, 255, 255, 0.08);
   color: var(--ink);
 }
@@ -2872,6 +2872,11 @@ body.animations-off .widget-title {
   font-size: 0.85rem;
 }
 
+.workout-date-input:focus {
+  outline: none;
+  border-color: var(--aberration-b);
+}
+
 .workout-summary-card {
   display: grid;
   gap: 0.4rem;
@@ -2901,6 +2906,7 @@ body.animations-off .widget-title {
 .workout-celebration {
   padding: 0.65rem 0.75rem;
   border: 2.5px solid var(--ink);
+  border-left: 6px solid var(--accent-yellow);
   background: var(--paper);
   box-shadow: 4px 4px 0 var(--relief-alt);
   margin-bottom: 0.7rem;
@@ -2934,24 +2940,45 @@ body.animations-off .widget-title {
 .workout-add-exercise-name {
   flex: 1;
   min-width: 0;
-  padding: 0.5rem 0.6rem;
+  padding: 0.55rem 0.65rem;
   border: 2px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+}
+
+/* The global .form-submit is width:100% — that crushes the name input in
+   this flex row down to min-content. Let the button hug its content. */
+.workout-add-exercise-row .form-submit {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+.workout-add-exercise-name::placeholder {
+  color: var(--ink-faint);
 }
 
 .workout-add-exercise-name:focus {
   outline: none;
-  box-shadow: 3px 2px 0 var(--relief), -3px -2px 0 var(--relief-alt);
+  border-color: var(--aberration-b);
+  box-shadow: none;
 }
 
 .workout-exercise-card {
-  padding: 0.6rem 0.65rem;
+  padding: 0.7rem 0.75rem;
   border: 2.5px solid var(--ink);
   background: var(--paper);
-  box-shadow: 3px 3px 0 var(--relief);
+  box-shadow: 4px 4px 0 var(--relief);
+}
+
+@media (hover: hover) {
+  .workout-exercise-card:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--relief);
+  }
 }
 
 .workout-exercise-header {
@@ -3001,12 +3028,13 @@ body.animations-off .widget-title {
 .workout-set-input {
   width: 100%;
   min-width: 0;
-  padding: 0.35rem 0.45rem;
+  padding: 0.4rem 0.5rem;
   border: 2px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 .workout-set-input:focus {
@@ -3283,7 +3311,7 @@ body.dark-mode .workout-exercise-card {
   grid-template-columns: 1fr 1fr;
   gap:  0.5rem 1rem;
   padding:   0.9rem 1rem;
-  border-left:   6px solid var(--accent-blue;
+  border-left: 6px solid var(--accent-blue);
 }
 .workout-summary-row {
   display: flex;
@@ -3295,10 +3323,10 @@ body.dark-mode .workout-exercise-card {
   font-size:   0.62rem;
   font-weight:   700;
   letter-spacing:   0.08em;
-  color: var(--ink-muted;
+  color: var(--ink-muted);
 }
 .workout-summary-value {
   font-family: var(--font-app-title);
-  font-size:   1.9rem;
-  line-height:   1;
+  font-size: 1.9rem;
+  line-height: 1;
 }
