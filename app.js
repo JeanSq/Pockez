@@ -22,6 +22,7 @@ import { getActiveProfile, getActiveProfileId, getProfiles, makeProfile, savePro
 
 import { computeWeightProgress, getGoalWeight, loadBodyStatsProfile, renderWeightChart, replayWeightChartAnimation } from "./weightChart.js?v=1";
 import { showSaveStatus } from "./ui.js?v=1";
+import { initPwa } from "./pwa.js?v=1";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -32,114 +33,9 @@ try {
 }
 
 
-// --- PWA: service worker (offline + installable when served over http[s]) ---
-if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-  window.addEventListener("load", () => {
-    // `updateViaCache: "none"` is the key to reliable updates: the browser is
-    // forced to re-check sw.js against the network on every update check
-    // instead of serving a possibly-stale copy out of its HTTP cache. Without
-    // it, a freshly pushed service worker can go unnoticed for a long time.
-    navigator.serviceWorker
-      .register("./sw.js", { scope: "./", updateViaCache: "none" })
-      .then((registration) => {
-        // Check right away on load (not only when the app returns to the
-        // foreground) so a new deploy is picked up on the very next visit.
-        registration.update().catch(() => {});
+// --- PWA: service worker + install UX (extracted to pwa.js) ---
+initPwa();
 
-        // ...and re-check whenever the app comes back to the foreground.
-        document.addEventListener("visibilitychange", () => {
-          if (!document.hidden) registration.update().catch(() => {});
-        });
-      })
-      .catch((error) => {
-        console.warn("Service worker registration failed:", error);
-      });
-
-    // When an updated worker takes over (sw.js uses skipWaiting +
-    // clients.claim), reload once so the page immediately runs the fresh
-    // files instead of waiting for the next visit. Only wired when a
-    // controller already exists - i.e. this is an UPDATE, not the first
-    // install - and the flag prevents reload loops.
-    if (navigator.serviceWorker.controller) {
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (refreshing) return;
-        refreshing = true;
-        window.location.reload();
-      });
-    }
-  });
-}
-
-// --- PWA: install UX ---
-// Android/Chrome fire `beforeinstallprompt` when the app meets the install
-// criteria (HTTPS, manifest + icons, active service worker). Capture it and
-// offer a custom "Install app" button (footer + Settings) instead of relying
-// only on the browser's built-in UI. iOS Safari has no such event at all, so
-// it gets a small manual "Add to Home Screen" hint instead.
-
-
-function showInstallButtons() {
-  installButtons.forEach((btn) => btn.removeAttribute("hidden"));
-  const footerWrap = document.querySelector(".footer-install");
-  if (footerWrap) footerWrap.removeAttribute("hidden");
-}
-
-function hideInstallButtons() {
-  installButtons.forEach((btn) => btn.setAttribute("hidden", ""));
-  const footerWrap = document.querySelector(".footer-install");
-  if (footerWrap) footerWrap.setAttribute("hidden", "");
-}
-
-function showIosHints() {
-  iosHintEls.forEach((el) => el.removeAttribute("hidden"));
-}
-
-function showInstalledToast() {
-  const strings = translations[languageSelect.value] || translations.en;
-  const toast = document.createElement("div");
-  toast.className = "install-toast";
-  toast.textContent = strings.appInstalled;
-  toast.setAttribute("role", "status");
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add("is-hiding");
-    setTimeout(() => toast.remove(), 400);
-  }, 2600);
-}
-
-// Already running as an installed app (home-screen shortcut / standalone
-// window) or from file:// (no SW, no install): never show install UI.
-if (isStandalone || isFileProtocol) {
-  hideInstallButtons();
-} else if (isIos) {
-  // iOS: no beforeinstallprompt — show the manual home-screen hint.
-  showIosHints();
-}
-
-window.addEventListener("beforeinstallprompt", (event) => {
-  // Prevent the browser's default mini-infobar so the prompt moment and
-  // styling stay ours (a deliberate in-app button converts better).
-  event.preventDefault();
-  state.deferredInstallPrompt = event;
-  if (!isStandalone && !isFileProtocol) showInstallButtons();
-});
-
-installButtons.forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    if (!state.deferredInstallPrompt) return;
-    // prompt() must be triggered from the same user gesture.
-    state.deferredInstallPrompt.prompt();
-    const { outcome } = await state.deferredInstallPrompt.userChoice;
-    if (outcome === "accepted") state.deferredInstallPrompt = null;
-  });
-});
-
-window.addEventListener("appinstalled", () => {
-  state.deferredInstallPrompt = null;
-  hideInstallButtons();
-  showInstalledToast();
-});
 
 debugLog('startup: added splash/no-js handling');
 
@@ -931,32 +827,8 @@ measurementCancelButton.addEventListener("click", cancelMeasurementEdit);
 
 chartRangeSelect.addEventListener("change", renderWeightLog);
 
-/* Reset the offline app shell so a stale cached copy can never strand the
-   user. Deletes every service-worker cache, then re-registers the worker so
-   it re-downloads the current shell. Notes (localStorage) are untouched. */
-async function resetOfflineCache() {
-  const strings = translations[languageSelect.value] || translations.en;
-  if (!window.confirm(strings.clearAppCacheConfirm)) return;
-  try {
-    showSaveStatus("saving"); // brief "working..." feedback
-    if ("caches" in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((key) => caches.delete(key)));
-    }
-    showSaveStatus("saved");
-    // Re-download the fresh appearance shell, then load it.
-    if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) await registration.update();
-    }
-    window.location.reload();
-  } catch (error) {
-    console.warn("Could not reset offline cache:", error);
-    showSaveStatus("error");
-  }
-}
+// Offline cache reset moved to pwa.js
 
-resetOfflineCacheButton.addEventListener("click", resetOfflineCache);
 
 trainerForm.addEventListener("submit", (event) => {
   event.preventDefault();
