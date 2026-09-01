@@ -23,7 +23,7 @@
     <link rel="preload" href="fonts/bangers-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link rel="stylesheet" href="style.css?v=31" />
+    <link rel="stylesheet" href="style.css?v=32" />
 
     <!-- Last-resort failsafe: if app.js never runs (flaky network, or a load
          during a site rebuild), force the app visible instead of sticking on
@@ -395,8 +395,8 @@
                 </svg>
               </span>
               <span class="dash-row-text">
-                <strong data-i18n="navNotes">Log</strong>
-                <em data-i18n="dashLogSaved">sessions logged</em>
+                <strong data-i18n="navNotes">Notes</strong>
+                <em data-i18n="dashLogSaved">notes saved</em>
               </span>
               <span class="dash-value"><span id="dash-notes-count">0</span></span>
             </button>
@@ -411,65 +411,28 @@
         <section
           class="widget-panel rugged-paper spider-hover"
           data-widget="notes"
-          aria-labelledby="log-heading"
+          aria-labelledby="notes-heading"
           hidden
         >
-          <h2 id="log-heading" class="widget-title" data-i18n="logTitle">Log</h2>
+          <h2 id="notes-heading" class="widget-title" data-i18n="logTitle">Notes</h2>
           <p class="widget-hint" data-i18n="logHint">
-            Training log, PRs, and session totals. Saves automatically.
+            Thoughts on effort, mood, recovery — anything. Saves automatically.
           </p>
 
-          <div class="workout-layout">
-            <aside class="workout-sidebar" aria-label="Saved sessions">
-              <button type="button" class="form-submit workout-new-button" id="workout-new" data-i18n="logNewSession">
-                New session
-              </button>
-              <ul class="workout-list" id="workout-list"></ul>
-            </aside>
-            <div class="workout-editor" hidden>
-              <label class="workout-date-label">
-                <span class="sr-only" data-i18n="logDateLabel">Date</span>
-                <input id="workout-date-input" class="workout-date-input" type="date" />
-              </label>
-
-              <div class="workout-summary-card">
-                <div class="workout-summary-row">
-                  <span class="workout-summary-label" data-i18n="logTotalLifted">Total lifted</span>
-                  <span class="workout-summary-value" id="workout-tonnage-value">0 kg</span>
-                </div>
-                <div class="workout-summary-row">
-                  <span class="workout-summary-label" data-i18n="logTotalReps">Total reps</span>
-                  <span class="workout-summary-value" id="workout-total-reps-value">0</span>
-                </div>
-              </div>
-
-              <div class="workout-celebration" id="workout-celebration" hidden>
-                <p class="workout-celebration-text" id="workout-celebration-text"></p>
-              </div>
-
-              <div class="workout-exercises" id="workout-exercises-container"></div>
-
-              <div class="workout-add-exercise-row">
-                <input list="workout-exercise-suggestions" id="workout-add-exercise-name" class="workout-add-exercise-name" type="text" data-i18n-placeholder="logAddCustomExercise" placeholder="Exercise name" />
-                <button type="button" class="workout-add-exercise-submit form-submit" id="workout-add-exercise-submit" data-i18n="logAddExercise">Add</button>
-              </div>
-
-              <datalist id="workout-exercise-suggestions"></datalist>
-
-              <label class="workout-feelings-label">
-                <span class="sr-only" data-i18n="logFeelingsLabel">How did it feel?</span>
-                <textarea
-                  id="workout-feelings-input"
-                  class="workout-feelings-area"
-                  rows="3"
-                  data-i18n-placeholder="logFeelingsPlaceholder"
-                  placeholder="Notes on effort, mood, recovery…"
-                ></textarea>
-              </label>
-
-              <button type="button" class="form-submit workout-save-button" id="workout-save-btn" data-i18n="logSave">Save</button>
-            </div>
+          <div class="notes-compose">
+            <label class="sr-only" for="note-compose-input" data-i18n="noteComposeLabel">New note</label>
+            <textarea
+              id="note-compose-input"
+              class="note-compose-area"
+              rows="3"
+              data-i18n-placeholder="noteComposePlaceholder"
+              placeholder="What's on your mind?"
+            ></textarea>
+            <button type="button" class="form-submit note-compose-submit" id="note-compose-submit" data-i18n="noteAdd">Add note</button>
           </div>
+
+          <ul class="notes-list" id="notes-list"></ul>
+
           <p class="save-status" id="save-status" data-i18n="saved">Saved</p>
         </section>
 
@@ -894,6 +857,6 @@
       </footer>
     </div>
 
-    <script type="module" src="app.js?v=40"></script>
+    <script type="module" src="app.js?v=41"></script>
   </body>
 </html>

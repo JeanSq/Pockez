@@ -1,18 +1,17 @@
-/**
- * Pockez — personal notes, health, and training
+﻿/**
+ * Pockez â€” personal notes, health, and training
  * Notes widget, i18n, single-widget icon navigation
  */
 import { STORAGE_KEYS, loadPreference, savePreference, removePreference } from "./storage.js?v=14";
-import { translations } from "./i18n.js?v=21";
+import { translations } from "./i18n.js?v=22";
 
 import { DEBUG_ENABLED, debugLog, logUiState, logWeightTooltip } from "./debug.js?v=2";
 import { formatMeasurementDate, formatWeight, getTodayDateValue } from "./format.js?v=1";
-import { accentOptions, activityDescription, activityInput, aggressiveCaloriesResult, animationsState, animationsToggle, backgroundOptions, bodyForm, bodyInputs, bodyResults, calorieModeOptions, chartEmpty, chartRangeSelect, chartSummary, clearDataButton, conservativeCaloriesResult, darkModeState, darkModeToggle, dashDateEl, dashProgressEl, dashProgressFill, dashProgressMeta, exportDataButton, goalHint, goalWeightInput, goalWeightResult, i18nAriaElements, i18nElements, i18nPlaceholderElements, i18nTitleElements, importDataButton, importDataInput, installButtons, iosHintEls, isFileProtocol, isIos, isStandalone, languageSelect, latestWeightResult, measurementCancelButton, measurementDateInput, measurementList, measurementSubmitButton, measurementWeightInput, navButtons, newWorkoutButton, profileAddButton, profileCancelButton, profileCount, profileDeleteButton, profileEditor, profileNameInput, profileRenameButton, profileSaveButton, profileSelect, quickLinks, resetOfflineCacheButton, saveStatus, settingsClose, settingsDialog, settingsOpen, startingWeightResult, summaryBmi, summaryCalorieMode, summaryCalories, summaryWeight, summaryWeightChange, titleEl, trainerCustomForm, trainerCustomSection, trainerCustomSplitInput, trainerDays, trainerForm, trainerModeInputs, trainerPlanHeading, trainerPlanMeta, trainerPlanTitle, trainerRecommendedSection, trainingDaysInput, trainingEmphasisInput, trainingGoalInput, trainingVolumeInput, trueShadowsState, trueShadowsToggle, weightChangeResult, weightChart, weightChartArea, weightChartBaseline, weightChartGrid, weightChartLine, weightChartLineUnderlay, weightChartPoints, weightChartTooltip, weightChartTooltipBox, weightChartTooltipText, weightChartXLabels, weightChartYLabels, weightForm, weightGoalLine, weightHeroFill, weightHeroMeta, weightHeroProgress, weightTrendLine, widgetPanels, workoutAddExerciseName, workoutAddExerciseSubmit, workoutCelebration, workoutCelebrationText, workoutDateInput, workoutEditor, workoutExercisesContainer, workoutFeelingsInput, workoutLayout, workoutList, workoutSaveButton, workoutTonnageValue, workoutTotalRepsValue } from "./elements.js?v=1";
+import { accentOptions, activityDescription, activityInput, aggressiveCaloriesResult, animationsState, animationsToggle, backgroundOptions, bodyForm, bodyInputs, bodyResults, calorieModeOptions, chartEmpty, chartRangeSelect, chartSummary, clearDataButton, conservativeCaloriesResult, darkModeState, darkModeToggle, dashDateEl, dashProgressEl, dashProgressFill, dashProgressMeta, exportDataButton, goalHint, goalWeightInput, goalWeightResult, i18nAriaElements, i18nElements, i18nPlaceholderElements, i18nTitleElements, importDataButton, importDataInput, installButtons, iosHintEls, isFileProtocol, isIos, isStandalone, languageSelect, latestWeightResult, measurementCancelButton, measurementDateInput, measurementList, measurementSubmitButton, measurementWeightInput, navButtons, profileAddButton, profileCancelButton, profileCount, profileDeleteButton, profileEditor, profileNameInput, profileRenameButton, profileSaveButton, profileSelect, quickLinks, resetOfflineCacheButton, saveStatus, settingsClose, settingsDialog, settingsOpen, startingWeightResult, summaryBmi, summaryCalorieMode, summaryCalories, summaryWeight, summaryWeightChange, titleEl, trainerCustomForm, trainerCustomSection, trainerCustomSplitInput, trainerDays, trainerForm, trainerModeInputs, trainerPlanHeading, trainerPlanMeta, trainerPlanTitle, trainerRecommendedSection, trainingDaysInput, trainingEmphasisInput, trainingGoalInput, trainingVolumeInput, trueShadowsState, trueShadowsToggle, weightChangeResult, weightChart, weightChartArea, weightChartBaseline, weightChartGrid, weightChartLine, weightChartLineUnderlay, weightChartPoints, weightChartTooltip, weightChartTooltipBox, weightChartTooltipText, weightChartXLabels, weightChartYLabels, weightForm, weightGoalLine, weightHeroFill, weightHeroMeta, weightHeroProgress, weightTrendLine, widgetPanels } from "./elements.js?v=2";
 import { TRAINER_BODY_REGION, TRAINER_MUSCLE_COLORS, trainerExercises } from "./exerciseLibrary.js?v=1";
 import { state } from "./state.js?v=1";
 
 import { addCustomExercise, addLibraryExercise, buildCustomTrainerPlan, buildTrainerPlan, customSplitIdForPlan, getDayRecommendedExerciseIds, recommendRepsForSets, recommendSetsForReps } from "./trainerEngine.js?v=1";
-import { computeWorkoutTonnage, getAllTimePRs, getCelebration, getWorkouts } from "./workoutEngine.js?v=1";
 
 
 import { formatTrainerRest, getSavedTrainerPlan, getSuggestedTrainerEmphasis, getTrainerDayName, getTrainerPlanStore, loadTrainerPlan, migrateLegacyTrainerPlan, renderTrainerPlan, saveTrainerPlan, saveTrainerPlanStore, setTrainerModeRadio, updateTrainerSections } from "./trainer.js?v=2";
@@ -23,7 +22,7 @@ import { getActiveProfile, getActiveProfileId, getProfiles, makeProfile, savePro
 import { computeWeightProgress, getGoalWeight, loadBodyStatsProfile, renderWeightChart, replayWeightChartAnimation } from "./weightChart.js?v=1";
 import { showSaveStatus } from "./ui.js?v=1";
 import { initPwa } from "./pwa.js?v=1";
-import { addWorkoutExercise, createWorkout, renderWorkouts, saveActiveWorkout, scheduleWorkoutSave } from "./workouts.js?v=1";
+import { addNote, renderNotes } from "./notes.js?v=1";
 
 // Fast startup: remove `no-js` (so CSS hiding applies) and enable splash immediately
 try {
@@ -116,7 +115,7 @@ function applyTranslations(lang) {
       : strings.trueShadowsOff;
   }
   renderWeightLog();
-  renderWorkouts();
+  renderNotes();
   renderProfiles();
   loadTrainerPlan();
   renderDashDate();
@@ -322,13 +321,13 @@ function loadBodyStats() {
   if (!savedStats) {
     bodyForm.reset();
     state.bodyStatsCalculated = false;
-    bodyResults.bmi.textContent = "—";
+    bodyResults.bmi.textContent = "â€”";
     bodyResults.bmiCategory.textContent = "";
     bodyResults.bmiMarker.hidden = true;
-    bodyResults.bmr.textContent = "—";
-    bodyResults.calories.textContent = "—";
-    conservativeCaloriesResult.textContent = "—";
-    aggressiveCaloriesResult.textContent = "—";
+    bodyResults.bmr.textContent = "â€”";
+    bodyResults.calories.textContent = "â€”";
+    conservativeCaloriesResult.textContent = "â€”";
+    aggressiveCaloriesResult.textContent = "â€”";
     updateActivityDescription();
     renderDashboardSummary();
     return;
@@ -394,12 +393,12 @@ function renderWeightLog() {
   const latestEntry = entries[entries.length - 1];
   const change = firstEntry && latestEntry ? Number(latestEntry.weight) - Number(firstEntry.weight) : null;
 
-  startingWeightResult.textContent = firstEntry ? formatWeight(firstEntry.weight) : "—";
-  latestWeightResult.textContent = latestEntry ? formatWeight(latestEntry.weight) : "—";
-  weightChangeResult.textContent = change === null ? "—" : `${change > 0 ? "+" : ""}${formatWeight(change)}`;
+  startingWeightResult.textContent = firstEntry ? formatWeight(firstEntry.weight) : "â€”";
+  latestWeightResult.textContent = latestEntry ? formatWeight(latestEntry.weight) : "â€”";
+  weightChangeResult.textContent = change === null ? "â€”" : `${change > 0 ? "+" : ""}${formatWeight(change)}`;
   const goalWeight = getGoalWeight();
   goalWeightInput.value = goalWeight === null ? "" : formatWeight(goalWeight);
-  goalWeightResult.textContent = goalWeight === null ? "—" : formatWeight(goalWeight);
+  goalWeightResult.textContent = goalWeight === null ? "â€”" : formatWeight(goalWeight);
   const strings = translations[languageSelect.value] || translations.en;
   // Null-ish (not ===null) on purpose: entries[...] is undefined when the
   // log is empty, and the old check let goal-without-measurements through.
@@ -419,7 +418,7 @@ function renderWeightLog() {
 
   // Goal-progress hero strip: same computation as above, home-tab styling.
   if (progress === null) {
-    weightHeroProgress.textContent = "—";
+    weightHeroProgress.textContent = "â€”";
     weightHeroMeta.textContent = strings.weightHeroNoGoal;
     weightHeroFill.style.width = "0%";
   } else {
@@ -443,7 +442,7 @@ function renderWeightLog() {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "measurement-delete";
-    deleteButton.textContent = "×";
+    deleteButton.textContent = "Ã—";
     deleteButton.title = (translations[languageSelect.value] || translations.en).deleteMeasurement;
     deleteButton.setAttribute("aria-label", `${deleteButton.title}: ${formatMeasurementDate(entry.date)}`);
     deleteButton.addEventListener("click", () => {
@@ -453,7 +452,7 @@ function renderWeightLog() {
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "measurement-edit";
-    editButton.textContent = "✎";
+    editButton.textContent = "âœŽ";
     editButton.title = strings.editMeasurement;
     editButton.setAttribute("aria-label", `${strings.editMeasurement}: ${formatMeasurementDate(entry.date)}`);
     editButton.addEventListener("click", () => startMeasurementEdit(entry));
@@ -497,7 +496,7 @@ function renderDashboardSummary() {
   const latestEntry = entries[entries.length - 1];
   const firstEntry = entries[0];
 
-  summaryWeight.textContent = latestEntry ? formatWeight(latestEntry.weight) : "—";
+  summaryWeight.textContent = latestEntry ? formatWeight(latestEntry.weight) : "â€”";
   summaryWeightChange.textContent = latestEntry && firstEntry
     ? `${Number(latestEntry.weight) - Number(firstEntry.weight) > 0 ? "+" : ""}${formatWeight(Number(latestEntry.weight) - Number(firstEntry.weight))} kg`
     : strings.noData;
@@ -513,14 +512,14 @@ function renderDashboardSummary() {
     if (dashProgressFill) dashProgressFill.style.width = `${pct}%`;
     if (dashProgressMeta) dashProgressMeta.textContent = `${strings.dashGoalLabel}: ${formatWeight(goalWeight)} kg`;
   } else {
-    if (dashProgressEl) dashProgressEl.textContent = "—";
+    if (dashProgressEl) dashProgressEl.textContent = "â€”";
     if (dashProgressFill) dashProgressFill.style.width = "0%";
     if (dashProgressMeta) dashProgressMeta.textContent = latestEntry ? strings.dashNoGoal : strings.noData;
   }
 
   if (!profile) {
-    summaryBmi.textContent = "—";
-    summaryCalories.textContent = "—";
+    summaryBmi.textContent = "â€”";
+    summaryCalories.textContent = "â€”";
     summaryCalorieMode.textContent = strings.noData;
     return;
   }
@@ -653,20 +652,14 @@ for (const link of quickLinks) {
   });
 }
 
-// Home "+" tile: same as "New note" in the Notes sidebar
+// Home "+" tile: jump to the Notes tab and focus the compose box
 const dashAddButton = document.getElementById("dash-add");
 if (dashAddButton) {
   dashAddButton.addEventListener("click", () => {
     showWidget("notes");
-    createWorkout();
+    noteComposeInput?.focus();
   });
 }
-
-// --- Workout log save / load / render (extracted to workouts.js) ---
-
-
-
-
 
 
 
@@ -749,29 +742,6 @@ profileNameInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") saveProfileName();
   if (event.key === "Escape") cancelProfileEdit();
 });
-
-if (newWorkoutButton) newWorkoutButton.addEventListener("click", createWorkout);
-if (workoutSaveButton) workoutSaveButton.addEventListener("click", saveActiveWorkout);
-if (workoutDateInput) workoutDateInput.addEventListener("change", scheduleWorkoutSave);
-if (workoutFeelingsInput) workoutFeelingsInput.addEventListener("input", scheduleWorkoutSave);
-
-// Add exercise: clicking the button (or pressing Enter in the name field)
-// adds an exercise card, which renders the reps/kg number inputs.
-if (workoutAddExerciseSubmit && workoutAddExerciseName) {
-  workoutAddExerciseSubmit.addEventListener("click", () => {
-    const name = workoutAddExerciseName.value.trim();
-    if (!name) return;
-    addWorkoutExercise(name);
-    workoutAddExerciseName.value = "";
-    workoutAddExerciseName.focus();
-  });
-  workoutAddExerciseName.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      workoutAddExerciseSubmit.click();
-    }
-  });
-}
 
 bodyForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -968,7 +938,7 @@ const bootSteps = [
   loadLanguage,
   loadSettings,
   renderProfiles,
-  renderWorkouts,
+  renderNotes,
   loadBodyStats,
   setTodayAsMeasurementDate,
   renderWeightLog,
@@ -1031,7 +1001,7 @@ function startRevealSequence() {
       revealNow();
     }, 1800);
   } else {
-    // No title element — quickly reveal
+    // No title element â€” quickly reveal
     setTimeout(revealNow, 200);
   }
 }
