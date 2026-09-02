@@ -1263,7 +1263,7 @@ body.animations-off .widget-title {
 .dash-hero-meta {
   display: block;
   margin: 0.2rem 0 0.6rem;
-  color: rgba(22, 22, 22, 0.78);
+  color: var(--text-on-dark); /* a11y: 4.8:1 contrast on --accent-blue (was rgba(22,22,22,0.78) ~3.7:1) */
   font-style: normal;
   font-family: var(--font-label);
   font-size: 0.68rem;
